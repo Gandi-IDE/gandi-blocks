@@ -47,6 +47,28 @@ Blockly.Blocks['motion_movesteps'] = {
     });
   }
 };
+// ------------------powered by xigua-----------------------
+Blockly.Blocks['motion_movegrids'] = {
+  /**
+   * Block to move grid (1 grid = 40 step).
+   * @this Blockly.Block
+   */
+  init: function() {
+    this.jsonInit({
+      "message0": Blockly.Msg.MOTION_MOVEGRIDS,
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "GRIDS"
+        }
+      ],
+      "category": Blockly.Categories.motion,
+      "extensions": ["colours_motion", "shape_statement"]
+    });
+  }
+};
+// ------------------powered by xigua-----------------------
+
 
 Blockly.Blocks['motion_turnright'] = {
   /**
