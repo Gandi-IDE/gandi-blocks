@@ -1779,6 +1779,61 @@ Blockly.WorkspaceSvg.prototype.centerOnBlock = function(id) {
   this.scrollbar.set(scrollToCenterX, scrollToCenterY);
 };
 
+// powered by xigua start
+/**
+ * 滚动到注释的中心位置
+ * @param {number} offsetX x位置上相对于视图相应比例的偏移量
+ * @param {number} offsetY y位置上相对于视图相应比例的偏移量
+ * @public
+ */
+Blockly.WorkspaceSvg.prototype.centerOnFirstComment = function(offsetX, offsetY) {
+  offsetX = offsetX || 0;
+  offsetY = offsetY || 0;
+  if (!this.scrollbar) {
+    console.warn('Tried to scroll a non-scrollable workspace.');
+    return;
+  }
+
+  var comment = this.getTopComments(true/* sort */)[0];
+  if (!comment) {
+    return;
+  }
+  // XY is in workspace coordinates.
+  var xy = comment.getRelativeToSurfaceXY();
+  // Height/width is in workspace units.
+  var heightWidth = comment.getHeightWidth();
+  // Find the enter of the block in workspace units.
+  var blockCenterY = xy.y + heightWidth.height / 2;
+  // In RTL the block's position is the top right of the block, not top left.
+  var multiplier = this.RTL ? -1 : 1;
+  var blockCenterX = xy.x + (multiplier * heightWidth.width / 2);
+  // Workspace scale, used to convert from workspace coordinates to pixels.
+  var scale = this.scale;// Center in pixels.  0, 0 is at the workspace origin.  These numbers may
+  // be negative.
+  var pixelX = blockCenterX * scale;
+  var pixelY = blockCenterY * scale;
+
+  var metrics = this.getMetrics();
+
+  // Scrolling to here would put the block in the top-left corner of the
+  // visible workspace.
+  var scrollToBlockX = pixelX - metrics.contentLeft;
+  var scrollToBlockY = pixelY - metrics.contentTop;
+
+  // viewHeight and viewWidth are in pixels.
+  var halfViewWidth = metrics.viewWidth / 2 + metrics.viewWidth * offsetX;
+  var halfViewHeight = metrics.viewHeight / 2 + metrics.viewHeight * offsetY;
+
+  // Put the block in the center of the visible workspace instead.
+  var scrollToCenterX = scrollToBlockX - halfViewWidth;
+  var scrollToCenterY = scrollToBlockY - halfViewHeight;
+
+  Blockly.hideChaff();
+  this.scrollbar.set(scrollToCenterX, scrollToCenterY);
+
+};
+// powered by xigua end
+
 /**
  * Set the workspace's zoom factor.
  * @param {number} newScale Zoom factor.
