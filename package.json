@@ -1,6 +1,6 @@
 {
   "name": "scratch-blocks",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "Scratch Blocks is a library for building creative computing interfaces.",
   "author": "Massachusetts Institute of Technology",
   "license": "Apache-2.0",
@@ -8,12 +8,11 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/LLK/scratch-blocks.git",
-    "sha": "45effda8b8eea3736cd54ca7f71233c928b6af1a"
+    "sha": "e7d22b9f883901a8bd9f487b0702facd7b382081"
   },
   "main": "./dist/vertical.js",
   "browser": "./shim/vertical.js",
   "scripts": {
-    "postinstall": "yarn prepublish",
     "deploy": "rimraf gh-pages/closure-library/scripts/ci/CloseAdobeDialog.exe && gh-pages -t -d gh-pages -m \"Build for $(git log --pretty=format:%H -n1)\"",
     "prepublish": "python build.py && webpack",
     "test:unit": "node tests/jsunit/test_runner.js",
