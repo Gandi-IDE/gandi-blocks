@@ -308,6 +308,10 @@
         Blockly.Xml.clearWorkspaceAndLoadFromXml(xml, workspace);
         workspace.getFlyout().setRecyclingEnabled(true);
       }
+
+      function setPosition() {
+        workspace.centerOnFirstComment();
+      }
     </script>
 
     <style>
@@ -578,5 +582,6 @@
       <input id="reportValue" type="text" value="123" />
       <input type="button" value="Report last clicked block" onclick="reportDemo()" />
     </p>
+    <button onclick="setPosition()">定位</button>
   </body>
 </html>
