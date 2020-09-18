@@ -1799,7 +1799,7 @@ Blockly.WorkspaceSvg.prototype.centerOnFirstComment = function(offsetX, offsetY)
     return;
   }
   // XY is in workspace coordinates.
-  var xy = comment.getRelativeToSurfaceXY();
+  var xy = comment instanceof Blockly.ScratchBlockComment ? comment.getXY() : comment.getRelativeToSurfaceXY();
   // Height/width is in workspace units.
   var heightWidth = comment.getHeightWidth();
   // Find the enter of the block in workspace units.
