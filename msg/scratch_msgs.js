@@ -481,7 +481,7 @@ Blockly.ScratchMsgs.locales["zh-cn"] =
     "SENSING_ASKANDWAIT": "询问 %1 并等待",
     "SENSING_ASK_TEXT": "你叫什么名字？",
     "SENSING_ANSWER": "回答",
-    "SENSING_KEYPRESSED": "按键 %1 是否被按下?",
+    "SENSING_KEYPRESSED": "按键 %1 是否按下?",
     "SENSING_MOUSEDOWN": "按下鼠标?",
     "SENSING_MOUSEX": "鼠标的x坐标",
     "SENSING_MOUSEY": "鼠标的y坐标",
