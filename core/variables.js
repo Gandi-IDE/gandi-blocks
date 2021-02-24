@@ -381,7 +381,7 @@ Blockly.Variables.nameValidator_ = function(type, text, workspace, additionalVar
   if (type == Blockly.BROADCAST_MESSAGE_VARIABLE_TYPE) {
     return Blockly.Variables.validateBroadcastMessageName_(text, workspace, opt_callback);
   } else if (type == Blockly.LIST_VARIABLE_TYPE) {
-    return Blockly.Variables.validateScalarVarOrListName_(text, workspace, additionalVars, false, type,
+    return Blockly.Variables.validateScalarVarOrListName_(text, workspace, additionalVars, isCloud, type,
         Blockly.Msg.LIST_ALREADY_EXISTS);
   } else {
     return Blockly.Variables.validateScalarVarOrListName_(text, workspace, additionalVars, isCloud, type,
