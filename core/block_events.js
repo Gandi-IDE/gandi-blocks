@@ -29,6 +29,9 @@ goog.provide('Blockly.Events.BlockChange');
 goog.provide('Blockly.Events.BlockCreate');
 goog.provide('Blockly.Events.BlockDelete');
 goog.provide('Blockly.Events.BlockMove');
+// powered by xigua start
+goog.provide('Blockly.Events.BlockHidden');
+// powered by xigua end
 goog.provide('Blockly.Events.Change');  // Deprecated.
 goog.provide('Blockly.Events.Create');  // Deprecated.
 goog.provide('Blockly.Events.Delete');  // Deprecated.
@@ -529,3 +532,29 @@ Blockly.Events.Move.prototype.run = function(forward) {
     }
   }
 };
+
+// powered by xigua start
+Blockly.Events.BlockHidden = function(block, hidden) {
+  if (!block) {
+    return;  // Blank event to be populated by fromJson.
+  }
+  Blockly.Events.BlockHidden.superClass_.constructor.call(this, block);
+
+  this.hidden = hidden;
+};
+goog.inherits(Blockly.Events.BlockHidden, Blockly.Events.BlockBase);
+
+Blockly.Events.BlockHidden.prototype.type = Blockly.Events.BLOCK_HIDDEN;
+
+Blockly.Events.BlockHidden.prototype.toJson = function() {
+  var json = Blockly.Events.BlockHidden.superClass_.toJson.call(this);
+  json['hidden'] = Boolean(this.hidden);
+  return json;
+};
+
+Blockly.Events.BlockHidden.prototype.run = function() {
+  var workspace = Blockly.Workspace.getById(this.workspaceId);
+  var block = workspace.getBlockById(this.blockId);
+  block.toggleHidden();
+};
+// powered by xigua end

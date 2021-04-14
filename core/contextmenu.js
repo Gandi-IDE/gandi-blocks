@@ -516,4 +516,37 @@ Blockly.ContextMenu.workspaceCommentOption = function(ws, e) {
   return wsCommentOption;
 };
 
+// powered by xigua start
+Blockly.ContextMenu.hideBlocks = function(block) {
+  return {
+    text: '隐藏该段代码',
+    enabled: true,
+    callback: function() {
+      var rootBlock = block.getRootBlock();
+      rootBlock.toggleHidden();
+    }
+  };
+};
+
+Blockly.ContextMenu.showBlocks = function(ws) {
+  var hiddenBlocks = Object.keys(ws.blockDB_).filter(function(blockId) {
+    return ws.blockDB_[blockId].hidden;
+  }).map(function(blockId) {
+    return ws.blockDB_[blockId];
+  });
+
+  return {
+    text: '显示隐藏的' + hiddenBlocks.length + '组代码块',
+    enabled: Boolean(hiddenBlocks.length),
+    callback: function() {
+      Blockly.Events.setGroup(true);
+      hiddenBlocks.forEach(function(block) {
+        block.toggleHidden();
+      });
+      Blockly.Events.setGroup(false);
+    }
+  };
+};
+// powered by xigua end
+
 // End helper functions for creating context menu options.

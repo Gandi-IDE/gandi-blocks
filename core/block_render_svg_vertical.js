@@ -634,6 +634,10 @@ Blockly.BlockSvg.prototype.render = function(opt_bubble) {
   Blockly.Field.startCache();
   this.rendered = true;
 
+  // powered by xigua start
+  this.svgGroup_.style.display = this.hidden ? 'none' : '';
+  // powered by xigua end
+
   var cursorX = Blockly.BlockSvg.SEP_SPACE_X;
   if (this.RTL) {
     cursorX = -cursorX;

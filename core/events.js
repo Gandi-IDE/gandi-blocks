@@ -114,6 +114,14 @@ Blockly.Events.END_DRAG = 'endDrag';
  */
 Blockly.Events.BLOCK_MOVE = Blockly.Events.MOVE;
 
+// powered by xigua start
+/**
+ * 隐藏代码块的事件
+ * @const
+ */
+Blockly.Events.BLOCK_HIDDEN = 'blockHidden';
+// powered by xigua end
+
 /**
  * Name of event that creates a variable.
  * @const

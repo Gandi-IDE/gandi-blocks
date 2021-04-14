@@ -1405,6 +1405,11 @@ Blockly.WorkspaceSvg.prototype.cleanUp = function() {
   var topBlocks = this.getTopBlocks(true);
   var cursorY = 0;
   for (var i = 0, block; block = topBlocks[i]; i++) {
+    // powered by xigua start
+    if (block.hidden) {
+      continue;
+    }
+    // powered by xigua end
     var xy = block.getRelativeToSurfaceXY();
     block.moveBy(-xy.x, cursorY - xy.y);
     block.snapToGrid();
@@ -1424,7 +1429,9 @@ Blockly.WorkspaceSvg.prototype.showContextMenu_ = function(e) {
   if (this.options.readOnly || this.isFlyout) {
     return;
   }
-  var menuOptions = [];
+  // powered by xigua start
+  var menuOptions = window.__XIGUA_SHORTCUT ? [Blockly.ContextMenu.showBlocks(this)] : [];
+  // powered by xigua end
   var topBlocks = this.getTopBlocks(true);
   var eventGroup = Blockly.utils.genUid();
   var ws = this;
@@ -1530,6 +1537,11 @@ Blockly.WorkspaceSvg.prototype.showContextMenu_ = function(e) {
 Blockly.WorkspaceSvg.buildDeleteList_ = function(topBlocks) {
   var deleteList = [];
   function addDeletableBlocks(block) {
+    // powered by xigua start
+    if (block.hidden) {
+      return;
+    }
+    // powered by xigua end
     if (block.isDeletable()) {
       deleteList = deleteList.concat(block.getDescendants(false));
     } else {

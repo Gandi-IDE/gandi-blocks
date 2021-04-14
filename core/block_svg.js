@@ -144,6 +144,10 @@ Blockly.BlockSvg.prototype.isGlowingStack_ = false;
  */
 Blockly.BlockSvg.INLINE = -1;
 
+// powered by xigua start
+Blockly.BlockSvg.prototype.hidden = false;
+// powered by xigua end
+
 /**
  * Create and initialize the SVG representation of the block.
  * May be called more than once.
@@ -672,7 +676,9 @@ Blockly.BlockSvg.prototype.showContextMenu_ = function(e) {
   }
   // Save the current block in a variable for use in closures.
   var block = this;
-  var menuOptions = [];
+  // powered by xigua start
+  var menuOptions = window.__XIGUA_SHORTCUT ? [Blockly.ContextMenu.hideBlocks(block)] : [];
+  // powered by xigua end
   if (this.isDeletable() && this.isMovable() && !block.isInFlyout) {
     menuOptions.push(
         Blockly.ContextMenu.blockDuplicateOption(block, e));
@@ -1312,3 +1318,13 @@ Blockly.BlockSvg.prototype.scheduleSnapAndBump = function() {
     Blockly.Events.setGroup(false);
   }, Blockly.BUMP_DELAY);
 };
+
+// powered by xigua start
+Blockly.BlockSvg.prototype.toggleHidden = function(hidden) {
+  this.hidden = hidden !== undefined ? hidden : !this.hidden;
+  this.render();
+
+  var BlockHiddenEvent = new Blockly.Events.BlockHidden(this, this.hidden);
+  Blockly.Events.fire(BlockHiddenEvent);
+};
+// powered by xigua end

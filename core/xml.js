@@ -179,6 +179,11 @@ Blockly.Xml.allFieldsToDom_ = function(block, element) {
  */
 Blockly.Xml.blockToDom = function(block, opt_noId) {
   var element = goog.dom.createDom(block.isShadow() ? 'shadow' : 'block');
+  // powered by xigua start
+  if (block.hidden) {
+    element.setAttribute('hidden', true);
+  }
+  // powered by xigua end
   element.setAttribute('type', block.type);
   if (!opt_noId) {
     element.setAttribute('id', block.id);
@@ -585,6 +590,12 @@ Blockly.Xml.domToBlock = function(xmlBlock, workspace) {
     if (workspace.rendered) {
       // Hide connections to speed up assembly.
       topBlock.setConnectionsHidden(true);
+      // powered by xigua start
+      var hidden = xmlBlock.getAttribute('hidden');
+      if (hidden) {
+        topBlock.hidden = true;
+      }
+      // powered by xigua end
       // Render each block.
       for (var i = blocks.length - 1; i >= 0; i--) {
         blocks[i].initSvg();

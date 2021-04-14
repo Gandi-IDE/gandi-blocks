@@ -434,6 +434,12 @@ Blockly.Connection.prototype.isConnectionAllowed = function(candidate) {
     return false;
   }
 
+  // powered by xigua start
+  if (candidate.sourceBlock_.getRootBlock().hidden) {
+    return false;
+  }
+  // powered by xigua end
+
   // Type checking.
   var canConnect = this.canConnectWithReason_(candidate);
   if (canConnect != Blockly.Connection.CAN_CONNECT) {
