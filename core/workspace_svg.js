@@ -1806,9 +1806,19 @@ Blockly.WorkspaceSvg.prototype.centerOnFirstComment = function(offsetX, offsetY)
     return;
   }
 
-  var comment = this.getTopComments(true/* sort */)[0];
-  if (!comment) {
-    return;
+  var comment;
+  var loopFlag = true;
+  var comments = this.getTopComments(true/* sort */);
+
+  while (loopFlag) {
+    comment = comments.shift();
+    if (!comment) {
+      return;
+    }
+
+    if (!comment.block_ || !comment.block_.hidden) {
+      loopFlag = false;
+    }
   }
   // XY is in workspace coordinates.
   var xy = comment instanceof Blockly.ScratchBlockComment ? comment.getXY() : comment.getRelativeToSurfaceXY();

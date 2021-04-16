@@ -636,6 +636,9 @@ Blockly.BlockSvg.prototype.render = function(opt_bubble) {
 
   // powered by xigua start
   this.svgGroup_.style.display = this.hidden ? 'none' : '';
+  if (this.comment && this.comment.bubble_) {
+    this.comment.bubble_.bubbleGroup_.style.display = this.hidden ? 'none' : '';
+  }
   // powered by xigua end
 
   var cursorX = Blockly.BlockSvg.SEP_SPACE_X;
