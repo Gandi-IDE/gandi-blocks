@@ -449,6 +449,17 @@ Blockly.Variables.validateScalarVarOrListName_ = function(name, workspace, addit
   if (isCloud) {
     name = Blockly.Variables.CLOUD_PREFIX + name;
   }
+  // powered by xigua start
+  // 避免在列表和变量之间创建同名云变量
+  if (isCloud && (
+    (type === Blockly.SCALAR_VARIABLE_TYPE && workspace.getVariable(name, Blockly.LIST_VARIABLE_TYPE)) ||
+    (type === Blockly.LIST_VARIABLE_TYPE && workspace.getVariable(name, Blockly.SCALAR_VARIABLE_TYPE))
+  )) {
+    // error
+    Blockly.alert('已经存在名为「%1」的云变量或云列表。'.replace('%1', name));
+    return null;
+  }
+  // powered by xigua end
   if (workspace.getVariable(name, type) || additionalVars.indexOf(name) >= 0) {
     // error
     Blockly.alert(errorMsg.replace('%1', name));
