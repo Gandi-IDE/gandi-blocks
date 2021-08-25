@@ -52,3 +52,27 @@ Blockly.Blocks['matrix'] = {
     });
   }
 };
+
+/** powered by xigua start */
+goog.provide('Blockly.Blocks.xigua_matrix');
+Blockly.Blocks['xigua_matrix'] = {
+  /**
+   * Block for xigua_matrix value.
+   * @this Blockly.Block
+   */
+  init: function() {
+    this.jsonInit({
+      "message0": "%1",
+      "args0": [
+        {
+          "type": "field_xigua_matrix",
+          "name": "XIGUA_MATRIX"
+        }
+      ],
+      "outputShape": Blockly.OUTPUT_SHAPE_ROUND,
+      "output": "Number",
+      "extensions": ["colours_pen"]
+    });
+  }
+};
+/** powered by xigua end*/
