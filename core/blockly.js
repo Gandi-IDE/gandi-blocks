@@ -65,6 +65,10 @@ goog.require('Blockly.inject');
 goog.require('Blockly.utils');
 goog.require('goog.color');
 
+/** powered by xigua  */
+goog.require('Blockly.FieldXiguaWhiteBoardNote');
+goog.require('Blockly.FieldXiguaMatrix');
+/** powered by xigua  */
 
 // Turn off debugging when compiled.
 /* eslint-disable no-unused-vars */

@@ -55,3 +55,33 @@ Blockly.Blocks['note'] = {
     });
   }
 };
+
+/** powered by xigua start */
+
+goog.provide('Blockly.Blocks.xigua_white_board_note');
+
+Blockly.Blocks['xigua_white_board_note'] = {
+  /**
+   * Block for musical note value.
+   * @this Blockly.Block
+   */
+  init: function() {
+    this.jsonInit({
+      "message0": "%1",
+      "args0": [
+        {
+          "type": "field_xigua_white_board_note",
+          "name": "XIGUA_WHITE_BOARD_NOTE",
+          "value": 60
+        }
+      ],
+      "outputShape": Blockly.OUTPUT_SHAPE_ROUND,
+      "output": "Number",
+      "colour": Blockly.Colours.textField,
+      "colourSecondary": Blockly.Colours.textField,
+      "colourTertiary": Blockly.Colours.textField
+    });
+  }
+};
+
+/** powered by xigua end*/
