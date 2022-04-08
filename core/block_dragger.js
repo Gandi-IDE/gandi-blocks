@@ -281,7 +281,7 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
       var allBlocks = ws.getAllBlocks();
       for (var i = 0; i < allBlocks.length; i++) {
         var block = allBlocks[i];
-        if (block.type == Blockly.PROCEDURES_CALL_BLOCK_TYPE) {
+        if (block.type == Blockly.PROCEDURES_CALL_BLOCK_TYPE || block.type == Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE) {
           var procCode = block.getProcCode();
           // Check for call blocks with no associated define block.
           if (!Blockly.Procedures.getDefineBlock(procCode, ws)) {

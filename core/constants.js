@@ -378,6 +378,13 @@ Blockly.PROCEDURES_PROTOTYPE_BLOCK_TYPE = 'procedures_prototype';
 Blockly.PROCEDURES_CALL_BLOCK_TYPE = 'procedures_call';
 
 /**
+ * CCW
+ * The type of all procedure call blocks.
+ * @const {string}
+ */
+Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE = 'procedures_call_with_return';
+
+/**
  * ENUM for flyout status button states.
  * @const
  */

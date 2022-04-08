@@ -319,7 +319,7 @@ Blockly.Procedures.getCallers = function(name, ws, definitionRoot,
   var callers = [];
   for (var i = 0; i < allBlocks.length; i++) {
     var block = allBlocks[i];
-    if (block.type == Blockly.PROCEDURES_CALL_BLOCK_TYPE ) {
+    if (block.type == Blockly.PROCEDURES_CALL_BLOCK_TYPE || block.type == Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE ) {
       var procCode = block.getProcCode();
       if (procCode && procCode == name) {
         callers.push(block);
@@ -490,7 +490,7 @@ Blockly.Procedures.editProcedureCallback_ = function(block) {
       return;
     }
     block = innerBlock;
-  } else if (block.type == Blockly.PROCEDURES_CALL_BLOCK_TYPE) {
+  } else if (block.type == Blockly.PROCEDURES_CALL_BLOCK_TYPE || block.type == Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE ) {
     // This is a call block, find the prototype corresponding to the procCode.
     // Make sure to search the correct workspace, call block can be in flyout.
     var workspaceToSearch = block.workspace.isFlyout ?
