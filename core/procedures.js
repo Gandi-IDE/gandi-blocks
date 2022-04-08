@@ -226,6 +226,29 @@ Blockly.Procedures.flyoutCategory = function(workspace) {
   // Create call blocks for each procedure defined in the workspace
   var mutations = Blockly.Procedures.allProcedureMutations(workspace);
   mutations = Blockly.Procedures.sortProcedureMutations_(mutations);
+
+  // CCW
+  // make return blocks
+  if (mutations.length > 0) {
+    var block = goog.dom.createDom('block');
+    block.setAttribute('type', 'procedures_return');
+    block.setAttribute('gap', 16);
+
+    var valueDom = goog.dom.createDom('value');
+    valueDom.setAttribute('name', 'RETURN');
+
+    var shadowDom = goog.dom.createDom('shadow');
+    shadowDom.setAttribute('type', 'text');
+
+    var fieldDom = goog.dom.createDom('field', null, '');
+    fieldDom.setAttribute('name', 'TEXT');
+
+    shadowDom.appendChild(fieldDom);
+    valueDom.appendChild(shadowDom);
+    block.appendChild(valueDom);
+    xmlList.push(block);
+  }
+
   for (var i = 0; i < mutations.length; i++) {
     var mutation = mutations[i];
     // <block type="procedures_call">
@@ -236,6 +259,14 @@ Blockly.Procedures.flyoutCategory = function(workspace) {
     block.setAttribute('gap', 16);
     block.appendChild(mutation);
     xmlList.push(block);
+
+    // CCW
+    var block_return = goog.dom.createDom('block');
+    block_return.setAttribute('type', 'procedures_call_with_return');
+    block.setAttribute('type', 'procedures_call');
+    block_return.setAttribute('gap', 16);
+    block_return.appendChild(mutation.cloneNode(true));
+    xmlList.push(block_return);
   }
   return xmlList;
 };

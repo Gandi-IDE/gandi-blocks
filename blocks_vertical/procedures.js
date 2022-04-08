@@ -819,6 +819,38 @@ Blockly.Blocks['procedures_call'] = {
   buildShadowDom_: Blockly.ScratchBlocks.ProcedureUtils.buildShadowDom_
 };
 
+Blockly.Blocks['procedures_call_with_return'] = {
+  /**
+   * Block for calling a procedure with no return value.
+   * @this Blockly.Block
+   */
+  init: function() {
+    this.jsonInit({
+      "extensions": ["colours_more", "output_string", "procedure_call_contextmenu"]
+    });
+    this.procCode_ = '';
+    this.argumentIds_ = [];
+    this.warp_ = false;
+  },
+  // Shared.
+  getProcCode: Blockly.ScratchBlocks.ProcedureUtils.getProcCode,
+  removeAllInputs_: Blockly.ScratchBlocks.ProcedureUtils.removeAllInputs_,
+  disconnectOldBlocks_: Blockly.ScratchBlocks.ProcedureUtils.disconnectOldBlocks_,
+  deleteShadows_: Blockly.ScratchBlocks.ProcedureUtils.deleteShadows_,
+  createAllInputs_: Blockly.ScratchBlocks.ProcedureUtils.createAllInputs_,
+  updateDisplay_: Blockly.ScratchBlocks.ProcedureUtils.updateDisplay_,
+
+  // Exist on all three blocks, but have different implementations.
+  mutationToDom: Blockly.ScratchBlocks.ProcedureUtils.callerMutationToDom,
+  domToMutation: Blockly.ScratchBlocks.ProcedureUtils.callerDomToMutation,
+  populateArgument_: Blockly.ScratchBlocks.ProcedureUtils.populateArgumentOnCaller_,
+  addProcedureLabel_: Blockly.ScratchBlocks.ProcedureUtils.addLabelField_,
+
+  // Only exists on the external caller.
+  attachShadow_: Blockly.ScratchBlocks.ProcedureUtils.attachShadow_,
+  buildShadowDom_: Blockly.ScratchBlocks.ProcedureUtils.buildShadowDom_
+};
+
 Blockly.Blocks['procedures_prototype'] = {
   /**
    * Block for calling a procedure with no return value, for rendering inside
@@ -969,3 +1001,25 @@ Blockly.Blocks['argument_editor_string_number'] = {
   // Exist on declaration and arguments editors, with different implementations.
   removeFieldCallback: Blockly.ScratchBlocks.ProcedureUtils.removeArgumentCallback_
 };
+
+// ------------------powered by ccw-----------------------
+Blockly.Blocks['procedures_return'] = {
+  /**
+   * Block to move grid (1 grid = 40 step).
+   * @this Blockly.Block
+   */
+  init: function() {
+    this.jsonInit({
+      "message0": Blockly.Msg.PROCEDURE_RETURN,
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "RETURN",
+        }
+      ],
+      "category": Blockly.Categories.more,
+      "extensions": ["colours_more","shape_end"]
+    });
+  }
+};
+// ------------------powered by ccw-----------------------
