@@ -379,7 +379,7 @@ Blockly.PROCEDURES_CALL_BLOCK_TYPE = 'procedures_call';
 
 /**
  * CCW
- * The type of all procedure call blocks.
+ * The type of return procedure call blocks.
  * @const {string}
  */
 Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE = 'procedures_call_with_return';

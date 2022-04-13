@@ -221,15 +221,35 @@ Blockly.Procedures.rename = function(name) {
 Blockly.Procedures.flyoutCategory = function(workspace) {
   var xmlList = [];
 
-  Blockly.Procedures.addCreateButton_(workspace, xmlList);
-
   // Create call blocks for each procedure defined in the workspace
   var mutations = Blockly.Procedures.allProcedureMutations(workspace);
   mutations = Blockly.Procedures.sortProcedureMutations_(mutations);
 
+  var shouldAddReturn = false;
+  for (var i = 0; i < mutations.length; i++) {
+    var mutation = mutations[i];
+    if (mutation.getAttribute('isreporter') === 'true') {
+      // CCW return procedures
+      var block_return = goog.dom.createDom('block');
+      block_return.setAttribute('type', Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE);
+      block_return.setAttribute('gap', 16);
+      block_return.appendChild(mutation.cloneNode(true));
+      xmlList.push(block_return);
+      shouldAddReturn = true;
+    } else {
+      // <block type="procedures_call">
+      //   <mutation ...></mutation>
+      // </block>
+      var block = goog.dom.createDom('block');
+      block.setAttribute('type', Blockly.PROCEDURES_CALL_BLOCK_TYPE);
+      block.setAttribute('gap', 16);
+      block.appendChild(mutation);
+      xmlList.push(block);
+    }
+  }
   // CCW
   // make return blocks
-  if (mutations.length > 0) {
+  if (shouldAddReturn) {
     var block = goog.dom.createDom('block');
     block.setAttribute('type', 'procedures_return');
     block.setAttribute('gap', 16);
@@ -246,28 +266,9 @@ Blockly.Procedures.flyoutCategory = function(workspace) {
     shadowDom.appendChild(fieldDom);
     valueDom.appendChild(shadowDom);
     block.appendChild(valueDom);
-    xmlList.push(block);
+    xmlList.unshift(block);
   }
-
-  for (var i = 0; i < mutations.length; i++) {
-    var mutation = mutations[i];
-    // <block type="procedures_call">
-    //   <mutation ...></mutation>
-    // </block>
-    var block = goog.dom.createDom('block');
-    block.setAttribute('type', 'procedures_call');
-    block.setAttribute('gap', 16);
-    block.appendChild(mutation);
-    xmlList.push(block);
-
-    // CCW
-    var block_return = goog.dom.createDom('block');
-    block_return.setAttribute('type', 'procedures_call_with_return');
-    block.setAttribute('type', 'procedures_call');
-    block_return.setAttribute('gap', 16);
-    block_return.appendChild(mutation.cloneNode(true));
-    xmlList.push(block_return);
-  }
+  Blockly.Procedures.addCreateButton_(workspace, xmlList);
   return xmlList;
 };
 
@@ -287,7 +288,7 @@ Blockly.Procedures.addCreateButton_ = function(workspace, xmlList) {
   button.setAttribute('text', msg);
   button.setAttribute('callbackKey', callbackKey);
   workspace.registerButtonCallback(callbackKey, callback);
-  xmlList.push(button);
+  xmlList.unshift(button);
 };
 
 /**
@@ -409,7 +410,8 @@ Blockly.Procedures.newProcedureMutation = function() {
       ' argumentids="[]"' +
       ' argumentnames="[]"' +
       ' argumentdefaults="[]"' +
-      ' warp="false">' +
+      ' warp="false"' +
+      ' isreporter="false">' +
       '</mutation>' +
       '</xml>';
   return Blockly.Xml.textToDom(mutationText).firstChild;
@@ -485,7 +487,7 @@ Blockly.Procedures.editProcedureCallback_ = function(block) {
     }
     var innerBlock = conn.targetBlock();
     if (!innerBlock ||
-        !innerBlock.type == Blockly.PROCEDURES_PROTOTYPE_BLOCK_TYPE) {
+        !(innerBlock.type == Blockly.PROCEDURES_PROTOTYPE_BLOCK_TYPE || innerBlock.type == Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE)) {
       alert('Bad inner block'); // TODO: Decide what to do about this.
       return;
     }
