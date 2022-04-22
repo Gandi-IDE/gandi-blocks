@@ -81,11 +81,16 @@ Blockly.Procedures.allProcedures = function(root) {
  * @package
  */
 Blockly.Procedures.allProcedureMutations = function(root) {
-  var blocks = root.getAllBlocks();
-  var mutations = [];
+  var blocks = root.getAllBlocks(false);
+  var mutations = root.getAllGlobalProcedureMutations();
   for (var i = 0; i < blocks.length; i++) {
     if (blocks[i].type == Blockly.PROCEDURES_PROTOTYPE_BLOCK_TYPE) {
       var mutation = blocks[i].mutationToDom(/* opt_generateShadows */ true);
+      var proccode = mutation.getAttribute('proccode');
+      if (root.getGlobalProcedureMutationByProccode(proccode)){
+        //CCW: exclude same procedures in current workspace
+        continue;
+      }
       if (mutation) {
         mutations.push(mutation);
       }

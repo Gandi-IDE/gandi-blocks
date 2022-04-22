@@ -107,6 +107,9 @@ Blockly.FieldTextInput.prototype.CURSOR = 'text';
  */
 Blockly.FieldTextInput.prototype.spellcheck_ = true;
 
+// CCW: This is a hack to make sure that the text input field is always has prefix in global procedures
+Blockly.FieldTextInput.prototype.prefix = '';
+
 /**
  * Install this text field on a block.
  */
@@ -226,6 +229,7 @@ Blockly.FieldTextInput.prototype.showEditor_ = function(
   var div = Blockly.WidgetDiv.DIV;
   // Apply text-input-specific fixed CSS
   div.className += ' fieldTextInput';
+
   // Create the input.
   var htmlInput =
       goog.dom.createDom(goog.dom.TagName.INPUT, 'blocklyHtmlInput');
@@ -570,7 +574,7 @@ Blockly.FieldTextInput.prototype.widgetDispose_ = function() {
     var div = Blockly.WidgetDiv.DIV;
     var htmlInput = Blockly.FieldTextInput.htmlInput_;
     // Save the edit (if it validates).
-    thisField.maybeSaveEdit_();
+    thisField.maybeSaveEdit_(thisField.prefix);
 
     thisField.unbindEvents_(htmlInput);
     if (htmlInput.dropDownArrowMouseWrapper_) {
@@ -617,13 +621,14 @@ Blockly.FieldTextInput.prototype.widgetDisposeAnimationFinished_ = function() {
   };
 };
 
-Blockly.FieldTextInput.prototype.maybeSaveEdit_ = function() {
+Blockly.FieldTextInput.prototype.maybeSaveEdit_ = function(prefix) {
   var htmlInput = Blockly.FieldTextInput.htmlInput_;
   // Save the edit (if it validates).
-  var text = htmlInput.value;
+  var pre = prefix || '';
+  var text = pre + htmlInput.value;
   if (this.sourceBlock_) {
     var text1 = this.callValidator(text);
-    if (text1 === null) {
+    if (text1 === null || text1.length === 0) {
       // Invalid edit.
       text = htmlInput.defaultValue;
     } else {
