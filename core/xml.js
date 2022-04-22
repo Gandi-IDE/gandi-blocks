@@ -496,6 +496,10 @@ Blockly.Xml.domToWorkspace = function(xml, workspace) {
             'another location.');
         }
         variablesFirst = false;
+      } else if (name == 'procedures') {
+        // CCW： global procedures
+        Blockly.Xml.domToProcedures(xmlChild, workspace);
+        variablesFirst = false;
       }
     }
   } finally {
@@ -657,6 +661,20 @@ Blockly.Xml.domToVariables = function(xmlVariables, workspace) {
       throw Error('Variable with id, ' + id + ' is without a type');
     }
     workspace.createVariable(name, type, id, isLocal, isCloud);
+  }
+};
+
+/**
+ * CCW: Decode an XML list of global procedure and add the global procedure to the workspace.
+ * @param {!Element} xmlProcedures List of XML procedure elements.
+ * @param {!Blockly.Workspace} workspace The workspace to which the procedure
+ *     should be added.
+ */
+Blockly.Xml.domToProcedures = function(xmlProcedures, workspace) {
+  for (var i = 0, xmlChild; xmlChild = xmlProcedures.children[i]; i++) {
+    if (xmlChild.getAttribute('isglobal') == 'true') {
+      workspace.createGlobalProcedure(xmlChild);
+    }
   }
 };
 

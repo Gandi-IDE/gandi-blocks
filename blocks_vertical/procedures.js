@@ -43,6 +43,9 @@ Blockly.ScratchBlocks.ProcedureUtils.callerMutationToDom = function() {
   container.setAttribute('proccode', this.procCode_);
   container.setAttribute('argumentids', JSON.stringify(this.argumentIds_));
   container.setAttribute('warp', JSON.stringify(this.warp_));
+  container.setAttribute('isreporter', JSON.stringify(this.isReporter_));
+  container.setAttribute('isglobal', JSON.stringify(this.isGlobal_));
+  container.setAttribute('targetid', JSON.stringify(this.targetId_));
   return container;
 };
 
@@ -58,6 +61,9 @@ Blockly.ScratchBlocks.ProcedureUtils.callerDomToMutation = function(xmlElement) 
       JSON.parse(xmlElement.getAttribute('generateshadows'));
   this.argumentIds_ = JSON.parse(xmlElement.getAttribute('argumentids'));
   this.warp_ = JSON.parse(xmlElement.getAttribute('warp'));
+  this.isReporter_ = JSON.parse(xmlElement.getAttribute('isreporter'));
+  this.isGlobal_ = JSON.parse(xmlElement.getAttribute('isglobal'));
+  this.targetId_ = JSON.parse(xmlElement.getAttribute('targetid'));
   this.updateDisplay_();
 };
 
@@ -82,7 +88,9 @@ Blockly.ScratchBlocks.ProcedureUtils.definitionMutationToDom = function(
   container.setAttribute('argumentdefaults',
       JSON.stringify(this.argumentDefaults_));
   container.setAttribute('warp', JSON.stringify(this.warp_));
-  container.setAttribute('isReporter', JSON.stringify(this.getIsReporter()));
+  container.setAttribute('isreporter', JSON.stringify(this.isReporter_));
+  container.setAttribute('isglobal', JSON.stringify(this.isGlobal_));
+  container.setAttribute('targetid', JSON.stringify(this.targetId_));
   container.setAttribute('type', Blockly.PROCEDURES_PROTOTYPE_BLOCK_TYPE);
   return container;
 };
@@ -97,6 +105,8 @@ Blockly.ScratchBlocks.ProcedureUtils.definitionDomToMutation = function(xmlEleme
   this.procCode_ = xmlElement.getAttribute('proccode');
   this.warp_ = JSON.parse(xmlElement.getAttribute('warp'));
   this.isReporter_ = JSON.parse(xmlElement.getAttribute('isreporter'));
+  this.isGlobal_ = JSON.parse(xmlElement.getAttribute('isglobal'));
+  this.targetId_ = JSON.parse(xmlElement.getAttribute('targetid'));
   var prevArgIds = this.argumentIds_;
   var prevDisplayNames = this.displayNames_;
 
@@ -679,6 +689,7 @@ Blockly.ScratchBlocks.ProcedureUtils.removeFieldCallback = function(field) {
     return;
   }
   var inputNameToRemove = null;
+  var isFirst = false;
   for (var n = 0; n < this.inputList.length; n++) {
     var input = this.inputList[n];
     if (input.connection) {
@@ -690,9 +701,14 @@ Blockly.ScratchBlocks.ProcedureUtils.removeFieldCallback = function(field) {
       for (var j = 0; j < input.fieldRow.length; j++) {
         if (input.fieldRow[j] == field) {
           inputNameToRemove = input.name;
+          isFirst = n === 0;
         }
       }
     }
+  }
+  if (isFirst) {
+    // Do not delete first field if it is a label
+    return;
   }
   if (inputNameToRemove) {
     Blockly.WidgetDiv.hide(true);
@@ -787,7 +803,22 @@ Blockly.ScratchBlocks.ProcedureUtils.setIsReporter = function(isReporter) {
 };
 
 Blockly.ScratchBlocks.ProcedureUtils.getIsReporter = function() {
-  return this.getOutputShape() === Blockly.OUTPUT_SHAPE_ROUND || this.isReporter_ === true;
+  return this.isReporter_;
+};
+
+Blockly.ScratchBlocks.ProcedureUtils.setIsGlobal = function(isGlobal) {
+  this.isGlobal_ = isGlobal;
+};
+
+Blockly.ScratchBlocks.ProcedureUtils.getIsGlobal = function() {
+  return this.isGlobal_;
+};
+Blockly.ScratchBlocks.ProcedureUtils.setTargetId = function(targetId) {
+  this.targetId_ = targetId;
+};
+
+Blockly.ScratchBlocks.ProcedureUtils.getTargetId = function() {
+  return this.targetId_;
 };
 
 
@@ -968,6 +999,8 @@ Blockly.Blocks['procedures_declaration'] = {
     this.argumentDefaults_ = [];
     this.warp_ = false;
     this.isReporter_ = false;
+    this.isGlobal_ = false;
+    this.targetId_ = '';
   },
   // Shared.
   getProcCode: Blockly.ScratchBlocks.ProcedureUtils.getProcCode,
@@ -997,6 +1030,11 @@ Blockly.Blocks['procedures_declaration'] = {
   onChangeFn: Blockly.ScratchBlocks.ProcedureUtils.updateDeclarationProcCode_,
   setIsReporter: Blockly.ScratchBlocks.ProcedureUtils.setIsReporter,
   getIsReporter: Blockly.ScratchBlocks.ProcedureUtils.getIsReporter,
+
+  setIsGlobal: Blockly.ScratchBlocks.ProcedureUtils.setIsGlobal,
+  getIsGlobal: Blockly.ScratchBlocks.ProcedureUtils.getIsGlobal,
+  setTargetId: Blockly.ScratchBlocks.ProcedureUtils.setTargetId,
+  getTargetId: Blockly.ScratchBlocks.ProcedureUtils.setTargetId,
 };
 
 Blockly.Blocks['argument_reporter_boolean'] = {
