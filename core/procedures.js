@@ -183,14 +183,13 @@ Blockly.Procedures.isNameUsed = function(name, workspace, opt_exclude) {
     if (blocks[i] == opt_exclude) {
       continue;
     }
-    if (blocks[i].getProcedureDef) {
-      var procName = blocks[i].getProcedureDef();
-      if (Blockly.Names.equals(procName[0], name)) {
-        return false;
+    if (blocks[i].procCode_) {
+      if (Blockly.Names.equals(blocks[i].procCode_, name)) {
+        return true;
       }
     }
   }
-  return true;
+  return false;
 };
 
 /**
@@ -443,6 +442,11 @@ Blockly.Procedures.createProcedureDefCallback_ = function(workspace) {
 Blockly.Procedures.createProcedureCallbackFactory_ = function(workspace) {
   return function(mutation) {
     if (mutation) {
+      var name = mutation.getAttribute('proccode');
+      if (Blockly.Procedures.isNameUsed(name, workspace, null)) {
+        Blockly.alert(Blockly.Msg.PROCEDURE_ALREADY_EXISTS.replace('%1', name));
+        return false;
+      }
       var blockText = '<xml>' +
           '<block type="procedures_definition">' +
           '<statement name="custom_block">' +
@@ -467,6 +471,7 @@ Blockly.Procedures.createProcedureCallbackFactory_ = function(workspace) {
       block.moveBy(posX / scale, (-workspace.scrollY + 30) / scale);
       block.scheduleSnapAndBump();
       Blockly.Events.setGroup(false);
+      return true;
     }
   };
 };
@@ -521,8 +526,14 @@ Blockly.Procedures.editProcedureCallback_ = function(block) {
 Blockly.Procedures.editProcedureCallbackFactory_ = function(block) {
   return function(mutation) {
     if (mutation) {
+      var name = mutation.getAttribute('proccode');
+      if (Blockly.Procedures.isNameUsed(name, block.workspace, block)) {
+        Blockly.alert(Blockly.Msg.PROCEDURE_ALREADY_EXISTS.replace('%1', name));
+        return false;
+      }
       Blockly.Procedures.mutateCallersAndPrototype(block.getProcCode(),
           block.workspace, mutation);
+      return true;
     }
   };
 };

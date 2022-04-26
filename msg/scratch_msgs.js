@@ -566,7 +566,7 @@ Blockly.ScratchMsgs.locales["zh-cn"] =
   "CANNOT_DELETE_VARIABLE_PROCEDURE": "无法删除变量「%1」，因为函数「%2」的定义中用到了它",
   "DELETE_VARIABLE": "删除变量「%1」",
   "NEW_PROCEDURE": "制作新的积木",
-  "PROCEDURE_ALREADY_EXISTS": "已经存在名为「%1」的程序。",
+  "PROCEDURE_ALREADY_EXISTS": "已经存在名为「%1」的自定义积木。",
   "PROCEDURE_DEFAULT_NAME": "积木名称",
   "PROCEDURE_USED": "在删除一个积木定义前，请先把该积木从所有使用的地方删除。",
   "NEW_LIST": "建立一个列表",
