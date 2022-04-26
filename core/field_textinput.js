@@ -550,6 +550,18 @@ Blockly.FieldTextInput.prototype.resizeEditor_ = function() {
   // Finally, set the actual style
   div.style.left = xy.x + 'px';
   div.style.top = xy.y + 'px';
+
+  //CCW: adjust custom reporter
+  if (this.sourceBlock_.isReporter_ && this.sourceBlock_.type === 'procedures_declaration') {
+    borderRadius = Blockly.BlockSvg.TEXT_FIELD_CORNER_RADIUS + 0.5;
+    div.style.borderRadius = borderRadius + 'px';
+    Blockly.FieldTextInput.htmlInput_.style.borderRadius = borderRadius + 'px';
+    var list = this.sourceBlock_.procCode_.split(' %').filter(str => !(str === 'b' || str === 's'));
+    if (list.length === 1) { //CCW: only adjust layout when there is only one text label
+      div.style.marginLeft = '10px';
+      div.style.marginTop = '5px';
+    }
+  }
 };
 
 /**
