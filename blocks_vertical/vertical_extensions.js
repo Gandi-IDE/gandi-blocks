@@ -145,7 +145,7 @@ Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_BOOLEAN = function() {
  * Mixin to add a context menu for a procedure definition block.
  * It adds the "edit" option and removes the "duplicate" option.
  * @mixin
- * @augments Blockly.Block
+ * @augments {Blockly.Block}
  * @package
  * @readonly
  */
@@ -154,7 +154,7 @@ Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_DEF_CONTEXTMENU = {
    * Add the "edit" option and removes the "duplicate" option from the context
    * menu.
    * @param {!Array.<!Object>} menuOptions List of menu options to edit.
-   * @this Blockly.Block
+   * @this {Blockly.Block}
    */
   customContextMenu: function(menuOptions) {
     // Add the edit option at the end.
@@ -173,10 +173,34 @@ Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_DEF_CONTEXTMENU = {
         }
         var rootBlock = this;
         option.callback = function() {
+
+          //CCW: global block delete
+          var isGlobal = false;
+          for (var i = 0; i < rootBlock.childBlocks_.length; i++) {
+            var block = rootBlock.childBlocks_[i];
+            isGlobal = block.type === Blockly.PROCEDURES_PROTOTYPE_BLOCK_TYPE && block.procCode_ === procCode && block.isGlobal_;
+          }
+
+          if (isGlobal) {
+            for (var i = 0; i < window.vm.runtime.targets.length; i++) {
+              var target = window.vm.runtime.targets[i];
+              for (var blockId in target.blocks._blocks) {
+                var block = target.blocks._blocks[blockId];
+                if (block.opcode == Blockly.PROCEDURES_CALL_BLOCK_TYPE || block.opcode == Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE) {
+                  if (block.mutation.proccode === procCode) {
+                    alert(Blockly.Msg.Global_PROCEDURE_USED.replace('%1', target.getName()));
+                    return;
+                  }
+                }
+              }
+            }
+          }
+
           var didDelete = Blockly.Procedures.deleteProcedureDefCallback(
               procCode, rootBlock);
           if (!didDelete) {
             alert(Blockly.Msg.PROCEDURE_USED);
+            return;
           }
         };
       }

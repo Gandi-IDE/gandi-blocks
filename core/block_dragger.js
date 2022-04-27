@@ -291,6 +291,22 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
           }
         }
       }
+      //CCW: global block delete
+      // TODO optimize this -- only do this if the block is a global block
+      for (var i = 0; i < window.vm.runtime.targets.length; i++) {
+        var target = window.vm.runtime.targets[i];
+        for (var blockId in target.blocks._blocks) {
+          var block = target.blocks._blocks[blockId];
+          if (block.opcode == Blockly.PROCEDURES_CALL_BLOCK_TYPE || block.opcode == Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE) {
+            var procCode = block.mutation.proccode;
+            if (!Blockly.Procedures.getDefineBlock(procCode, ws)) {
+              alert(Blockly.Msg.Global_PROCEDURE_USED.replace('%1', target.getName()));
+              ws.undo();
+              return;
+            }
+          }
+        }
+      }
       // The proc deletion was valid, update the toolbox.
       ws.refreshToolboxSelection_();
     });

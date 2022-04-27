@@ -332,6 +332,7 @@ Blockly.Msg.NEW_PROCEDURE = 'Make a Block';
 Blockly.Msg.PROCEDURE_ALREADY_EXISTS = 'A procedure named "%1" already exists.';
 Blockly.Msg.PROCEDURE_DEFAULT_NAME = 'block name';
 Blockly.Msg.PROCEDURE_USED = 'To delete a block definition, first remove all uses of the block';
+Blockly.Msg.Global_PROCEDURE_USED = 'To delete a global block definition, first remove all uses of the block in sprite %1';
 
 
 // Lists
