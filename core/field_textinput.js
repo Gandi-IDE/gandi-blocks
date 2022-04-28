@@ -636,8 +636,10 @@ Blockly.FieldTextInput.prototype.widgetDisposeAnimationFinished_ = function() {
 Blockly.FieldTextInput.prototype.maybeSaveEdit_ = function(prefix) {
   var htmlInput = Blockly.FieldTextInput.htmlInput_;
   // Save the edit (if it validates).
-  var pre = prefix || '';
-  var text = pre + htmlInput.value;
+  var text = htmlInput.value;
+  if (prefix && !text.startsWith(prefix)) {
+    text = prefix + text;
+  }
   if (this.sourceBlock_) {
     var text1 = this.callValidator(text);
     if (text1 === null || text1.length === 0) {
