@@ -642,7 +642,7 @@ Blockly.FieldTextInput.prototype.maybeSaveEdit_ = function(prefix) {
   }
   if (this.sourceBlock_) {
     var text1 = this.callValidator(text);
-    if (text1 === null || text1.length === 0) {
+    if (text1 === null) {
       // Invalid edit.
       text = htmlInput.defaultValue;
     } else {
