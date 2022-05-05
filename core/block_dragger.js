@@ -239,7 +239,11 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
   // Scratch-specific: note possible illegal definition deletion for rollback below.
   var isDeletingProcDef = this.wouldDeleteBlock_ &&
       (this.draggingBlock_.type == Blockly.PROCEDURES_DEFINITION_BLOCK_TYPE);
-
+  var deletedProcBlock = null;
+  if(isDeletingProcDef) {
+    // maybeDeleteBlock_() will dispose the draggingBlock_, so we need to save it
+    deletedProcBlock = this.draggingBlock_.childBlocks_[0];
+  }
   var deleted = this.maybeDeleteBlock_();
   if (!deleted) {
     // These are expensive and don't need to be done if we're deleting.
@@ -277,6 +281,7 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
   // Only do this if we deleted a proc def.
   if (isDeletingProcDef) {
     var ws = this.workspace_;
+    var deletedProcCode = deletedProcBlock.getProcCode();
     setTimeout(function() {
       var allBlocks = ws.getAllBlocks();
       for (var i = 0; i < allBlocks.length; i++) {
@@ -284,29 +289,33 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
         if (block.type == Blockly.PROCEDURES_CALL_BLOCK_TYPE || block.type == Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE) {
           var procCode = block.getProcCode();
           // Check for call blocks with no associated define block.
-          if (!Blockly.Procedures.getDefineBlock(procCode, ws)) {
+          if (deletedProcCode === procCode && !Blockly.Procedures.getDefineBlock(procCode, ws)) {
             alert(Blockly.Msg.PROCEDURE_USED);
             ws.undo();
             return; // There can only be one define deletion at a time.
           }
         }
       }
+
       //CCW: global block delete
-      // TODO optimize this -- only do this if the block is a global block
-      for (var i = 0; i < window.vm.runtime.targets.length; i++) {
-        var target = window.vm.runtime.targets[i];
-        for (var blockId in target.blocks._blocks) {
-          var block = target.blocks._blocks[blockId];
-          if (block.opcode == Blockly.PROCEDURES_CALL_BLOCK_TYPE || block.opcode == Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE) {
-            var procCode = block.mutation.proccode;
-            if (!Blockly.Procedures.getDefineBlock(procCode, ws)) {
-              alert(Blockly.Msg.Global_PROCEDURE_USED.replace('%1', target.getName()));
-              ws.undo();
-              return;
+      if (deletedProcBlock.isGlobal_) {
+        for (var i = 0; i < window.vm.runtime.targets.length; i++) {
+          var target = window.vm.runtime.targets[i];
+          for (var blockId in target.blocks._blocks) {
+            var block = target.blocks._blocks[blockId];
+            if (block.opcode == Blockly.PROCEDURES_CALL_BLOCK_TYPE || block.opcode == Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE) {
+              var procCode = block.mutation.proccode;
+              if (deletedProcCode === procCode && !Blockly.Procedures.getDefineBlock(procCode, ws)) {
+                alert(Blockly.Msg.Global_PROCEDURE_USED.replace('%1', target.getName()));
+                ws.undo();
+                return;
+              }
             }
           }
         }
       }
+
+
       // The proc deletion was valid, update the toolbox.
       ws.refreshToolboxSelection_();
     });
