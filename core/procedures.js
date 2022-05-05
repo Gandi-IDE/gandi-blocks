@@ -183,7 +183,7 @@ Blockly.Procedures.isNameUsed = function(name, workspace, opt_exclude) {
     if (blocks[i] == opt_exclude) {
       continue;
     }
-    if (blocks[i].procCode_) {
+    if (blocks[i].procCode_ && blocks[i].type === Blockly.PROCEDURES_PROTOTYPE_BLOCK_TYPE) {
       if (Blockly.Names.equals(blocks[i].procCode_, name)) {
         return true;
       }
