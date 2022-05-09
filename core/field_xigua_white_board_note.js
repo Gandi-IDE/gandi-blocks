@@ -366,6 +366,7 @@ Blockly.FieldXiguaWhiteBoardNote.prototype.dispose_ = function() {
  * @private
  */
 Blockly.FieldXiguaWhiteBoardNote.prototype.showEditor_ = function() {
+  if (Blockly.locked) return;
   var noFocus =
       goog.userAgent.MOBILE || goog.userAgent.ANDROID || goog.userAgent.IPAD;
   // Mobile browsers have issues with in-line textareas (focus & keyboards).

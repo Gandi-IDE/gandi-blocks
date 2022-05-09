@@ -58,6 +58,7 @@ goog.inherits(Blockly.FieldTextInputRemovable, Blockly.FieldTextInput);
  * @private
  */
 Blockly.FieldTextInputRemovable.prototype.showEditor_ = function() {
+  if (Blockly.locked) return;
   Blockly.FieldTextInputRemovable.superClass_.showEditor_.call(this);
 
   var div = Blockly.WidgetDiv.DIV;

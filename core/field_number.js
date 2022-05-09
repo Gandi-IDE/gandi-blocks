@@ -163,6 +163,7 @@ Blockly.FieldNumber.prototype.setConstraints_ = function(opt_min, opt_max,
  * @private
  */
 Blockly.FieldNumber.prototype.showEditor_ = function() {
+  if (Blockly.locked) return;
   Blockly.FieldNumber.activeField_ = this;
   // Do not focus on mobile devices so we can show the num-pad
   var showNumPad = this.useTouchInteraction_;

@@ -294,6 +294,7 @@ Blockly.FieldXiguaMatrix.prototype.getValue = function() {
  * @private
  */
 Blockly.FieldXiguaMatrix.prototype.showEditor_ = function() {
+  if (Blockly.locked) return;
   // If there is an existing drop-down someone else owns, hide it immediately and clear it.
   Blockly.DropDownDiv.hideWithoutAnimation();
   Blockly.DropDownDiv.clearContent();

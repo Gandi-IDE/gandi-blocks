@@ -158,6 +158,7 @@ Blockly.BlockDragger.initIconData_ = function(block) {
  * @package
  */
 Blockly.BlockDragger.prototype.startBlockDrag = function(currentDragDeltaXY) {
+  if(Blockly.locked) return;
   if (!Blockly.Events.getGroup()) {
     Blockly.Events.setGroup(true);
   }
@@ -339,6 +340,7 @@ Blockly.BlockDragger.prototype.fireDragOutsideEvent_ = function(isOutside) {
  * @private
  */
 Blockly.BlockDragger.prototype.fireEndDragEvent_ = function(isOutside) {
+  if(Blockly.locked) return;
   var event = new Blockly.Events.EndBlockDrag(this.draggingBlock_, isOutside);
   Blockly.Events.fire(event);
 };
