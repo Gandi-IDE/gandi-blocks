@@ -381,6 +381,7 @@ Blockly.FieldNote.prototype.dispose_ = function() {
  * @private
  */
 Blockly.FieldNote.prototype.showEditor_ = function() {
+  if (Blockly.locked) return;
   // Mobile browsers have issues with in-line textareas (focus & keyboards).
   Blockly.FieldNote.superClass_.showEditor_.call(this, this.useTouchInteraction_);
 

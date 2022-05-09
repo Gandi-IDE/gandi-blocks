@@ -288,6 +288,7 @@ Blockly.FieldColourSlider.prototype.activateEyedropperInternal_ = function() {
  * @private
  */
 Blockly.FieldColourSlider.prototype.showEditor_ = function() {
+  if (Blockly.locked) return;
   Blockly.DropDownDiv.hideWithoutAnimation();
   Blockly.DropDownDiv.clearContent();
   var div = Blockly.DropDownDiv.getContentDiv();

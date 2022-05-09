@@ -168,6 +168,7 @@ Blockly.FieldAngle.prototype.dispose_ = function() {
  * @private
  */
 Blockly.FieldAngle.prototype.showEditor_ = function() {
+  if (Blockly.locked) return;
   // Mobile browsers have issues with in-line textareas (focus & keyboards).
   Blockly.FieldAngle.superClass_.showEditor_.call(this, this.useTouchInteraction_);
   // If there is an existing drop-down someone else owns, hide it immediately and clear it.

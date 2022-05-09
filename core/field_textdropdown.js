@@ -122,7 +122,7 @@ Blockly.FieldTextDropdown.prototype.dispose = function() {
  * If the drop-down isn't open, show the text editor.
  */
 Blockly.FieldTextDropdown.prototype.showEditor_ = function() {
-  if (!this.dropDownOpen_) {
+  if (!this.dropDownOpen_ && !Blockly.locked) {
     Blockly.FieldTextDropdown.superClass_.showEditor_.call(this, null, null,
         true, function() {
           // When the drop-down arrow is clicked, hide text editor and show drop-down.

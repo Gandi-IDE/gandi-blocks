@@ -114,6 +114,7 @@ Blockly.FieldDate.prototype.setValue = function(date) {
  * @private
  */
 Blockly.FieldDate.prototype.showEditor_ = function() {
+  if (Blockly.locked) return;
   Blockly.WidgetDiv.show(this, this.sourceBlock_.RTL,
       Blockly.FieldDate.widgetDispose_);
 

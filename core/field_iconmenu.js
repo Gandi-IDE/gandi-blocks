@@ -180,6 +180,7 @@ Blockly.FieldIconMenu.prototype.getSrcForValue = function(value) {
  * @private
  */
 Blockly.FieldIconMenu.prototype.showEditor_ = function() {
+  if (Blockly.locked) return;
   // If there is an existing drop-down we own, this is a request to hide the drop-down.
   if (Blockly.DropDownDiv.hideIfOwner(this)) {
     return;

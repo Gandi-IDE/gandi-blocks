@@ -191,6 +191,7 @@ Blockly.FieldColour.prototype.setColumns = function(columns) {
  * @private
  */
 Blockly.FieldColour.prototype.showEditor_ = function() {
+  if (Blockly.locked) return;
   Blockly.WidgetDiv.show(this, this.sourceBlock_.RTL,
       Blockly.FieldColour.widgetDispose_);
 

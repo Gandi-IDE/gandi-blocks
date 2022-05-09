@@ -220,6 +220,7 @@ Blockly.FieldTextInput.prototype.setRestrictor = function(restrictor) {
  */
 Blockly.FieldTextInput.prototype.showEditor_ = function(
     opt_quietInput, opt_readOnly, opt_withArrow, opt_arrowCallback) {
+  if (Blockly.locked) return;
   this.workspace_ = this.sourceBlock_.workspace;
   var quietInput = opt_quietInput || false;
   var readOnly = opt_readOnly || false;

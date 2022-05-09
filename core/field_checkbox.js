@@ -120,6 +120,7 @@ Blockly.FieldCheckbox.prototype.setValue = function(newBool) {
  * @private
  */
 Blockly.FieldCheckbox.prototype.showEditor_ = function() {
+  if (Blockly.locked) return;
   var newState = !this.state_;
   if (this.sourceBlock_) {
     // Call any validation function, and allow it to override.
