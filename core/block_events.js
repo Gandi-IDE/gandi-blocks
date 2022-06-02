@@ -220,7 +220,7 @@ Blockly.Events.Change.prototype.run = function(forward) {
  * @constructor
  */
 Blockly.Events.Create = function(block) {
-  if (!block || Blockly.locked) {
+  if (!block) {
     return;  // Blank event to be populated by fromJson.
   }
   Blockly.Events.Create.superClass_.constructor.call(this, block);
@@ -299,7 +299,7 @@ Blockly.Events.Create.prototype.run = function(forward) {
  * @constructor
  */
 Blockly.Events.Delete = function(block) {
-  if (!block || Blockly.locked) {
+  if (!block) {
     return;  // Blank event to be populated by fromJson.
   }
   if (block.getParent()) {
