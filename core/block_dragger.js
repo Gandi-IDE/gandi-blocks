@@ -36,6 +36,7 @@ goog.require('goog.math.Coordinate');
 goog.require('goog.asserts');
 
 
+
 /**
  * Class for a block dragger.  It moves blocks around the workspace when they
  * are being dragged by a mouse or touch.
@@ -300,8 +301,9 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
 
       //CCW: global block delete
       if (deletedProcBlock.isGlobal_) {
-        for (var i = 0; i < window.vm.runtime.targets.length; i++) {
-          var target = window.vm.runtime.targets[i];
+        var allTargets = Blockly.getAllTargets();
+        for (var i = 0; i < allTargets.length; i++) {
+          var target = allTargets[i];
           for (var blockId in target.blocks._blocks) {
             var block = target.blocks._blocks[blockId];
             if (block.opcode == Blockly.PROCEDURES_CALL_BLOCK_TYPE || block.opcode == Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE) {

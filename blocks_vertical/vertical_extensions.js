@@ -149,6 +149,7 @@ Blockly.ScratchBlocks.VerticalExtensions.OUTPUT_BOOLEAN = function() {
  * @package
  * @readonly
  */
+// @ts-ignore
 Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_DEF_CONTEXTMENU = {
   /**
    * Add the "edit" option and removes the "duplicate" option from the context
@@ -182,8 +183,9 @@ Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_DEF_CONTEXTMENU = {
           }
 
           if (isGlobal) {
-            for (var i = 0; i < window.vm.runtime.targets.length; i++) {
-              var target = window.vm.runtime.targets[i];
+            var allTargets = Blockly.getAllTargets();
+            for (var i = 0; i < allTargets.length; i++) {
+              var target = allTargets[i];
               for (var blockId in target.blocks._blocks) {
                 var block = target.blocks._blocks[blockId];
                 if (block.opcode == Blockly.PROCEDURES_CALL_BLOCK_TYPE || block.opcode == Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE) {
