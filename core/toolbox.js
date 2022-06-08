@@ -85,17 +85,41 @@ Blockly.Toolbox = function(workspace) {
 };
 
 /**
+ * @see {@link Blockly.Toolbox.prototype.width}
+ * @type {number}
+ */
+Blockly.Toolbox.prototype.NORMAL_WIDTH = 310;
+
+/**
+ * The width category menu
+ * @type {number}
+ */
+Blockly.Toolbox.prototype.NO_FLYOUT_WIDTH = 60;
+
+/**
  * Width of the toolbox, which changes only in vertical layout.
  * This is the sum of the width of the flyout (250) and the category menu (60).
  * @type {number}
  */
-Blockly.Toolbox.prototype.width = 310;
+Blockly.Toolbox.prototype.width = Blockly.Toolbox.prototype.NORMAL_WIDTH;
 
 /**
  * Height of the toolbox, which changes only in horizontal layout.
  * @type {number}
  */
 Blockly.Toolbox.prototype.height = 0;
+
+/**
+ * @type {Blockly.Flyout | Blockly.VerticalFlyout | Blockly.HorizontalFlyout | null}
+ */
+Blockly.Toolbox.prototype.flyout_ = null;
+
+/**
+ * The last position {@link this.flyout_} scrolled to
+ * @type {number}
+ * @private
+ */
+Blockly.Toolbox.prototype.lastPositionFlyoutScrolledTo_ = Number.MIN_SAFE_INTEGER;
 
 Blockly.Toolbox.prototype.selectedItem_ = null;
 
@@ -110,8 +134,10 @@ Blockly.Toolbox.prototype.init = function() {
    * HTML container for the Toolbox menu.
    * @type {Element}
    */
-  this.HtmlDiv =
-      goog.dom.createDom(goog.dom.TagName.DIV, 'blocklyToolboxDiv');
+  this.HtmlDiv = goog.dom.createDom(
+      goog.dom.TagName.DIV,
+      'blocklyToolboxDiv' + (workspace.options.nonStickyFlyout ? ' nonStickyFlyout' : '')
+  );
   this.HtmlDiv.setAttribute('dir', workspace.RTL ? 'RTL' : 'LTR');
   svg.parentNode.insertBefore(this.HtmlDiv, svg);
 
@@ -218,6 +244,9 @@ Blockly.Toolbox.prototype.showAll_ = function() {
  * @return {number} The width of the toolbox.
  */
 Blockly.Toolbox.prototype.getWidth = function() {
+  if (this.workspace_.options.nonStickyFlyout) {
+    return this.NO_FLYOUT_WIDTH;
+  }
   return this.width;
 };
 
@@ -432,6 +461,12 @@ Blockly.Toolbox.prototype.setFlyoutScrollPos = function(pos) {
   this.flyout_.setScrollPos(pos);
 };
 
+/**
+ * @return {Blockly.Flyout | Blockly.VerticalFlyout | Blockly.HorizontalFlyout | null} toolbox flyout
+ */
+Blockly.Toolbox.prototype.getFlyout = function() {
+  return this.flyout_;
+};
 
 /**
  * Set the currently selected category.
@@ -485,8 +520,7 @@ Blockly.Toolbox.prototype.scrollToCategoryByName = function(name) {
   var scrollPositions = this.flyout_.categoryScrollPositions;
   for (var i = 0; i < scrollPositions.length; i++) {
     if (name === scrollPositions[i].categoryName) {
-      this.flyout_.setVisible(true);
-      this.flyout_.scrollTo(scrollPositions[i].position);
+      this.scrollFlyoutToPosition(scrollPositions[i].position);
       return;
     }
   }
@@ -501,11 +535,32 @@ Blockly.Toolbox.prototype.scrollToCategoryById = function(id) {
   var scrollPositions = this.flyout_.categoryScrollPositions;
   for (var i = 0; i < scrollPositions.length; i++) {
     if (id === scrollPositions[i].categoryId) {
-      this.flyout_.setVisible(true);
-      this.flyout_.scrollTo(scrollPositions[i].position);
+      this.scrollFlyoutToPosition(scrollPositions[i].position);
       return;
     }
   }
+};
+
+/**
+ * Scroll {@link this.flyout_} to a position
+ * @param {number} position The position that flyout will scroll to
+ */
+Blockly.Toolbox.prototype.scrollFlyoutToPosition = function(position) {
+  if (this.workspace_.options.nonStickyFlyout && this.lastPositionFlyoutScrolledTo_ === position) {
+    this.flyout_.hide();
+    this.resetScrollToHideConditions();
+    return;
+  }
+  this.flyout_.setVisible(true);
+  this.flyout_.scrollTo(position);
+  this.lastPositionFlyoutScrolledTo_ = position;
+};
+
+/**
+ * Clean up, next click on menu will display the flyout
+ */
+Blockly.Toolbox.prototype.resetScrollToHideConditions = function() {
+  this.lastPositionFlyoutScrolledTo_ = Number.MIN_SAFE_INTEGER;
 };
 
 /**

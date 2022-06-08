@@ -186,6 +186,12 @@ Blockly.BlockDragger.prototype.startBlockDrag = function(currentDragDeltaXY) {
     var style = this.draggingBlock_.isDeletable() ? 'blocklyToolboxDelete' :
         'blocklyToolboxGrab';
     toolbox.addStyle(style);
+    if (this.workspace_.options.nonStickyFlyout) {
+      if (toolbox.getFlyout()) {
+        toolbox.resetScrollToHideConditions();
+        toolbox.getFlyout().hide();
+      }
+    }
   }
 };
 
