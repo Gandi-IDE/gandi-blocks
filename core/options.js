@@ -135,6 +135,7 @@ Blockly.Options = function(options) {
   this.gridOptions = Blockly.Options.parseGridOptions_(options);
   this.zoomOptions = Blockly.Options.parseZoomOptions_(options);
   this.toolboxPosition = toolboxPosition;
+  this.nonStickyFlyout = !!options.nonStickyFlyout;
 };
 
 /**

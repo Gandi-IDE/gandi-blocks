@@ -685,9 +685,9 @@ Blockly.Scrollbar.prototype.updateDisplay_ = function() {
     show = this.isVisible();
   }
   if (show) {
-    this.outerSvg_.setAttribute('display', 'block');
+    Blockly.utils.removeClass(this.outerSvg_, 'blocklyFlyoutScrollbarHidingAnimation');
   } else {
-    this.outerSvg_.setAttribute('display', 'none');
+    Blockly.utils.addClass(this.outerSvg_, 'blocklyFlyoutScrollbarHidingAnimation');
   }
 };
 

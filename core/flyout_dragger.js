@@ -45,6 +45,8 @@ Blockly.FlyoutDragger = function(flyout) {
   Blockly.FlyoutDragger.superClass_.constructor.call(this,
       flyout.getWorkspace());
 
+  this.flyout_ = flyout;
+
   /**
    * The scrollbar to update to move the flyout.
    * Unlike the main workspace, the flyout has only one scrollbar, in either the
@@ -65,6 +67,12 @@ Blockly.FlyoutDragger = function(flyout) {
 goog.inherits(Blockly.FlyoutDragger, Blockly.WorkspaceDragger);
 
 /**
+ * @type {Blockly.Flyout | Blockly.VerticalFlyout | Blockly.HorizontalFlyout | null}
+ * @private
+ */
+Blockly.FlyoutDragger.prototype.flyout_ = null;
+
+/**
  * Move the appropriate scrollbar to drag the flyout.
  * Since flyouts only scroll in one direction at a time, this will discard one
  * of the calculated values.
@@ -79,5 +87,8 @@ Blockly.FlyoutDragger.prototype.updateScroll_ = function(x, y) {
     this.scrollbar_.set(x);
   } else {
     this.scrollbar_.set(y);
+  }
+  if (this.flyout_ && this.flyout_.getParentToolbox()) {
+    this.flyout_.getParentToolbox().resetScrollToHideConditions();
   }
 };

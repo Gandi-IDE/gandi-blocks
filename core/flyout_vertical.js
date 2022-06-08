@@ -327,7 +327,7 @@ Blockly.VerticalFlyout.prototype.position = function() {
 
   if (this.parentToolbox_) {
     var toolboxWidth = this.parentToolbox_.getWidth();
-    var categoryWidth = toolboxWidth - this.width_;
+    var categoryWidth = this.targetWorkspace_.options.nonStickyFlyout ? toolboxWidth : (toolboxWidth - this.width_);
     var x = this.toolboxPosition_ == Blockly.TOOLBOX_AT_RIGHT ?
         targetWorkspaceMetrics.viewWidth : categoryWidth;
     var y = 0;
@@ -396,6 +396,9 @@ Blockly.VerticalFlyout.prototype.setBackgroundPath_ = function(width, height) {
  */
 Blockly.VerticalFlyout.prototype.scrollToStart = function() {
   this.scrollbar_.set(0);
+  if (this.parentToolbox_) {
+    this.parentToolbox_.resetScrollToHideConditions();
+  }
 };
 
 /**
@@ -439,6 +442,9 @@ Blockly.VerticalFlyout.prototype.wheel_ = function(e) {
     pos = Math.min(pos, limit);
     pos = Math.max(pos, 0);
     this.scrollbar_.set(pos);
+    if (this.parentToolbox_) {
+      this.parentToolbox_.resetScrollToHideConditions();
+    }
     // When the flyout moves from a wheel event, hide WidgetDiv and DropDownDiv.
     Blockly.WidgetDiv.hide(true);
     Blockly.DropDownDiv.hideWithoutAnimation();
@@ -743,7 +749,8 @@ Blockly.VerticalFlyout.prototype.getClientRect = function() {
   var height = flyoutRect.height;
 
   if (this.toolboxPosition_ == Blockly.TOOLBOX_AT_LEFT) {
-    return new goog.math.Rect(x - BIG_NUM, y, BIG_NUM + width, height);
+    var rectWidth = this.targetWorkspace_.options.nonStickyFlyout ? BIG_NUM : (BIG_NUM + width);
+    return new goog.math.Rect(x - BIG_NUM, y, rectWidth, height);
   } else {  // Right
     return new goog.math.Rect(x, y, BIG_NUM + width, height);
   }

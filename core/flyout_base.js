@@ -364,6 +364,14 @@ Blockly.Flyout.prototype.setParentToolbox = function(toolbox) {
 };
 
 /**
+ * Get parent toolbox
+ * @return {Blockly.Toolbox | null} The toolbox that owns this flyout.
+ */
+Blockly.Flyout.prototype.getParentToolbox = function() {
+  return this.parentToolbox_;
+};
+
+/**
  * Get the width of the flyout.
  * @return {number} The width of the flyout.
  */
@@ -434,7 +442,13 @@ Blockly.Flyout.prototype.updateDisplay_ = function() {
   } else {
     show = this.isVisible();
   }
-  this.svgGroup_.style.display = show ? 'block' : 'none';
+  // this.svgGroup_.style.display = show ? 'block' : 'none';
+  this.svgGroup_.style.display = 'block';
+  if (show) {
+    this.svgGroup_.classList.remove('blocklyFlyoutHidingAnimation');
+  } else {
+    this.svgGroup_.classList.add('blocklyFlyoutHidingAnimation');
+  }
   // Update the scrollbar's visiblity too since it should mimic the
   // flyout's visibility.
   this.scrollbar_.setContainerVisible(show);
