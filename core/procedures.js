@@ -415,6 +415,8 @@ Blockly.Procedures.newProcedureMutation = function() {
       ' argumentnames="[]"' +
       ' argumentdefaults="[]"' +
       ' warp="false"' +
+      ' isglobal="false"' +
+      // ' targetid="0"' +
       ' isreporter="false">' +
       '</mutation>' +
       '</xml>';
