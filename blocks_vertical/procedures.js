@@ -1128,7 +1128,7 @@ Blockly.Blocks['procedures_return'] = {
   }
 };
 
-Blockly.Blocks['ccw_hat_var'] = {
+Blockly.Blocks['ccw_hat_parameter'] = {
   /**
    * reporter block as input in hat
    * @this Blockly.Block
