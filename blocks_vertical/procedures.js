@@ -1110,7 +1110,7 @@ Blockly.Blocks['argument_editor_string_number'] = {
 // ------------------powered by ccw-----------------------
 Blockly.Blocks['procedures_return'] = {
   /**
-   * Block to move grid (1 grid = 40 step).
+   * return block
    * @this Blockly.Block
    */
   init: function() {
@@ -1124,6 +1124,25 @@ Blockly.Blocks['procedures_return'] = {
       ],
       "category": Blockly.Categories.more,
       "extensions": ["colours_more","shape_end"]
+    });
+  }
+};
+
+Blockly.Blocks['ccw_hat_var'] = {
+  /**
+   * reporter block as input in hat
+   * @this Blockly.Block
+   */
+  init: function() {
+    this.jsonInit({ "message0": " %1",
+      "args0": [
+        {
+          "type": "field_label_serializable",
+          "name": "VALUE",
+          "text": ""
+        }
+      ],
+      "extensions": ["colours_more", "output_number", "output_string"]
     });
   }
 };
