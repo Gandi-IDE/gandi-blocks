@@ -567,5 +567,12 @@ Blockly.Blocks.defaultToolbox = '<xml id="toolbox-categories" style="display: no
         '</shadow>' +
       '</value>' +
     '</block>' +
+    '<block type="event_whengreaterthan" id="event_whengreaterthan">' +
+    '<value name="VALUE">' +
+      '<shadow type="ccw_hat_parameter">' +
+        '<field name="VALUE">extra</field>' +
+      '</shadow>' +
+    '</value>' +
+    '</block>' +
   '</category>' +
   '</xml>';
