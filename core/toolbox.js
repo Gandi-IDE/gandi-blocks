@@ -124,6 +124,48 @@ Blockly.Toolbox.prototype.lastPositionFlyoutScrolledTo_ = Number.MIN_SAFE_INTEGE
 Blockly.Toolbox.prototype.selectedItem_ = null;
 
 /**
+ * type of blocks those should be hidden from flyout
+ * @type {string[]}
+ * @private
+ */
+Blockly.Toolbox.prototype.ghostBlockTypes_ = [];
+
+/**
+ * id of categories those should be hidden from toolbox
+ * @type {string[]}
+ * @protected
+ */
+Blockly.Toolbox.prototype.ghostCaregoryIds_ = [];
+
+/**
+ * determine if should rerender while arr1 is different from arr2
+ * @param {Array.<any> =} arr1 a set of ids or names
+ * @param {Array.<any> =} arr2 same as above
+ * @return {boolean} true: should rerender
+ * @private
+ */
+Blockly.Toolbox.prototype.shouldRerender_ = function(arr1, arr2) {
+  // same object
+  if (arr1 === arr2) {
+    return false;
+  }
+
+  if (arr1 instanceof Array && arr2 instanceof Array) {
+    if (arr1.length !== arr2.length) {
+      return true;
+    }
+    // as the same length array, check each item
+    for (var i = 0; i < arr1.length; i++) {
+      if (!arr2.includes(arr1[i])) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+};
+
+/**
  * Initializes the toolbox.
  */
 Blockly.Toolbox.prototype.init = function() {
@@ -236,7 +278,50 @@ Blockly.Toolbox.prototype.showAll_ = function() {
 
     allContents = allContents.concat(category.getContents());
   }
+  if (this.ghostBlockTypes_ && this.ghostBlockTypes_.length > 0) {
+    try {
+      var nonGhostContents = [];
+      for (var j = 0; j < allContents.length; j++) {
+        var content = allContents[j];
+        if (!content.getAttribute) continue;
+
+        var type = content.getAttribute('type');
+        if (!type || !this.ghostBlockTypes_.includes(type)) {
+          nonGhostContents.push(content);
+        }
+      }
+      allContents = nonGhostContents;
+    } catch (e) {
+      console.error('error on processing ghost blocks:', e);
+    }
+  }
   this.flyout_.show(allContents);
+};
+
+/**
+ * Hide some blocks from flyout and toolbox
+ * @param {Array.<string | number>} blockTypes array of hidden block type attribute
+ */
+Blockly.Toolbox.prototype.setGhostBlocks = function(blockTypes) {
+  if (!blockTypes) return;
+
+  if (this.shouldRerender_(this.ghostBlockTypes_, blockTypes)) {
+    this.ghostBlockTypes_ = blockTypes;
+    this.refreshSelection();
+  }
+};
+
+/**
+ * hide some categories from toolbox
+ * @param {string[]} ids category ids for hiding
+ */
+Blockly.Toolbox.prototype.setGhostCategories = function(ids) {
+  if (!ids) return;
+
+  if (this.shouldRerender_(this.ghostCaregoryIds_, ids)) {
+    this.ghostCaregoryIds_ = ids;
+    this.populate_(this.workspace_.options.languageTree);
+  }
 };
 
 /**
@@ -666,11 +751,23 @@ Blockly.Toolbox.CategoryMenu.prototype.populate = function(domTree) {
   // Remove old categories
   this.dispose();
   this.createDom();
+
+  var ghostCategories = this.parent_.ghostCaregoryIds_;
+
   var categories = [];
   // Find actual categories from the DOM tree.
   for (var i = 0, child; child = domTree.childNodes[i]; i++) {
     if (!child.tagName || child.tagName.toUpperCase() != 'CATEGORY') {
       continue;
+    }
+    try {
+      if (ghostCategories && ghostCategories.length > 0) {
+        if (ghostCategories.includes(child.getAttribute('id'))) {
+          continue;
+        }
+      }
+    } catch (e) {
+      console.error('error on processing ghost categories:', e);
     }
     categories.push(child);
   }
