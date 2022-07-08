@@ -198,12 +198,22 @@ Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_DEF_CONTEXTMENU = {
             }
           }
 
+          // cache workspace before deleting
+          var ws = rootBlock.workspace;
+
           var didDelete = Blockly.Procedures.deleteProcedureDefCallback(
               procCode, rootBlock);
           if (!didDelete) {
             alert(Blockly.Msg.PROCEDURE_USED);
             return;
           }
+
+          setTimeout(function() {
+            ws.fireDeletionListeners(rootBlock, function() {
+              ws.undo();
+              ws.refreshToolboxSelection_();
+            });
+          });
         };
       }
     }

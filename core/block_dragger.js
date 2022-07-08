@@ -276,25 +276,37 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
   }
   Blockly.Events.setGroup(false);
 
+  var ws = this.workspace_;
+
   if (isOutside) {
-    var ws = this.workspace_;
-    // Reset a drag to outside of scratch-blocks
+    // Reset a drag to the outside of scratch-blocks
     setTimeout(function() {
       ws.undo();
     });
+    return;
   }
+
+  var deletedBlock = this.draggingBlock_;
+  var fireDeletionListeners = function(undoFunc) {
+    if (deleted) {
+      ws.fireDeletionListeners(deletedBlock, undoFunc);
+    }
+  };
 
   // Scratch-specific: roll back deletes that create call blocks with defines.
   // Have to wait for connections to be re-established, so put in setTimeout.
   // Only do this if we deleted a proc def.
-  if (isDeletingProcDef) {
-    var ws = this.workspace_;
+  if (isDeletingProcDef && deletedProcBlock) {
     var deletedProcCode = deletedProcBlock.getProcCode();
     setTimeout(function() {
       var allBlocks = ws.getAllBlocks();
       for (var i = 0; i < allBlocks.length; i++) {
         var block = allBlocks[i];
-        if (block.type == Blockly.PROCEDURES_CALL_BLOCK_TYPE || block.type == Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE) {
+        if (
+          block.type == Blockly.PROCEDURES_CALL_BLOCK_TYPE
+          ||
+          block.type == Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE
+        ) {
           var procCode = block.getProcCode();
           // Check for call blocks with no associated define block.
           if (deletedProcCode === procCode && !Blockly.Procedures.getDefineBlock(procCode, ws)) {
@@ -312,7 +324,11 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
           var target = allTargets[i];
           for (var blockId in target.blocks._blocks) {
             var block = target.blocks._blocks[blockId];
-            if (block.opcode == Blockly.PROCEDURES_CALL_BLOCK_TYPE || block.opcode == Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE) {
+            if (
+              block.opcode == Blockly.PROCEDURES_CALL_BLOCK_TYPE
+              ||
+              block.opcode == Blockly.PROCEDURES_CALL_WITH_RETURN_BLOCK_TYPE
+            ) {
               var procCode = block.mutation.proccode;
               if (deletedProcCode === procCode && !Blockly.Procedures.getDefineBlock(procCode, ws)) {
                 alert(Blockly.Msg.Global_PROCEDURE_USED.replace('%1', target.getName()));
@@ -324,11 +340,21 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
         }
       }
 
-
       // The proc deletion was valid, update the toolbox.
       ws.refreshToolboxSelection_();
+
+      fireDeletionListeners(function() {
+        ws.undo();
+        ws.refreshToolboxSelection_();
+      });
     });
+
+    return;
   }
+
+  setTimeout(function(){
+    fireDeletionListeners();
+  });
 };
 
 /**

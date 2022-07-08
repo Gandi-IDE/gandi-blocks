@@ -738,6 +738,16 @@ Blockly.VerticalFlyout.prototype.getClientRect = function() {
     return null;
   }
 
+  var parentToolbox = this.parentToolbox_;
+  if (
+    this.targetWorkspace_.options.nonStickyFlyout
+    && parentToolbox
+    // prevent infinite loop
+    && parentToolbox.getWorkspace().options.nonStickyFlyout
+  ) {
+    return parentToolbox.getClientRect();
+  }
+
   var flyoutRect = this.svgGroup_.getBoundingClientRect();
   // BIG_NUM is offscreen padding so that blocks dragged beyond the shown flyout
   // area are still deleted.  Must be larger than the largest screen size,
@@ -749,8 +759,7 @@ Blockly.VerticalFlyout.prototype.getClientRect = function() {
   var height = flyoutRect.height;
 
   if (this.toolboxPosition_ == Blockly.TOOLBOX_AT_LEFT) {
-    var rectWidth = this.targetWorkspace_.options.nonStickyFlyout ? BIG_NUM : (BIG_NUM + width);
-    return new goog.math.Rect(x - BIG_NUM, y, rectWidth, height);
+    return new goog.math.Rect(x - BIG_NUM, y, BIG_NUM + width, height);
   } else {  // Right
     return new goog.math.Rect(x, y, BIG_NUM + width, height);
   }
