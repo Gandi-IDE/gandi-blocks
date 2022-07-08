@@ -369,6 +369,18 @@ Blockly.Scrollbar.prototype.setHandleLength_ = function(newLength) {
 Blockly.Scrollbar.prototype.setHandlePosition = function(newPosition) {
   this.handlePosition_ = newPosition;
   this.svgHandle_.setAttribute(this.positionAttribute_, this.handlePosition_);
+  if (this.workspace_.zoomControls_) {
+    var position = newPosition / this.ratio_;
+    var event = new CustomEvent("blocklyScrollbarPositionChange", {
+      "detail": {
+        axis: this.positionAttribute_,
+        value: position,
+        contentWidth: this.oldHostMetrics_.contentWidth,
+        contentHeight: this.oldHostMetrics_.contentHeight
+      },
+    });
+    document.dispatchEvent(event);
+  }
 };
 
 /**
