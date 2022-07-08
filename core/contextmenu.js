@@ -228,10 +228,6 @@ Blockly.ContextMenu.blockDeleteOption = function(block) {
         Blockly.Msg.DELETE_X_BLOCKS.replace('%1', String(descendantCount)),
     enabled: true,
     callback: function() {
-      var ws = block.workspace;
-      setTimeout(function() {
-        ws.fireDeletionListeners(block);
-      });
       Blockly.Events.setGroup(true);
       block.dispose(true, true);
       Blockly.Events.setGroup(false);

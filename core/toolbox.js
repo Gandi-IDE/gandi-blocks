@@ -283,10 +283,7 @@ Blockly.Toolbox.prototype.showAll_ = function() {
       var nonGhostContents = [];
       for (var j = 0; j < allContents.length; j++) {
         var content = allContents[j];
-        if (!content.getAttribute) {
-          nonGhostContents.push(content);
-          continue;
-        }
+        if (!content.getAttribute) continue;
 
         var type = content.getAttribute('type');
         if (!type || !this.ghostBlockTypes_.includes(type)) {
@@ -413,7 +410,7 @@ Blockly.Toolbox.prototype.getClientRect = function() {
   }
 
   // If not an auto closing flyout, always use the (larger) flyout client rect
-  if (!this.flyout_.autoClose && !this.workspace_.options.nonStickyFlyout) {
+  if (!this.flyout_.autoClose) {
     return this.flyout_.getClientRect();
   }
 
@@ -707,14 +704,6 @@ Blockly.Toolbox.prototype.setSelectedItemFactory = function(item) {
       Blockly.Touch.clearTouchIdentifier();
     }
   };
-};
-
-/**
- * Get current toolbox workspace
- * @return {Blockly.Workspace} Workspace of current toolbox
- */
-Blockly.Toolbox.prototype.getWorkspace = function() {
-  return this.workspace_;
 };
 
 // Category menu
