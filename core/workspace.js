@@ -77,6 +77,19 @@ Blockly.Workspace = function(opt_options) {
   this.tapListeners_ = [];
 
   /**
+   * @typedef DeletionCallbackFunc
+   * @type {(block: Blockly.BlockSvg, undoFunc: Function, ws: Blockly.Workspace) => boolean | void}
+   *  return <code>true</code> to stop firing the rest of callbacks
+   */
+
+  /**
+   * Listeners for watching block deletion
+   * @type {Array.<DeletionCallbackFunc>}
+   * @private
+   */
+  this.deletionListeners_ = [];
+
+  /**
    * @type {!Array.<!Blockly.Events.Abstract>}
    * @protected
    */
@@ -153,6 +166,7 @@ Blockly.Workspace.prototype.refreshToolboxSelection_ = function() {
  */
 Blockly.Workspace.prototype.dispose = function() {
   this.listeners_.length = 0;
+  this.deletionListeners_.length = 0;
   this.clear();
   // Remove from workspace database.
   delete Blockly.Workspace.WorkspaceDB_[this.id];
@@ -490,7 +504,7 @@ Blockly.Workspace.prototype.newBlock = function(prototypeName, opt_id) {
 
 /**
  * Undo or redo the previous action.
- * @param {boolean} redo False if undo, true if redo.
+ * @param {boolean=} redo False if undo, true if redo.
  */
 Blockly.Workspace.prototype.undo = function(redo) {
   var inputStack = redo ? this.redoStack_ : this.undoStack_;
@@ -666,6 +680,49 @@ Blockly.Workspace.prototype.createPotentialVariableMap = function() {
  */
 Blockly.Workspace.prototype.getVariableMap = function() {
   return this.variableMap_;
+};
+
+/**
+ * Add a listener into {@link this#deletionListeners_}
+ * @param {DeletionCallbackFunc} callback Function that will be triggered on block is deleted
+ * @return {DeletionCallbackFunc | undefined} This is what passed in
+ *  or undefined if the callback is not a valid function
+ */
+Blockly.Workspace.prototype.addDeletionListener = function(callback) {
+  if (!callback || !(callback instanceof Function)) return;
+  this.deletionListeners_.push(callback);
+  return callback;
+};
+
+/**
+ * Remove a listener from {@link this#deletionListeners_}
+ * @param {DeletionCallbackFunc} callback Function that is about to be removed from listener list
+ * @return {DeletionCallbackFunc} Function that is removed from listener list
+ */
+Blockly.Workspace.prototype.removeDeletionListener = function(callback) {
+  var index = this.deletionListeners_.indexOf(callback);
+  if (index !== -1) {
+    this.deletionListeners_.splice(index, 1);
+  }
+  return callback;
+};
+
+/**
+ * Fire all deletion listeners
+ * @param {Blockly.BlockSvg} block Block that was just been removed
+ * @param {Function=} undoFunc Function for undo, {@link Blockly.Workspace.undo} will be used if this omitted
+ */
+Blockly.Workspace.prototype.fireDeletionListeners = function(block, undoFunc) {
+  for (var i = 0; i < this.deletionListeners_.length; i++) {
+    var func = this.deletionListeners_[i];
+    try {
+      if (func(block, undoFunc || this.undo.bind(this), this) === true) {
+        break;
+      }
+    } catch (e) {
+      console.error('error on firing deletion event for block:', block, ', using func:', func, ', with error:', e);
+    }
+  }
 };
 
 /**
