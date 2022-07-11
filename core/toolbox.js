@@ -635,8 +635,8 @@ Blockly.Toolbox.prototype.scrollToCategoryById = function(id) {
  */
 Blockly.Toolbox.prototype.scrollFlyoutToPosition = function(position) {
   if (this.workspace_.options.nonStickyFlyout && this.lastPositionFlyoutScrolledTo_ === position) {
-    this.flyout_.hide();
     this.resetScrollToHideConditions();
+    this.flyout_.setVisible(false);
     return;
   }
   this.flyout_.setVisible(true);

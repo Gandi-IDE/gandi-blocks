@@ -189,7 +189,7 @@ Blockly.BlockDragger.prototype.startBlockDrag = function(currentDragDeltaXY) {
     if (this.workspace_.options.nonStickyFlyout) {
       if (toolbox.getFlyout()) {
         toolbox.resetScrollToHideConditions();
-        toolbox.getFlyout().hide();
+        toolbox.getFlyout().setVisible(false);
       }
     }
   }
