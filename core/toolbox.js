@@ -278,26 +278,6 @@ Blockly.Toolbox.prototype.showAll_ = function() {
 
     allContents = allContents.concat(category.getContents());
   }
-  if (this.ghostBlockTypes_ && this.ghostBlockTypes_.length > 0) {
-    try {
-      var nonGhostContents = [];
-      for (var j = 0; j < allContents.length; j++) {
-        var content = allContents[j];
-        if (!content.getAttribute) {
-          nonGhostContents.push(content);
-          continue;
-        }
-
-        var type = content.getAttribute('type');
-        if (!type || !this.ghostBlockTypes_.includes(type)) {
-          nonGhostContents.push(content);
-        }
-      }
-      allContents = nonGhostContents;
-    } catch (e) {
-      console.error('error on processing ghost blocks:', e);
-    }
-  }
   this.flyout_.show(allContents);
 };
 
@@ -312,6 +292,14 @@ Blockly.Toolbox.prototype.setGhostBlocks = function(blockTypes) {
     this.ghostBlockTypes_ = blockTypes;
     this.refreshSelection();
   }
+};
+
+/**
+ * Get all ghost block types
+ * @return {string[]} block types for hiding
+ */
+Blockly.Toolbox.prototype.getGhostBlocks = function() {
+  return this.ghostBlockTypes_ || [];
 };
 
 /**
