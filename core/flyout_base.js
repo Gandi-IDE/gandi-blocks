@@ -486,6 +486,8 @@ Blockly.Flyout.prototype.show = function(xmlList) {
   this.clearOldBlocks_();
 
   this.setVisible(true);
+  // Get ghost blocks from parent toolbox
+  var ghostBlocks = this.parentToolbox_ ? this.parentToolbox_.getGhostBlocks() : [];
   // Create the blocks to be shown in this flyout.
   var contents = [];
   var gaps = [];
@@ -513,9 +515,13 @@ Blockly.Flyout.prototype.show = function(xmlList) {
         // We assume that in a flyout, the same block id (or type if missing id) means
         // the same output BlockSVG.
 
+        var type = xml.getAttribute('type');
+        // hide ghost block
+        if (ghostBlocks.includes(type)) continue;
+
         // Look for a block that matches the id or type, our createBlock will assign
         // id = type if none existed.
-        var id = xml.getAttribute('id') || xml.getAttribute('type');
+        var id = xml.getAttribute('id') || type;
         var recycled = this.recycleBlocks_.findIndex(function(block) {
           return block.id === id;
         });
