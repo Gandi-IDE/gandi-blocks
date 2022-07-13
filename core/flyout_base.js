@@ -446,6 +446,8 @@ Blockly.Flyout.prototype.updateDisplay_ = function() {
   this.svgGroup_.style.display = 'block';
   if (show) {
     this.svgGroup_.classList.remove('blocklyFlyoutHidingAnimation');
+    // re-position to prevent "display incompletely after window resized"
+    this.position();
   } else {
     this.svgGroup_.classList.add('blocklyFlyoutHidingAnimation');
   }
@@ -458,9 +460,9 @@ Blockly.Flyout.prototype.updateDisplay_ = function() {
  * Hide and empty the flyout.
  */
 Blockly.Flyout.prototype.hide = function() {
-  if (!this.isVisible()) {
-    return;
-  }
+  // if (!this.isVisible()) {
+  //   return;
+  // }
   this.setVisible(false);
   // Delete all the event listeners.
   for (var x = 0, listen; listen = this.listeners_[x]; x++) {
