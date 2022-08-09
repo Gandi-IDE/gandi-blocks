@@ -237,8 +237,8 @@ Blockly.VerticalFlyout.prototype.getContentBoundingBox_ = function() {
  * @private
  */
 Blockly.VerticalFlyout.prototype.getMetrics_ = function() {
-  if (!this.isVisible()) {
-    // Flyout is hidden.
+  if (!this.isVisible() && !this.targetWorkspace_.options.nonStickyFlyout) {
+    // Flyout is hidden. But within nonStickyFlyout, metrics of flyout should be retrieved
     return null;
   }
 
@@ -312,7 +312,8 @@ Blockly.VerticalFlyout.prototype.setMetrics_ = function(xyRatio) {
  * Move the flyout to the edge of the workspace.
  */
 Blockly.VerticalFlyout.prototype.position = function() {
-  if (!this.isVisible()) {
+  if (!this.isVisible() && !this.targetWorkspace_.options.nonStickyFlyout) {
+    // Always reposition the flyout in nonStickyFlyout mode
     return;
   }
   var targetWorkspaceMetrics = this.targetWorkspace_.getMetrics();

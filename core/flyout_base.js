@@ -436,7 +436,7 @@ Blockly.Flyout.prototype.setContainerVisible = function(visible) {
  * @private
  */
 Blockly.Flyout.prototype.updateDisplay_ = function() {
-  var show = true;
+  var show;
   if (!this.containerVisible_) {
     show = false;
   } else {
@@ -446,8 +446,6 @@ Blockly.Flyout.prototype.updateDisplay_ = function() {
   this.svgGroup_.style.display = 'block';
   if (show) {
     this.svgGroup_.classList.remove('blocklyFlyoutHidingAnimation');
-    // re-position to prevent "display incompletely after window resized"
-    this.position();
   } else {
     this.svgGroup_.classList.add('blocklyFlyoutHidingAnimation');
   }
