@@ -386,6 +386,15 @@ Blockly.Workspace.prototype.deleteVariableById = function(id) {
 };
 
 /**
+ * Force delete a variable from this workspace by the passed
+ * in ID. But don't delete if it's used by blocks.
+ * @param {string} id ID of variable to delete.
+ */
+Blockly.Workspace.prototype.forceDeleteVariableById = function(id) {
+  this.variableMap_.forceDeleteVariableById(id);
+};
+
+/**
  * Deletes a variable and all of its uses from this workspace without asking the
  * user for confirmation.
  * @param {!Blockly.VariableModel} variable Variable to delete.

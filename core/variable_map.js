@@ -277,6 +277,31 @@ Blockly.VariableMap.prototype.deleteVariableById = function(id) {
 };
 
 /**
+ * Force delete a variable from this workspace by the passed
+ * in ID. But don't delete it if it's used by multiple blocks.
+ * @param {string} id ID of variable to delete.
+ */
+Blockly.VariableMap.prototype.forceDeleteVariableById = function(id) {
+  var variable = this.getVariableById(id);
+  if (variable) {
+    // Check whether this variable is a function parameter before deleting.
+    var uses = this.getVariableUsesById(id);
+    for (var i = 0, block; block = uses[i]; i++) {
+      if (block.type == Blockly.PROCEDURES_DEFINITION_BLOCK_TYPE || block.type == 'procedures_defreturn') {
+        return;
+      }
+    }
+    if (uses.length > 0) {
+      console.warn("Can't delete variable: " + id + ", because it's used by blocks.");
+    } else {
+      this.deleteVariableInternal_(variable, uses);
+    }
+  } else {
+    console.warn("Can't delete non-existent variable: " + id);
+  }
+};
+
+/**
  * Deletes a variable and all of its uses from this workspace without asking the
  * user for confirmation.
  * @param {!Blockly.VariableModel} variable Variable to delete.
