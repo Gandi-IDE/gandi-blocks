@@ -1298,6 +1298,10 @@ Blockly.Css.CONTENT = [
     'stroke: ' + Blockly.Colours.motion.tertiary + ';',
   '}',
 
+  '.disabled .blocklyTouchTargetBackground {',
+    'cursor: var(--cursor_not_allowed);',
+  '}',
+
   '.blocklyFlyoutCheckboxPath {',
     'fill: transparent;',
     'stroke: white;',

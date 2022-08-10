@@ -1152,6 +1152,16 @@ Blockly.WorkspaceSvg.prototype.deleteVariableById = function(id) {
 };
 
 /**
+ * Force delete a variable from this workspace by the passed
+ * in ID. But don't delete if it's used by blocks.
+ * @param {string} id ID of variable to delete.
+ */
+Blockly.WorkspaceSvg.prototype.forceDeleteVariableById = function(id) {
+  Blockly.WorkspaceSvg.superClass_.forceDeleteVariableById.call(this, id);
+  this.refreshToolboxSelection_();
+};
+
+/**
  * Create a new variable with the given name.  Update the flyout to show the new
  *     variable immediately.
  * @param {string} name The new variable's name.
