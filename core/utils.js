@@ -946,3 +946,12 @@ Blockly.utils.startsWith = function(str, prefix) {
 Blockly.utils.toRadians = function(angleDegrees) {
   return angleDegrees * Math.PI / 180;
 };
+
+/**
+ * Show a toast message.
+ * @param {String} text The text to display.
+ * @package
+ */
+Blockly.utils.toast = function(text) {
+  alert(text);
+};
