@@ -955,3 +955,15 @@ Blockly.utils.toRadians = function(angleDegrees) {
 Blockly.utils.toast = function(text) {
   alert(text);
 };
+
+/**
+ * Whether to disable the newly created variable
+ * @param {Boolean} isLocal Whether the variable is locally scoped.
+ * @return {boolean} True if the new variable should be disabled.
+ * @package
+ */
+Blockly.utils.getNewVariableIsDisabled = function() {
+  return false;
+};
+
+
