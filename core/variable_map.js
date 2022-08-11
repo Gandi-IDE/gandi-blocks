@@ -220,13 +220,16 @@ Blockly.VariableMap.prototype.createVariable = function(name,
 /**
  * Delete a variable.
  * @param {Blockly.VariableModel} variable Variable to delete.
+ * @param {!Boolean} not_fire_event True if the event should not be fired.
  */
-Blockly.VariableMap.prototype.deleteVariable = function(variable) {
+Blockly.VariableMap.prototype.deleteVariable = function(variable, not_fire_event) {
   var variableList = this.variableMap_[variable.type];
   for (var i = 0, tempVar; tempVar = variableList[i]; i++) {
     if (tempVar.getId() == variable.getId()) {
       variableList.splice(i, 1);
-      Blockly.Events.fire(new Blockly.Events.VarDelete(variable));
+      if(!not_fire_event) {
+        Blockly.Events.fire(new Blockly.Events.VarDelete(variable));
+      }
       return;
     }
   }
@@ -294,7 +297,7 @@ Blockly.VariableMap.prototype.forceDeleteVariableById = function(id) {
     if (uses.length > 0) {
       console.warn("Can't delete variable: " + id + ", because it's used by blocks.");
     } else {
-      this.deleteVariableInternal_(variable, uses);
+      this.deleteVariableInternal_(variable, uses, true);
     }
   } else {
     console.warn("Can't delete non-existent variable: " + id);
@@ -306,10 +309,10 @@ Blockly.VariableMap.prototype.forceDeleteVariableById = function(id) {
  * user for confirmation.
  * @param {!Blockly.VariableModel} variable Variable to delete.
  * @param {!Array.<!Blockly.Block>} uses An array of uses of the variable.
+ * @param {!Boolean} not_fire_event True if the event should not be fired.
  * @private
  */
-Blockly.VariableMap.prototype.deleteVariableInternal_ = function(variable,
-    uses) {
+Blockly.VariableMap.prototype.deleteVariableInternal_ = function(variable,uses,not_fire_event) {
   var existingGroup = Blockly.Events.getGroup();
   if (!existingGroup) {
     Blockly.Events.setGroup(true);
@@ -318,7 +321,7 @@ Blockly.VariableMap.prototype.deleteVariableInternal_ = function(variable,
     for (var i = 0; i < uses.length; i++) {
       uses[i].dispose(true, false);
     }
-    this.deleteVariable(variable);
+    this.deleteVariable(variable, not_fire_event);
   } finally {
     if (!existingGroup) {
       Blockly.Events.setGroup(false);
