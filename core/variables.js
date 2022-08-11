@@ -31,6 +31,7 @@
 goog.provide('Blockly.Variables');
 
 goog.require('Blockly.Blocks');
+goog.require('Blockly.utils');
 goog.require('Blockly.constants');
 goog.require('Blockly.VariableModel');
 goog.require('Blockly.Workspace');
@@ -329,7 +330,11 @@ Blockly.Variables.createVariable = function(workspace, opt_callback, opt_type) {
           var flyout = workspace.isFlyout ? workspace : workspace.getFlyout();
           var variableBlockId = variable.getId();
           if (flyout.setCheckboxState) {
-            flyout.setCheckboxState(variableBlockId, true);
+            var disabled = Blockly.utils.getNewVariableIsDisabled(isLocal);
+            flyout.setCheckboxState(variableBlockId, {
+              checked: true,
+              disabled: disabled
+            });
           }
 
           if (opt_callback) {

@@ -694,26 +694,44 @@ Blockly.VerticalFlyout.prototype.checkboxClicked_ = function(checkboxObj) {
 /**
  * Set the state of a checkbox by block ID.
  * @param {string} blockId ID of the block whose checkbox should be set
- * @param {boolean} value Value to set the checkbox to.
+ * @param {boolean | object} value Value to set the checkbox to.
  * @public
  */
 Blockly.VerticalFlyout.prototype.setCheckboxState = function(blockId, value) {
   var checkboxObj = this.checkboxes_[blockId];
-  if (!checkboxObj || checkboxObj.clicked === value) {
+
+  if (!checkboxObj) {
     return;
   }
-
+  var newClicked;
+  var newDisabled;
   var oldValue = checkboxObj.clicked;
-  checkboxObj.clicked = value;
 
-  if (checkboxObj.clicked) {
-    Blockly.utils.addClass(checkboxObj.svgRoot, 'checked');
+  if(value instanceof Object) {
+    newClicked = value.checked;
+    newDisabled = value.disabled;
   } else {
-    Blockly.utils.removeClass(checkboxObj.svgRoot, 'checked');
+    newClicked = value;
   }
 
-  Blockly.Events.fire(new Blockly.Events.Change(
-      checkboxObj.block, 'checkbox', null, oldValue, value));
+  if (typeof newClicked !== 'undefined' && checkboxObj.clicked !== newClicked) {
+    checkboxObj.clicked = newClicked;
+    if (checkboxObj.clicked) {
+      Blockly.utils.addClass(checkboxObj.svgRoot, 'checked');
+    } else {
+      Blockly.utils.removeClass(checkboxObj.svgRoot, 'checked');
+    }
+    Blockly.Events.fire(new Blockly.Events.Change(checkboxObj.block, 'checkbox', null, oldValue, value));
+  }
+
+  if (typeof newDisabled !== 'undefined' && checkboxObj.disabled !== newDisabled) {
+    checkboxObj.disabled = newDisabled;
+    if (checkboxObj.disabled) {
+      Blockly.utils.addClass(checkboxObj.svgRoot, 'disabled');
+    } else {
+      Blockly.utils.removeClass(checkboxObj.svgRoot, 'disabled');
+    }
+  }
 };
 
 /**
