@@ -1133,10 +1133,11 @@ Blockly.WorkspaceSvg.prototype.refreshToolboxSelection_ = function() {
  *     flyout to show the renamed variable immediately.
  * @param {string} id ID of the variable to rename.
  * @param {string} newName New variable name.
+ * @param {!Boolean} not_fire_event True if the event should not be fired.
  * @package
  */
-Blockly.WorkspaceSvg.prototype.renameVariableById = function(id, newName) {
-  Blockly.WorkspaceSvg.superClass_.renameVariableById.call(this, id, newName);
+Blockly.WorkspaceSvg.prototype.renameVariableById = function(id, newName, not_fire_event) {
+  Blockly.WorkspaceSvg.superClass_.renameVariableById.call(this, id, newName, not_fire_event);
   this.refreshToolboxSelection_();
 };
 

@@ -68,16 +68,17 @@ Blockly.VariableMap.prototype.clear = function() {
  * Rename the given variable by updating its name in the variable map.
  * @param {!Blockly.VariableModel} variable Variable to rename.
  * @param {string} newName New variable name.
+ * @param {!Boolean} not_fire_event True if the event should not be fired.
  * @package
  */
-Blockly.VariableMap.prototype.renameVariable = function(variable, newName) {
+Blockly.VariableMap.prototype.renameVariable = function(variable, newName, not_fire_event) {
   var type = variable.type;
   var conflictVar = this.getVariable(newName, type);
   var blocks = this.workspace.getAllBlocks();
   Blockly.Events.setGroup(true);
   try {
     if (!conflictVar) {
-      this.renameVariableAndUses_(variable, newName, blocks);
+      this.renameVariableAndUses_(variable, newName, blocks, not_fire_event);
     } else {
       // We don't want to rename the variable if one with the exact new name
       // already exists.
@@ -97,14 +98,15 @@ Blockly.VariableMap.prototype.renameVariable = function(variable, newName) {
  * variable to rename with the given ID.
  * @param {string} id ID of the variable to rename.
  * @param {string} newName New variable name.
+ * @param {!Boolean} not_fire_event True if the event should not be fired.
  */
-Blockly.VariableMap.prototype.renameVariableById = function(id, newName) {
+Blockly.VariableMap.prototype.renameVariableById = function(id, newName, not_fire_event) {
   var variable = this.getVariableById(id);
   if (!variable) {
     throw new Error('Tried to rename a variable that didn\'t exist. ID: ' + id);
   }
 
-  this.renameVariable(variable, newName);
+  this.renameVariable(variable, newName, not_fire_event);
 };
 
 /**
@@ -114,11 +116,14 @@ Blockly.VariableMap.prototype.renameVariableById = function(id, newName) {
  * @param {string} newName New variable name.
  * @param {!Array.<!Blockly.Block>} blocks The list of all blocks in the
  *     workspace.
+ * @param {!Boolean} not_fire_event True if the event should not be fired.
  * @private
  */
 Blockly.VariableMap.prototype.renameVariableAndUses_ = function(variable,
-    newName, blocks) {
-  Blockly.Events.fire(new Blockly.Events.VarRename(variable, newName));
+    newName, blocks, not_fire_event) {
+  if(!not_fire_event) {
+    Blockly.Events.fire(new Blockly.Events.VarRename(variable, newName));
+  }
   variable.name = newName;
   for (var i = 0; i < blocks.length; i++) {
     blocks[i].updateVarName(variable);
