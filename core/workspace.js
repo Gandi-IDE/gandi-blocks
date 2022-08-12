@@ -344,9 +344,10 @@ Blockly.Workspace.prototype.clear = function() {
  * variable to rename with the given ID.
  * @param {string} id ID of the variable to rename.
  * @param {string} newName New variable name.
+ * @param {!Boolean} not_fire_event True if the event should not be fired.
  */
-Blockly.Workspace.prototype.renameVariableById = function(id, newName) {
-  this.variableMap_.renameVariableById(id, newName);
+Blockly.Workspace.prototype.renameVariableById = function(id, newName, not_fire_event) {
+  this.variableMap_.renameVariableById(id, newName, not_fire_event);
 };
 
 /**
