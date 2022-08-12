@@ -561,7 +561,7 @@ Blockly.Procedures.externalProcedureDefCallback = function(/** mutator, callback
  */
 Blockly.Procedures.makeEditOption = function(block) {
   var editOption = {
-    enabled: true,
+    enabled: !Blockly.utils.isTeamwork(),
     text: Blockly.Msg.EDIT_PROCEDURE,
     callback: function() {
       Blockly.Procedures.editProcedureCallback_(block);
