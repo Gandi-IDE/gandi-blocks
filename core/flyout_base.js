@@ -558,7 +558,9 @@ Blockly.Flyout.prototype.show = function(xmlList) {
         } else {
           gaps.push(default_gap);
         }
-      } else if ((tagName == 'LABEL') && (xml.getAttribute('showStatusButton') == 'true')) {
+      } else if ((tagName == 'LABEL') && (
+        (xml.getAttribute('showStatusButton') == 'true') || String(xml.getAttribute('warningTipText') !== 'null'))
+      ) {
         var curButton = new Blockly.FlyoutExtensionCategoryHeader(this.workspace_,
             this.targetWorkspace_, xml);
         contents.push({type: 'button', button: curButton});

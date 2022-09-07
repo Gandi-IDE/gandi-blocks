@@ -55,71 +55,115 @@ Blockly.FlyoutExtensionCategoryHeader = function(workspace, targetWorkspace, xml
   this.extensionId = xml.getAttribute('id');
 
   /**
+   * @type {string}
+   * @private
+   */
+  this.warningTipText_ = String(xml.getAttribute('warningTipText'));
+ 
+  /**
+  * @type {boolean}
+  * @private
+   */
+  this.showStatusButton_ = xml.getAttribute('showStatusButton') == 'true';
+ 
+  /**
    * Whether this is a label at the top of a category.
    * @type {boolean}
    * @private
    */
   this.isCategoryLabel_ = true;
+ 
+  this.menuButtonsCount = 0;
+  this.menuButtonWidth = 24;
+  this.marginX = 15;
+  this.marginY = 10;
+  this.touchPadding = 4;
 };
 goog.inherits(Blockly.FlyoutExtensionCategoryHeader, Blockly.FlyoutButton);
-
+ 
 /**
  * Create the label and button elements.
  * @return {!Element} The SVG group.
- */
+  */
 Blockly.FlyoutExtensionCategoryHeader.prototype.createDom = function() {
   var cssClass = 'blocklyFlyoutLabel';
-
-  this.svgGroup_ = Blockly.utils.createSvgElement('g', {'class': cssClass},
-      this.workspace_.getCanvas());
-
+  this.menuButtonsCount = 0;
+  this.svgGroup_ = Blockly.utils.createSvgElement('g', {'class': cssClass}, this.workspace_.getCanvas());
+ 
   this.addTextSvg(true);
-
+ 
   this.refreshStatus();
-
-  var statusButtonWidth = 30;
-  var marginX = 20;
-  var marginY = 5;
-  var touchPadding = 16;
-
-  var statusButtonX = this.workspace_.RTL ? (marginX - this.flyoutWidth_ + statusButtonWidth) :
-      (this.flyoutWidth_ - statusButtonWidth - marginX) / this.workspace_.scale;
-
-  if (this.imageSrc_) {
-    /** @type {SVGElement} */
-    this.imageElement_ = Blockly.utils.createSvgElement(
-        'image',
-        {
-          'class': 'blocklyFlyoutButton',
-          'height': statusButtonWidth + 'px',
-          'width': statusButtonWidth + 'px',
-          'x': statusButtonX + 'px',
-          'y': marginY + 'px'
-        },
-        this.svgGroup_);
-    this.imageElementBackground_ = Blockly.utils.createSvgElement(
-        'rect',
-        {
-          'class': 'blocklyTouchTargetBackground',
-          'height': statusButtonWidth + 2 * touchPadding + 'px',
-          'width': statusButtonWidth + 2 * touchPadding + 'px',
-          'x': (statusButtonX - touchPadding) + 'px',
-          'y': (marginY - touchPadding) + 'px'
-        },
-        this.svgGroup_);
-    this.setImageSrc(this.imageSrc_);
+ 
+  if (this.warningTipText_ !== 'null') {
+    var warningTipElements = this.appendMenuNode('scratch-warning.svg');
+    this.tipElement_ = warningTipElements.element;
+    this.tipElementBackground_ = warningTipElements.elementBackground;
+    Blockly.bindEventWithChecks_(this.tipElementBackground_, 'mouseover', this, this.onMouseOver_, true);
+    Blockly.bindEventWithChecks_(this.tipElementBackground_, 'mouseout', this, this.onMouseOut_, true);
   }
-
-  this.callback_ = Blockly.statusButtonCallback.bind(this, this.extensionId);
-
-  this.mouseUpWrapper_ = Blockly.bindEventWithChecks_(this.imageElementBackground_, 'mouseup',
-      this, this.onMouseUp_);
+ 
+  if(this.showStatusButton_ && this.imageSrc_) {
+    var statusButtonElements = this.appendMenuNode(null, true);
+    this.imageElement_ = statusButtonElements.element;
+    this.imageElementBackground_ = statusButtonElements.elementBackground;
+    this.setImageSrc(this.imageSrc_);
+    this.callback_ = Blockly.statusButtonCallback.bind(this, this.extensionId);
+    Blockly.bindEventWithChecks_(this.imageElementBackground_, 'mouseup', this, this.onMouseUp_);
+  }
+ 
   return this.svgGroup_;
 };
-
+ 
+/**
+ * Add a menu to the Label node.
+ * @param {string} iconFileName Name of the icon.
+ * @param {string} clickable True if element is clickable.
+ * @return {object} The menu element node and elementBackground node.
+  */
+Blockly.FlyoutExtensionCategoryHeader.prototype.appendMenuNode = function(iconFileName, clickable) {
+  var basePath = Blockly.mainWorkspace.options.pathToMedia;
+  this.menuButtonsCount ++;
+  /** @type {SVGElement} */
+  var element = Blockly.utils.createSvgElement(
+      'image',
+      {
+        'class': 'blocklyFlyoutButton',
+        'height': this.menuButtonWidth + 'px',
+        'width': this.menuButtonWidth + 'px',
+        'x': this.getMenuButtonPositionX() + 'px',
+        'y': this.marginY + 'px',
+      },
+      this.svgGroup_);
+  var elementBackground = Blockly.utils.createSvgElement(
+      'rect',
+      {
+        'class': 'transparentRect' + (clickable ? ' clickable' : ''),
+        'height': this.menuButtonWidth + 2 * this.touchPadding + 'px',
+        'width': this.menuButtonWidth + 2 * this.touchPadding + 'px',
+        'x': (this.getMenuButtonPositionX() - this.touchPadding) + 'px',
+        'y': (this.marginY - this.touchPadding) + 'px'
+      },
+      this.svgGroup_);
+  if (iconFileName !== null) {
+    element.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', basePath + iconFileName);
+  }
+  return {element: element, elementBackground: elementBackground };
+};
+ 
+/**
+ * Gets the X position of the menu button.
+ * @return {number} The distance to the left of the menu node
+  */
+Blockly.FlyoutExtensionCategoryHeader.prototype.getMenuButtonPositionX = function() {
+  if(this.workspace_.RTL) {
+    return (this.marginX - this.flyoutWidth_ + (this.menuButtonWidth * this.menuButtonsCount)) / this.workspace_.scale;
+  }
+  return (this.flyoutWidth_ - (this.menuButtonWidth * this.menuButtonsCount) - this.marginX) / this.workspace_.scale;
+};
+ 
 /**
  * Set the image on the status button using a status string.
- */
+  */
 Blockly.FlyoutExtensionCategoryHeader.prototype.refreshStatus = function() {
   var status = Blockly.FlyoutExtensionCategoryHeader.getExtensionState(this.extensionId);
   var basePath = Blockly.mainWorkspace.options.pathToMedia;
@@ -130,12 +174,12 @@ Blockly.FlyoutExtensionCategoryHeader.prototype.refreshStatus = function() {
     this.setImageSrc(basePath + 'status-not-ready.svg');
   }
 };
-
+ 
 /**
  * Set the source URL of the image for the button.
  * @param {?string} src New source.
  * @package
- */
+  */
 Blockly.FlyoutExtensionCategoryHeader.prototype.setImageSrc = function(src) {
   if (src === null) {
     // No change if null.
@@ -147,13 +191,38 @@ Blockly.FlyoutExtensionCategoryHeader.prototype.setImageSrc = function(src) {
         'xlink:href', this.imageSrc_ || '');
   }
 };
-
+ 
 /**
  * Gets the extension state. Overridden externally.
  * @param {string} extensionId The ID of the extension in question.
  * @return {Blockly.StatusButtonState} The state of the extension.
  * @public
- */
+  */
 Blockly.FlyoutExtensionCategoryHeader.getExtensionState = function(/* extensionId */) {
   return Blockly.StatusButtonState.NOT_READY;
 };
+ 
+/**
+ * @param {!Event} e Mouse up event.
+ * @private
+  */
+Blockly.FlyoutExtensionCategoryHeader.prototype.onMouseOver_ = function(e) {
+  var rect = e.target.getBoundingClientRect();
+  var container = document.createElement('div');
+  container.className = "extensionTipContainer";
+  container.innerText = this.warningTipText_;
+  container.style.left = rect.x + 'px';
+  container.style.top = rect.y + 22 + 'px';
+  document.body.appendChild(container);
+  this.tipContainer = container;
+};
+ 
+/**
+ * @param {!Event} e Mouse up event.
+ * @private
+  */
+Blockly.FlyoutExtensionCategoryHeader.prototype.onMouseOut_ = function() {
+  document.body.removeChild(this.tipContainer);
+};
+ 
+ 
