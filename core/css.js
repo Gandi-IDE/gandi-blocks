@@ -546,6 +546,28 @@ Blockly.Css.CONTENT = [
     'cursor: pointer;',
   '}',
 
+  '.transparentRect {',
+    'fill: transparent;',
+  '}',
+
+  '.clickable {',
+    'fill: transparent;',
+    'cursor: pointer;',
+  '}',
+
+  '.extensionTipContainer {',
+    'position: fixed;',
+    'max-width: 560px;',
+    'min-width: 100px;',
+    'padding: 20px;',
+    'font-size: 19px;',
+    'line-height: 29px;',
+   ' color: #FFFFFF;',
+    'background: #3C414C;',
+    'border-radius: 12px;',
+    'z-index: 990;',
+  '}',
+
   '.blocklyFlyoutLabelText {',
     'font-family: "Helvetica Neue", Helvetica, sans-serif;',
     'font-size: 14pt;',

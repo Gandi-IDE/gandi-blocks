@@ -270,6 +270,7 @@ Blockly.Toolbox.prototype.showAll_ = function() {
       ' id="' + category.id_ + '"' +
       ' category-label="true"' +
       ' showStatusButton="' + category.showStatusButton_ + '"' +
+      ' warningTipText="' + category.warningTipText_ + '"' +
       ' web-class="categoryLabel">' +
       '</label></xml>';
     var labelXML = Blockly.Xml.textToDom(labelString);
@@ -817,6 +818,7 @@ Blockly.Toolbox.Category = function(parent, parentHtml, domTree) {
   this.custom_ = domTree.getAttribute('custom');
   this.iconURI_ = domTree.getAttribute('iconURI');
   this.showStatusButton_ = domTree.getAttribute('showStatusButton');
+  this.warningTipText_ = domTree.getAttribute('warningTipText');
   this.contents_ = [];
   if (!this.custom_) {
     this.parseContents_(domTree);
