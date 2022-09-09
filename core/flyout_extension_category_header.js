@@ -76,8 +76,8 @@ Blockly.FlyoutExtensionCategoryHeader = function(workspace, targetWorkspace, xml
   this.menuButtonsCount = 0;
   this.menuButtonWidth = 24;
   this.marginX = 15;
-  this.marginY = 10;
-  this.touchPadding = 4;
+  this.marginY = 11;
+  this.touchPadding = 6;
 };
 goog.inherits(Blockly.FlyoutExtensionCategoryHeader, Blockly.FlyoutButton);
  
@@ -124,24 +124,25 @@ Blockly.FlyoutExtensionCategoryHeader.prototype.appendMenuNode = function(iconFi
   var basePath = Blockly.mainWorkspace.options.pathToMedia;
   this.menuButtonsCount ++;
   /** @type {SVGElement} */
-  var element = Blockly.utils.createSvgElement(
-      'image',
-      {
-        'class': 'blocklyFlyoutButton',
-        'height': this.menuButtonWidth + 'px',
-        'width': this.menuButtonWidth + 'px',
-        'x': this.getMenuButtonPositionX() + 'px',
-        'y': this.marginY + 'px',
-      },
-      this.svgGroup_);
   var elementBackground = Blockly.utils.createSvgElement(
       'rect',
       {
-        'class': 'transparentRect' + (clickable ? ' clickable' : ''),
+        'class': 'extensionHeaderMenuBackground' + (clickable ? ' clickable' : ''),
         'height': this.menuButtonWidth + 2 * this.touchPadding + 'px',
         'width': this.menuButtonWidth + 2 * this.touchPadding + 'px',
         'x': (this.getMenuButtonPositionX() - this.touchPadding) + 'px',
         'y': (this.marginY - this.touchPadding) + 'px'
+      },
+      this.svgGroup_);
+  /** @type {SVGElement} */
+  var element = Blockly.utils.createSvgElement(
+      'image',
+      {
+        'class': 'extensionHeaderMenu',
+        'height': this.menuButtonWidth + 'px',
+        'width': this.menuButtonWidth + 'px',
+        'x': this.getMenuButtonPositionX() + 'px',
+        'y': this.marginY + 'px',
       },
       this.svgGroup_);
   if (iconFileName !== null) {
@@ -212,7 +213,7 @@ Blockly.FlyoutExtensionCategoryHeader.prototype.onMouseOver_ = function(e) {
   container.className = "extensionTipContainer";
   container.innerText = this.warningTipText_;
   container.style.left = rect.x + 'px';
-  container.style.top = rect.y + 22 + 'px';
+  container.style.top = rect.y + 30 + 'px';
   document.body.appendChild(container);
   this.tipContainer = container;
 };

@@ -546,8 +546,18 @@ Blockly.Css.CONTENT = [
     'cursor: pointer;',
   '}',
 
-  '.transparentRect {',
+  '.extensionHeaderMenu {',
+    'pointer-events: none;',
+  '}',
+
+  '.extensionHeaderMenuBackground {',
     'fill: transparent;',
+  '}',
+
+  '.extensionHeaderMenuBackground:hover {',
+    'fill: #3E495B;',
+    'rx: 5px;',
+    'ry: 5px;',
   '}',
 
   '.clickable {',
@@ -557,14 +567,16 @@ Blockly.Css.CONTENT = [
 
   '.extensionTipContainer {',
     'position: fixed;',
-    'max-width: 560px;',
+    'max-width: 284px;',
     'min-width: 100px;',
-    'padding: 20px;',
-    'font-size: 19px;',
-    'line-height: 29px;',
-   ' color: #FFFFFF;',
-    'background: #3C414C;',
-    'border-radius: 12px;',
+    'padding: 16px;',
+    'font-size: 12px;',
+    'line-height: 18px;',
+   ' color: #D1D5DB;',
+    'background: #191E25;',
+    'border-radius: 8px;',
+    'border: 1px solid rgba(46, 54, 68, 0.6);',
+    'box-shadow: 0px 10px 24px rgba(0, 0, 0, 0.15), 0px 2px 16px rgba(0, 0, 0, 0.5);',
     'z-index: 990;',
   '}',
 
