@@ -97,6 +97,13 @@ Blockly.Toolbox.prototype.NORMAL_WIDTH = 321;
 Blockly.Toolbox.prototype.NO_FLYOUT_WIDTH = 68;
 
 /**
+ * The distance from the top of the container
+ * 46(marginTop) + 29(toolboxHeader) + 2(border)
+ * @type {number}
+ */
+Blockly.Toolbox.prototype.MARGIN_TOP = 77;
+
+/**
  * Width of the toolbox, which changes only in vertical layout.
  * This is the sum of the width of the flyout (250) and the category menu (60).
  * @type {number}
@@ -334,7 +341,7 @@ Blockly.Toolbox.prototype.getWidth = function() {
  * @return {number} The height of the toolbox.
  */
 Blockly.Toolbox.prototype.getHeight = function() {
-  return this.categoryMenu_ ? (this.categoryMenu_.getHeight() + 77) : 77;
+  return this.categoryMenu_ ? (this.categoryMenu_.getHeight() + this.MARGIN_TOP) : this.MARGIN_TOP;
 };
 
 /**
