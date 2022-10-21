@@ -88,13 +88,20 @@ Blockly.Toolbox = function(workspace) {
  * @see {@link Blockly.Toolbox.prototype.width}
  * @type {number}
  */
-Blockly.Toolbox.prototype.NORMAL_WIDTH = 310;
+Blockly.Toolbox.prototype.NORMAL_WIDTH = 321;
 
 /**
  * The width category menu
  * @type {number}
  */
-Blockly.Toolbox.prototype.NO_FLYOUT_WIDTH = 60;
+Blockly.Toolbox.prototype.NO_FLYOUT_WIDTH = 68;
+
+/**
+ * The distance from the top of the container
+ * 46(marginTop) + 29(toolboxHeader) + 2(border)
+ * @type {number}
+ */
+Blockly.Toolbox.prototype.MARGIN_TOP = 77;
 
 /**
  * Width of the toolbox, which changes only in vertical layout.
@@ -180,6 +187,9 @@ Blockly.Toolbox.prototype.init = function() {
       goog.dom.TagName.DIV,
       'blocklyToolboxDiv' + (workspace.options.nonStickyFlyout ? ' nonStickyFlyout' : '')
   );
+  this.HtmlDiv.style.width = this.NORMAL_WIDTH + 'px';
+  this.toolboxBody_ = goog.dom.createDom(goog.dom.TagName.DIV, 'toolboxBody');
+  this.HtmlDiv.appendChild(this.toolboxBody_);
   this.HtmlDiv.setAttribute('dir', workspace.RTL ? 'RTL' : 'LTR');
   svg.parentNode.insertBefore(this.HtmlDiv, svg);
 
@@ -199,7 +209,8 @@ Blockly.Toolbox.prototype.init = function() {
       }, /*opt_noCaptureIdentifier*/ false, /*opt_noPreventDefault*/ true);
 
   this.createFlyout_();
-  this.categoryMenu_ = new Blockly.Toolbox.CategoryMenu(this, this.HtmlDiv);
+  this.toolboxHeader_ = new Blockly.Toolbox.Header(this, this.HtmlDiv);
+  this.categoryMenu_ = new Blockly.Toolbox.CategoryMenu(this, this.toolboxBody_);
   this.populate_(workspace.options.languageTree);
   this.position();
 };
@@ -239,9 +250,7 @@ Blockly.Toolbox.prototype.createFlyout_ = function() {
     this.flyout_ = new Blockly.VerticalFlyout(options);
   }
   this.flyout_.setParentToolbox(this);
-
-  goog.dom.insertSiblingAfter(
-      this.flyout_.createDom('svg'), this.workspace_.getParentSvg());
+  this.toolboxBody_.appendChild(this.flyout_.createDom('svg'));
   this.flyout_.init(workspace);
 };
 
@@ -332,7 +341,7 @@ Blockly.Toolbox.prototype.getWidth = function() {
  * @return {number} The height of the toolbox.
  */
 Blockly.Toolbox.prototype.getHeight = function() {
-  return this.categoryMenu_ ? this.categoryMenu_.getHeight() : 0;
+  return this.categoryMenu_ ? (this.categoryMenu_.getHeight() + this.MARGIN_TOP) : this.MARGIN_TOP;
 };
 
 /**
@@ -360,9 +369,10 @@ Blockly.Toolbox.prototype.position = function() {
     if (this.toolboxPosition == Blockly.TOOLBOX_AT_RIGHT) {  // Right
       treeDiv.style.right = '0';
     } else {  // Left
-      treeDiv.style.left = '0';
+      treeDiv.style.transform = 'translate(72px, 77px)';
+      treeDiv.style.margin = '-29px 0 0 -68px';
     }
-    treeDiv.style.height = '100%';
+    treeDiv.style.height = 'calc(100% - 46px)';
   }
   this.flyout_.position();
 };
@@ -735,7 +745,8 @@ Blockly.Toolbox.CategoryMenu.prototype.getHeight = function() {
 Blockly.Toolbox.CategoryMenu.prototype.createDom = function() {
   this.table = goog.dom.createDom('div', this.parent_.horizontalLayout_ ?
     'scratchCategoryMenuHorizontal' : 'scratchCategoryMenu');
-  this.parentHtml_.appendChild(this.table);
+  var parentNode = this.parentHtml_;
+  parentNode.insertBefore(this.table, parentNode.children[0]);
 };
 
 /**
@@ -799,6 +810,49 @@ Blockly.Toolbox.CategoryMenu.prototype.dispose = function() {
   }
 };
 
+// Header
+/**
+ * Place the menu of utility classes
+ * @param {Blockly.Toolbox} parent The toolbox that owns the header.
+ * @param {Element} parentHtml The containing html div.
+ * @constructor
+ */
+Blockly.Toolbox.Header = function(parent, parentHtml) {
+  this.parent_ = parent;
+  this.parentHtml_ = parentHtml;
+  this.createDom();
+};
+
+/**
+ * Create the DOM for a header in the toolbox.
+ */
+Blockly.Toolbox.Header.prototype.createDom = function() {
+  this.container_ = goog.dom.createDom('div', 'toolboxHeader');
+  this.toolboxIsHide_ = false;
+  this.switch_ = goog.dom.createDom('div', 'toolboxSwitchBotton');
+  this.container_.appendChild(this.switch_);
+  this.parentHtml_.insertBefore(this.container_, this.parent_.toolboxBody_);
+
+  Blockly.bindEvent_(this.switch_, 'mouseup', this, this.triggerToolbox);
+};
+
+Blockly.Toolbox.Header.prototype.triggerToolbox = function() {
+  this.toolboxIsHide_ = !this.toolboxIsHide_;
+  if(this.toolboxIsHide_) {
+    this.parentHtml_.classList.add('collapsed');
+    this.parentHtml_.style.width = this.parent_.NO_FLYOUT_WIDTH + 'px';
+  } else {
+    this.parentHtml_.classList.remove('collapsed');
+    this.parentHtml_.style.width = this.parent_.NORMAL_WIDTH + 'px';
+  }
+};
+
+Blockly.Toolbox.Header.prototype.dispose = function() {
+  goog.dom.removeNode(this.switch_);
+  this.switch_ = null;
+  this.container_ = null;
+  this.toolboxIsHide_ = null;
+};
 
 // Category
 /**
@@ -877,6 +931,8 @@ Blockly.Toolbox.Category.prototype.createDom = function() {
     this.bubble_.style.backgroundColor = this.colour_;
     this.bubble_.style.borderColor = this.secondaryColour_;
   }
+  
+  this.item_.setAttribute('style', '--colour: ' + this.colour_ + ';--secondaryColour: ' + this.secondaryColour_ + ';');
   this.item_.appendChild(this.bubble_);
   this.item_.appendChild(this.label_);
   this.parentHtml_.appendChild(this.item_);

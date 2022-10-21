@@ -339,14 +339,12 @@ Blockly.VerticalFlyout.prototype.position = function() {
   }
 
   // Record the height for Blockly.Flyout.getMetrics_
-  this.height_ = Math.max(0, targetWorkspaceMetrics.viewHeight - y);
+  this.height_ = Math.max(0, targetWorkspaceMetrics.viewHeight - this.targetWorkspace_.toolbox_.MARGIN_TOP - y);
 
   this.setBackgroundPath_(this.width_, this.height_);
 
   this.svgGroup_.setAttribute("width", this.width_);
   this.svgGroup_.setAttribute("height", this.height_);
-  var transform = 'translate(' + x + 'px,' + y + 'px)';
-  Blockly.utils.setCssTransform(this.svgGroup_, transform);
 
   // Update the scrollbar (if one exists).
   if (this.scrollbar_) {

@@ -444,6 +444,7 @@ Blockly.Flyout.prototype.updateDisplay_ = function() {
   }
   // this.svgGroup_.style.display = show ? 'block' : 'none';
   this.svgGroup_.style.display = 'block';
+  this.svgGroup_.style.position = 'unset';
   if (show) {
     this.svgGroup_.classList.remove('blocklyFlyoutHidingAnimation');
   } else {

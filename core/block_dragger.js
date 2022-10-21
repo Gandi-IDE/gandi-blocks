@@ -159,6 +159,7 @@ Blockly.BlockDragger.initIconData_ = function(block) {
  * @package
  */
 Blockly.BlockDragger.prototype.startBlockDrag = function(currentDragDeltaXY) {
+  this.rootDiv = document.getElementsByClassName('injectionDiv')[0];
   if(Blockly.locked) return;
   if (!Blockly.Events.getGroup()) {
     Blockly.Events.setGroup(true);
@@ -212,7 +213,7 @@ Blockly.BlockDragger.prototype.dragBlock = function(e, currentDragDeltaXY) {
   this.dragIcons_(delta);
 
   this.deleteArea_ = this.workspace_.isDeleteArea(e);
-  var isOutside = !this.workspace_.isInsideBlocksArea(e);
+  var isOutside = !this.rootDiv.contains(e.target);
   this.draggedConnectionManager_.update(delta, this.deleteArea_, isOutside);
   if (isOutside !== this.wasOutside_) {
     this.fireDragOutsideEvent_(isOutside);
