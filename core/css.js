@@ -1362,7 +1362,7 @@ Blockly.Css.CONTENT = [
   '.toolboxBody {',
     'position: relative;',
     'display: flex;',
-    'height: 100%;',
+    'height: calc(100% - 29px);',
     'flex: 1;',
     'cursor: auto;',
   '}',
@@ -1392,6 +1392,10 @@ Blockly.Css.CONTENT = [
     '-ms-user-select: none;',
   '}',
 
+  '.scratchCategoryMenu::-webkit-scrollbar {',
+    ' display: none;',
+  '}',
+
   '.scratchCategoryMenuHorizontal {',
     'width: 100%;',
     'height: 50px;',
@@ -1413,7 +1417,7 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.scratchCategoryMenuItem {',
-    'padding: 0.375rem 0px;',
+    'padding: 12px 0px;',
     'cursor: pointer;',
     'text-align: center;',
     'position: relative;',
@@ -1447,14 +1451,19 @@ Blockly.Css.CONTENT = [
     'height: 1.25rem;',
     'border: 1px solid;',
     'border-radius: 100%;',
-    'margin: 0 auto 0.125rem;',
+    'margin: 0 auto 2px;',
   '}',
 
   '.scratchCategoryItemIcon {',
-    'width: 20px;',
-    'height: 20px;',
-    'margin: 0 auto 0.125rem;',
+    'width: 24px;',
+    'height: 24px;',
+    'margin: 0 auto 2px;',
     'background-size: 100%;',
+  '}',
+
+  '.scratchCategoryMenuItemLabel {',
+    'font-size: 12px;',
+    'line-height: 20px;',
   '}',
 
   '.scratchCategoryMenuItem:hover {',

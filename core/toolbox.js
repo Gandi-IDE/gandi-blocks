@@ -372,7 +372,7 @@ Blockly.Toolbox.prototype.position = function() {
       treeDiv.style.transform = 'translate(72px, 77px)';
       treeDiv.style.margin = '-29px 0 0 -68px';
     }
-    treeDiv.style.height = 'calc(100% - 46px)';
+    treeDiv.style.height = 'calc(100% - 52px)';
   }
   this.flyout_.position();
 };
