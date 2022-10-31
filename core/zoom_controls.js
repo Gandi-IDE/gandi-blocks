@@ -44,21 +44,21 @@ Blockly.ZoomControls = function(workspace) {
  * @type {string}
  * @private
  */
-Blockly.ZoomControls.prototype.ZOOM_IN_PATH_ = 'zoom-in.svg';
+Blockly.ZoomControls.prototype.ZOOM_IN_PATH_ = 'zoom-in-new.svg';
 
 /**
  * Zoom out icon path.
  * @type {string}
  * @private
  */
-Blockly.ZoomControls.prototype.ZOOM_OUT_PATH_ = 'zoom-out.svg';
+Blockly.ZoomControls.prototype.ZOOM_OUT_PATH_ = 'zoom-out-new.svg';
 
 /**
  * Zoom reset icon path.
  * @type {string}
  * @private
  */
-Blockly.ZoomControls.prototype.ZOOM_RESET_PATH_ = 'zoom-reset.svg';
+Blockly.ZoomControls.prototype.ZOOM_RESET_PATH_ = 'zoom-reset-new.svg';
 
 /**
  * Width of the zoom controls.
