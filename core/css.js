@@ -779,7 +779,7 @@ Blockly.Css.CONTENT = [
 
   '.blocklyMainBackground {',
     'stroke-width: 1;',
-    'stroke: #c6c6c6;',  /* Equates to #ddd due to border being off-pixel. */
+    'fill: var(--theme-color-500);',
   '}',
 
   '.blocklyMutatorBackground {',
@@ -789,7 +789,7 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.blocklyFlyoutBackground {',
-    'fill: $colour_flyout;',
+    'fill: var(--theme-color-300);',
     'fill-opacity: .8;',
   '}',
 
@@ -799,8 +799,8 @@ Blockly.Css.CONTENT = [
 
   '.blocklyFlyoutScrollbar {',
     'z-index: 30;',
-    'transition: .3s;',
   '}',
+
   '.blocklyFlyoutScrollbar.blocklyFlyoutScrollbarHidingAnimation {',
     'transform: translateX(-100%) !important;',
   '}',
