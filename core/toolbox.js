@@ -192,7 +192,8 @@ Blockly.Toolbox.prototype.init = function() {
   this.HtmlDiv.appendChild(this.toolboxBody_);
   this.HtmlDiv.setAttribute('dir', workspace.RTL ? 'RTL' : 'LTR');
   svg.parentNode.insertBefore(this.HtmlDiv, svg);
-
+  
+  Blockly.bindEvent_(this.HtmlDiv, 'mouseleave', this, this.onMouseOutToolbox);
   // Clicking on toolbox closes popups.
   Blockly.bindEventWithChecks_(this.HtmlDiv, 'mousedown', this,
       function(e) {
@@ -207,7 +208,6 @@ Blockly.Toolbox.prototype.init = function() {
         }
         Blockly.Touch.clearTouchIdentifier();  // Don't block future drags.
       }, /*opt_noCaptureIdentifier*/ false, /*opt_noPreventDefault*/ true);
-
   this.createFlyout_();
   this.toolboxHeader_ = new Blockly.Toolbox.Header(this, this.HtmlDiv);
   this.categoryMenu_ = new Blockly.Toolbox.CategoryMenu(this, this.toolboxBody_);
@@ -716,6 +716,14 @@ Blockly.Toolbox.prototype.getWorkspace = function() {
   return this.workspace_;
 };
 
+Blockly.Toolbox.prototype.onMouseOutToolbox = function() {
+  if(this.toolboxHeader_.toolboxIsHide_) {
+    this.HtmlDiv.classList.add('collapsed');
+    this.HtmlDiv.style.width = this.NO_FLYOUT_WIDTH + 'px';
+    this.HtmlDiv.style.translate = '';
+  }
+};
+
 // Category menu
 /**
  * Class for a table of category titles that will control which category is
@@ -747,6 +755,16 @@ Blockly.Toolbox.CategoryMenu.prototype.createDom = function() {
     'scratchCategoryMenuHorizontal' : 'scratchCategoryMenu');
   var parentNode = this.parentHtml_;
   parentNode.insertBefore(this.table, parentNode.children[0]);
+
+  Blockly.bindEvent_(this.table, 'mouseenter', this, this.onMouseEnterMenu);
+};
+
+Blockly.Toolbox.CategoryMenu.prototype.onMouseEnterMenu = function() {
+  if(this.parent_.toolboxHeader_.toolboxIsHide_) {
+    this.parent_.HtmlDiv.classList.remove('collapsed');
+    this.parent_.HtmlDiv.style.width = this.parent_.NORMAL_WIDTH + 'px';
+    this.HtmlDiv.style.transition = 'width 0.2s ease';
+  }
 };
 
 /**
@@ -784,6 +802,7 @@ Blockly.Toolbox.CategoryMenu.prototype.populate = function(domTree) {
   }
 
   // Create a single column of categories
+  this.table.removeEventListener('mouseenter', this.onMouseEnterMenu);
   for (var i = 0; i < categories.length; i++) {
     var child = categories[i];
     var row = goog.dom.createDom('div', 'scratchCategoryMenuRow');
@@ -829,7 +848,7 @@ Blockly.Toolbox.Header = function(parent, parentHtml) {
 Blockly.Toolbox.Header.prototype.createDom = function() {
   this.container_ = goog.dom.createDom('div', 'toolboxHeader');
   this.toolboxIsHide_ = false;
-  this.switch_ = goog.dom.createDom('div', 'toolboxSwitchBotton');
+  this.switch_ = goog.dom.createDom('div', 'toolboxSwitchButton');
   this.container_.appendChild(this.switch_);
   this.parentHtml_.insertBefore(this.container_, this.parent_.toolboxBody_);
 

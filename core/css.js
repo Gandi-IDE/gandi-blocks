@@ -919,7 +919,7 @@ Blockly.Css.CONTENT = [
     '-webkit-tap-highlight-color: transparent;', /* issue #1345 */
   '}',
 
-  '.blocklyToolboxDiv.collapsed .toolboxSwitchBotton {',
+  '.blocklyToolboxDiv.collapsed .toolboxSwitchButton {',
     'transform: rotate(180deg);',
   '}',
 
@@ -1367,7 +1367,7 @@ Blockly.Css.CONTENT = [
     'cursor: auto;',
   '}',
 
-  '.toolboxSwitchBotton {',
+  '.toolboxSwitchButton {',
     'width: 24px;',
     'height: 24px;',
     'cursor: pointer;',
