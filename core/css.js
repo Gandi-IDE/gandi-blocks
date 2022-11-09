@@ -917,6 +917,7 @@ Blockly.Css.CONTENT = [
     'font-family: "Helvetica Neue", Helvetica, sans-serif;',
     'z-index: 40;', /* so blocks go over toolbox when dragging */
     '-webkit-tap-highlight-color: transparent;', /* issue #1345 */
+    'transition: width 0.2s;',
   '}',
 
   '.blocklyToolboxDiv.collapsed .toolboxSwitchButton {',

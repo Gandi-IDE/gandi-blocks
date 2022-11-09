@@ -720,7 +720,6 @@ Blockly.Toolbox.prototype.onMouseOutToolbox = function() {
   if(this.toolboxHeader_.toolboxIsHide_) {
     this.HtmlDiv.classList.add('collapsed');
     this.HtmlDiv.style.width = this.NO_FLYOUT_WIDTH + 'px';
-    this.HtmlDiv.style.translate = '';
   }
 };
 
@@ -763,7 +762,6 @@ Blockly.Toolbox.CategoryMenu.prototype.onMouseEnterMenu = function() {
   if(this.parent_.toolboxHeader_.toolboxIsHide_) {
     this.parent_.HtmlDiv.classList.remove('collapsed');
     this.parent_.HtmlDiv.style.width = this.parent_.NORMAL_WIDTH + 'px';
-    this.HtmlDiv.style.transition = 'width 0.2s ease';
   }
 };
 
