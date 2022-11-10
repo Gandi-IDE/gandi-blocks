@@ -193,7 +193,7 @@ Blockly.Toolbox.prototype.init = function() {
   this.HtmlDiv.setAttribute('dir', workspace.RTL ? 'RTL' : 'LTR');
   svg.parentNode.insertBefore(this.HtmlDiv, svg);
   
-  Blockly.bindEvent_(this.HtmlDiv, 'mouseleave', this, this.onMouseOutToolbox);
+  Blockly.bindEvent_(this.HtmlDiv, 'mouseleave', this, this.onMouseLeaveToolbox);
   // Clicking on toolbox closes popups.
   Blockly.bindEventWithChecks_(this.HtmlDiv, 'mousedown', this,
       function(e) {
@@ -716,10 +716,14 @@ Blockly.Toolbox.prototype.getWorkspace = function() {
   return this.workspace_;
 };
 
-Blockly.Toolbox.prototype.onMouseOutToolbox = function() {
+Blockly.Toolbox.prototype.onMouseLeaveToolbox = function() {
   if(this.toolboxHeader_.toolboxIsHide_) {
     this.HtmlDiv.classList.add('collapsed');
     this.HtmlDiv.style.width = this.NO_FLYOUT_WIDTH + 'px';
+    var that = this;
+    setTimeout(function() {
+      that.workspace_.recordCachedAreas();
+    }, 300);
   }
 };
 
@@ -762,6 +766,10 @@ Blockly.Toolbox.CategoryMenu.prototype.onMouseEnterMenu = function() {
   if(this.parent_.toolboxHeader_.toolboxIsHide_) {
     this.parent_.HtmlDiv.classList.remove('collapsed');
     this.parent_.HtmlDiv.style.width = this.parent_.NORMAL_WIDTH + 'px';
+    var that = this;
+    setTimeout(function() {
+      that.parent_.workspace_.recordCachedAreas();
+    }, 300);
   }
 };
 
@@ -862,6 +870,10 @@ Blockly.Toolbox.Header.prototype.triggerToolbox = function() {
     this.parentHtml_.classList.remove('collapsed');
     this.parentHtml_.style.width = this.parent_.NORMAL_WIDTH + 'px';
   }
+  var that = this;
+  setTimeout(function() {
+    that.parent_.workspace_.recordCachedAreas();
+  }, 300);
 };
 
 Blockly.Toolbox.Header.prototype.dispose = function() {
