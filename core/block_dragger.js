@@ -154,11 +154,12 @@ Blockly.BlockDragger.initIconData_ = function(block) {
 
 /**
  * Start dragging a block.  This includes moving it to the drag surface.
+ * @param {!Event} e The most recent move event.
  * @param {!goog.math.Coordinate} currentDragDeltaXY How far the pointer has
  *     moved from the position at mouse down, in pixel units.
  * @package
  */
-Blockly.BlockDragger.prototype.startBlockDrag = function(currentDragDeltaXY) {
+Blockly.BlockDragger.prototype.startBlockDrag = function(e, currentDragDeltaXY) {
   this.rootDiv = document.getElementsByClassName('injectionDiv')[0];
   if(Blockly.locked) return;
   if (!Blockly.Events.getGroup()) {
@@ -187,6 +188,9 @@ Blockly.BlockDragger.prototype.startBlockDrag = function(currentDragDeltaXY) {
     var style = this.draggingBlock_.isDeletable() ? 'blocklyToolboxDelete' :
         'blocklyToolboxGrab';
     toolbox.addStyle(style);
+    if (!this.workspace_.isDeleteArea(e)) {
+      toolbox.addStyle('dragStartInWorkspace');
+    }
     if (this.workspace_.options.nonStickyFlyout) {
       if (toolbox.getFlyout()) {
         toolbox.resetScrollToHideConditions();
@@ -274,6 +278,7 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
     var style = this.draggingBlock_.isDeletable() ? 'blocklyToolboxDelete' :
         'blocklyToolboxGrab';
     toolbox.removeStyle(style);
+    toolbox.removeStyle('dragStartInWorkspace');
   }
   Blockly.Events.setGroup(false);
 

@@ -193,7 +193,8 @@ Blockly.Toolbox.prototype.init = function() {
   this.HtmlDiv.setAttribute('dir', workspace.RTL ? 'RTL' : 'LTR');
   svg.parentNode.insertBefore(this.HtmlDiv, svg);
   
-  Blockly.bindEvent_(this.HtmlDiv, 'mouseleave', this, this.onMouseLeaveToolbox);
+  Blockly.bindEvent_(this.toolboxBody_, 'mouseleave', this, this.onMouseLeaveToolbox);
+  Blockly.bindEvent_(this.toolboxBody_, 'mouseenter', this, this.onMouseEnterMenu);
   // Clicking on toolbox closes popups.
   Blockly.bindEventWithChecks_(this.HtmlDiv, 'mousedown', this,
       function(e) {
@@ -716,6 +717,17 @@ Blockly.Toolbox.prototype.getWorkspace = function() {
   return this.workspace_;
 };
 
+Blockly.Toolbox.prototype.onMouseEnterMenu = function() {
+  if(this.toolboxHeader_.toolboxIsHide_) {
+    this.HtmlDiv.classList.remove('collapsed');
+    this.HtmlDiv.style.width = this.NORMAL_WIDTH + 'px';
+    var that = this;
+    setTimeout(function() {
+      that.workspace_.recordCachedAreas();
+    }, 300);
+  }
+};
+
 Blockly.Toolbox.prototype.onMouseLeaveToolbox = function() {
   if(this.toolboxHeader_.toolboxIsHide_) {
     this.HtmlDiv.classList.add('collapsed');
@@ -758,19 +770,6 @@ Blockly.Toolbox.CategoryMenu.prototype.createDom = function() {
     'scratchCategoryMenuHorizontal' : 'scratchCategoryMenu');
   var parentNode = this.parentHtml_;
   parentNode.insertBefore(this.table, parentNode.children[0]);
-
-  Blockly.bindEvent_(this.table, 'mouseenter', this, this.onMouseEnterMenu);
-};
-
-Blockly.Toolbox.CategoryMenu.prototype.onMouseEnterMenu = function() {
-  if(this.parent_.toolboxHeader_.toolboxIsHide_) {
-    this.parent_.HtmlDiv.classList.remove('collapsed');
-    this.parent_.HtmlDiv.style.width = this.parent_.NORMAL_WIDTH + 'px';
-    var that = this;
-    setTimeout(function() {
-      that.parent_.workspace_.recordCachedAreas();
-    }, 300);
-  }
 };
 
 /**
@@ -808,7 +807,6 @@ Blockly.Toolbox.CategoryMenu.prototype.populate = function(domTree) {
   }
 
   // Create a single column of categories
-  this.table.removeEventListener('mouseenter', this.onMouseEnterMenu);
   for (var i = 0; i < categories.length; i++) {
     var child = categories[i];
     var row = goog.dom.createDom('div', 'scratchCategoryMenuRow');
