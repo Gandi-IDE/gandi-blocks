@@ -457,7 +457,7 @@ Blockly.Gesture.prototype.startDraggingBlock_ = function() {
   }
   this.blockDragger_ = new Blockly.BlockDragger(this.targetBlock_,
       this.startWorkspace_);
-  this.blockDragger_.startBlockDrag(this.currentDragDeltaXY_);
+  this.blockDragger_.startBlockDrag(this.mostRecentEvent_, this.currentDragDeltaXY_);
   this.blockDragger_.dragBlock(this.mostRecentEvent_,
       this.currentDragDeltaXY_);
 };

@@ -779,7 +779,7 @@ Blockly.Css.CONTENT = [
 
   '.blocklyMainBackground {',
     'stroke-width: 1;',
-    'stroke: #c6c6c6;',  /* Equates to #ddd due to border being off-pixel. */
+    'fill: var(--theme-color-500);',
   '}',
 
   '.blocklyMutatorBackground {',
@@ -789,7 +789,7 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.blocklyFlyoutBackground {',
-    'fill: $colour_flyout;',
+    'fill: var(--theme-color-300);',
     'fill-opacity: .8;',
   '}',
 
@@ -799,8 +799,8 @@ Blockly.Css.CONTENT = [
 
   '.blocklyFlyoutScrollbar {',
     'z-index: 30;',
-    'transition: .3s;',
   '}',
+
   '.blocklyFlyoutScrollbar.blocklyFlyoutScrollbarHidingAnimation {',
     'transform: translateX(-100%) !important;',
   '}',
@@ -917,9 +917,10 @@ Blockly.Css.CONTENT = [
     'font-family: "Helvetica Neue", Helvetica, sans-serif;',
     'z-index: 40;', /* so blocks go over toolbox when dragging */
     '-webkit-tap-highlight-color: transparent;', /* issue #1345 */
+    'transition: width 0.2s;',
   '}',
 
-  '.blocklyToolboxDiv.collapsed .toolboxSwitchBotton {',
+  '.blocklyToolboxDiv.collapsed .toolboxSwitchButton {',
     'transform: rotate(180deg);',
   '}',
 
@@ -1362,12 +1363,30 @@ Blockly.Css.CONTENT = [
   '.toolboxBody {',
     'position: relative;',
     'display: flex;',
-    'height: 100%;',
+    'height: calc(100% - 29px);',
     'flex: 1;',
     'cursor: auto;',
   '}',
 
-  '.toolboxSwitchBotton {',
+  '.dragStartInWorkspace .toolboxBody::after {',
+    'content: "";',
+    'position: absolute;',
+    'width: 100%;',
+    'height: 100%;',
+    'backdrop-filter: blur(10px);',
+    'background-image: url("<<<PATH>>>/trash-can.svg");',
+    'background-repeat: no-repeat;',
+    'background-position: center center;',
+    'background-size: 54px;',
+    'pointer-events: none;',
+    'z-index: 21;',
+  '}',
+
+  '.dragStartInWorkspace .toolboxBody:hover::after {',
+    'background-image: url("<<<PATH>>>/trash-can-open.svg");',
+  '}',
+
+  '.toolboxSwitchButton {',
     'width: 24px;',
     'height: 24px;',
     'cursor: pointer;',
@@ -1392,6 +1411,10 @@ Blockly.Css.CONTENT = [
     '-ms-user-select: none;',
   '}',
 
+  '.scratchCategoryMenu::-webkit-scrollbar {',
+    ' display: none;',
+  '}',
+
   '.scratchCategoryMenuHorizontal {',
     'width: 100%;',
     'height: 50px;',
@@ -1413,7 +1436,7 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.scratchCategoryMenuItem {',
-    'padding: 0.375rem 0px;',
+    'padding: 12px 0px;',
     'cursor: pointer;',
     'text-align: center;',
     'position: relative;',
@@ -1447,14 +1470,19 @@ Blockly.Css.CONTENT = [
     'height: 1.25rem;',
     'border: 1px solid;',
     'border-radius: 100%;',
-    'margin: 0 auto 0.125rem;',
+    'margin: 0 auto 2px;',
   '}',
 
   '.scratchCategoryItemIcon {',
-    'width: 20px;',
-    'height: 20px;',
-    'margin: 0 auto 0.125rem;',
+    'width: 24px;',
+    'height: 24px;',
+    'margin: 0 auto 2px;',
     'background-size: 100%;',
+  '}',
+
+  '.scratchCategoryMenuItemLabel {',
+    'font-size: 12px;',
+    'line-height: 20px;',
   '}',
 
   '.scratchCategoryMenuItem:hover {',

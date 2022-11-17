@@ -192,7 +192,9 @@ Blockly.Toolbox.prototype.init = function() {
   this.HtmlDiv.appendChild(this.toolboxBody_);
   this.HtmlDiv.setAttribute('dir', workspace.RTL ? 'RTL' : 'LTR');
   svg.parentNode.insertBefore(this.HtmlDiv, svg);
-
+  
+  Blockly.bindEvent_(this.toolboxBody_, 'mouseleave', this, this.onMouseLeaveToolbox);
+  Blockly.bindEvent_(this.toolboxBody_, 'mouseenter', this, this.onMouseEnterMenu);
   // Clicking on toolbox closes popups.
   Blockly.bindEventWithChecks_(this.HtmlDiv, 'mousedown', this,
       function(e) {
@@ -207,7 +209,6 @@ Blockly.Toolbox.prototype.init = function() {
         }
         Blockly.Touch.clearTouchIdentifier();  // Don't block future drags.
       }, /*opt_noCaptureIdentifier*/ false, /*opt_noPreventDefault*/ true);
-
   this.createFlyout_();
   this.toolboxHeader_ = new Blockly.Toolbox.Header(this, this.HtmlDiv);
   this.categoryMenu_ = new Blockly.Toolbox.CategoryMenu(this, this.toolboxBody_);
@@ -372,7 +373,7 @@ Blockly.Toolbox.prototype.position = function() {
       treeDiv.style.transform = 'translate(72px, 77px)';
       treeDiv.style.margin = '-29px 0 0 -68px';
     }
-    treeDiv.style.height = 'calc(100% - 46px)';
+    treeDiv.style.height = 'calc(100% - 52px)';
   }
   this.flyout_.position();
 };
@@ -716,6 +717,28 @@ Blockly.Toolbox.prototype.getWorkspace = function() {
   return this.workspace_;
 };
 
+Blockly.Toolbox.prototype.onMouseEnterMenu = function() {
+  if(this.toolboxHeader_.toolboxIsHide_) {
+    this.HtmlDiv.classList.remove('collapsed');
+    this.HtmlDiv.style.width = this.NORMAL_WIDTH + 'px';
+    var that = this;
+    setTimeout(function() {
+      that.workspace_.recordCachedAreas();
+    }, 300);
+  }
+};
+
+Blockly.Toolbox.prototype.onMouseLeaveToolbox = function() {
+  if(this.toolboxHeader_.toolboxIsHide_) {
+    this.HtmlDiv.classList.add('collapsed');
+    this.HtmlDiv.style.width = this.NO_FLYOUT_WIDTH + 'px';
+    var that = this;
+    setTimeout(function() {
+      that.workspace_.recordCachedAreas();
+    }, 300);
+  }
+};
+
 // Category menu
 /**
  * Class for a table of category titles that will control which category is
@@ -829,7 +852,7 @@ Blockly.Toolbox.Header = function(parent, parentHtml) {
 Blockly.Toolbox.Header.prototype.createDom = function() {
   this.container_ = goog.dom.createDom('div', 'toolboxHeader');
   this.toolboxIsHide_ = false;
-  this.switch_ = goog.dom.createDom('div', 'toolboxSwitchBotton');
+  this.switch_ = goog.dom.createDom('div', 'toolboxSwitchButton');
   this.container_.appendChild(this.switch_);
   this.parentHtml_.insertBefore(this.container_, this.parent_.toolboxBody_);
 
@@ -845,6 +868,10 @@ Blockly.Toolbox.Header.prototype.triggerToolbox = function() {
     this.parentHtml_.classList.remove('collapsed');
     this.parentHtml_.style.width = this.parent_.NORMAL_WIDTH + 'px';
   }
+  var that = this;
+  setTimeout(function() {
+    that.parent_.workspace_.recordCachedAreas();
+  }, 300);
 };
 
 Blockly.Toolbox.Header.prototype.dispose = function() {
