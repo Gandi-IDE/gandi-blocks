@@ -1402,6 +1402,7 @@ Blockly.Css.CONTENT = [
     'color: $colour_toolboxText;',
     'font-size: .7rem;',
     'user-select: none;',
+    'border-right: 1px solid var(--theme-color-200);',
     '-webkit-user-select: none;',
     '-moz-user-select: none;',
     '-ms-user-select: none;',
