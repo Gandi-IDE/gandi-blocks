@@ -308,6 +308,19 @@ Blockly.utils.isRightButton = function(e) {
 };
 
 /**
+ * Whether the object is a dom object
+ * @param {Object} object Object.
+ * @return {boolean} True if the object is a dom object.
+ */
+Blockly.utils.isDom = typeof HTMLElement === 'object'
+  ? function(object) {
+    return object instanceof HTMLElement;
+  }
+  : function(object) {
+    return object && typeof obj === 'object' && object.nodeType === 1 && typeof object.nodeName === 'string';
+  };
+
+/**
  * Return the converted coordinates of the given mouse event.
  * The origin (0,0) is the top-left corner of the Blockly SVG.
  * @param {!Event} e Mouse event.

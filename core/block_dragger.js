@@ -217,7 +217,7 @@ Blockly.BlockDragger.prototype.dragBlock = function(e, currentDragDeltaXY) {
   this.dragIcons_(delta);
 
   this.deleteArea_ = this.workspace_.isDeleteArea(e);
-  var isOutside = !this.rootDiv.contains(e.target);
+  var isOutside = Blockly.utils.isDom(e.target) ? !this.rootDiv.contains(e.target) : false;
   this.draggedConnectionManager_.update(delta, this.deleteArea_, isOutside);
   if (isOutside !== this.wasOutside_) {
     this.fireDragOutsideEvent_(isOutside);
