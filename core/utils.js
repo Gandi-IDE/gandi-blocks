@@ -317,7 +317,7 @@ Blockly.utils.isDom = typeof HTMLElement === 'object'
     return object instanceof HTMLElement;
   }
   : function(object) {
-    return object && typeof obj === 'object' && object.nodeType === 1 && typeof object.nodeName === 'string';
+    return object && typeof object === 'object' && object.nodeType === 1 && typeof object.nodeName === 'string';
   };
 
 /**
