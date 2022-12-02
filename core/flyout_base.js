@@ -124,7 +124,7 @@ Blockly.Flyout = function(workspaceOptions) {
   this.permanentlyDisabled_ = [];
 
   /**
-   * The toolbox that this flyout belongs to, or none if tihs is a simple
+   * The toolbox that this flyout belongs to, or none if this is a simple
    * workspace.
    * @type {Blockly.Toolbox}
    * @private
