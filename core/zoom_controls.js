@@ -86,7 +86,7 @@ Blockly.ZoomControls.prototype.MARGIN_BETWEEN_ = 8;
  * @type {number}
  * @private
  */
-Blockly.ZoomControls.prototype.MARGIN_BOTTOM_ = 12;
+Blockly.ZoomControls.prototype.MARGIN_BOTTOM_ = -4;
 
 /**
  * Distance between zoom controls and right edge of workspace.

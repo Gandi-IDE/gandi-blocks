@@ -339,7 +339,10 @@ Blockly.VerticalFlyout.prototype.position = function() {
   }
 
   // Record the height for Blockly.Flyout.getMetrics_
-  this.height_ = Math.max(0, targetWorkspaceMetrics.viewHeight - this.targetWorkspace_.toolbox_.MARGIN_TOP - y);
+  this.height_ = Math.max(0,targetWorkspaceMetrics.viewHeight -
+    this.targetWorkspace_.toolbox_.MARGIN_TOP - this.targetWorkspace_.toolbox_.MARGIN_BOTTOM
+    - y
+  );
 
   this.setBackgroundPath_(this.width_, this.height_);
 

@@ -174,6 +174,7 @@ Blockly.Css.CONTENT = [
 
   '.blocklyWidgetDiv.fieldTextInput.removableTextInput {',
     'overflow: visible;',
+    'outline: none;',
   '}',
 
   '.blocklyTextDropDownArrow {',
@@ -521,7 +522,7 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.blocklyFlyoutButton .blocklyText {',
-    'fill: $colour_text;',
+    'fill: var(--theme-text-primary);',
   '}',
 
   '.blocklyFlyoutButtonShadow {',
@@ -529,7 +530,6 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.blocklyFlyoutButton:hover {',
-    'fill: white;',
     'cursor: pointer;',
   '}',
 
@@ -583,7 +583,7 @@ Blockly.Css.CONTENT = [
   '.blocklyFlyoutLabelText {',
     'font-family: "Helvetica Neue", Helvetica, sans-serif;',
     'font-size: 14pt;',
-    'fill: #575E75;',
+    'fill: var(--theme-text-primary);',
     'font-weight: bold;',
   '}',
 
@@ -766,14 +766,14 @@ Blockly.Css.CONTENT = [
   '.blocklyHtmlInput {',
     'border: none;',
     'font-family: "Helvetica Neue", Helvetica, sans-serif;',
-    'font-size: 12pt;',
+    'font-size: 12px;',
     'height: 100%;',
     'margin: 0;',
     'outline: none;',
     'box-sizing: border-box;',
     'width: 100%;',
     'text-align: center;',
-    'color: $colour_text;',
+    'color: #242731;',
     'font-weight: 500;',
   '}',
 
@@ -815,7 +815,8 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.blocklyScrollbarHandle {',
-    'fill: $colour_scrollbar;',
+    'fill: var(--theme-text-primary);',
+    'fill-opacity: 0.3;',
   '}',
 
   '.blocklyScrollbarBackground:hover+.blocklyScrollbarHandle,',
@@ -826,6 +827,14 @@ Blockly.Css.CONTENT = [
   '.blocklyZoom>image {',
     'opacity: 1;',
     'cursor: pointer;',
+  '}',
+
+  '.blocklyZoom image:nth-child(2) {',
+    'transform: translateY(8px);',
+  '}',
+
+  '.blocklyZoom image:nth-child(3) {',
+      'transform: translateY(-8px);',
   '}',
 
   /* Darken flyout scrollbars due to being on a grey background. */
@@ -1152,7 +1161,7 @@ Blockly.Css.CONTENT = [
    * #noflip to .goog-menuitem.
    */
   '.blocklyWidgetDiv .goog-menuitem {',
-    'color: var(--theme-color-text);',
+    'color: var(--theme-text-primary);',
     'line-height: 20px;',
     'list-style: none;',
     'margin: 0;',
@@ -1209,7 +1218,7 @@ Blockly.Css.CONTENT = [
   '.blocklyWidgetDiv .goog-menuitem-disabled .goog-menuitem-content, ',
   '.blocklyDropDownDiv .goog-menuitem-disabled .goog-menuitem-accel,',
   '.blocklyDropDownDiv .goog-menuitem-disabled .goog-menuitem-content {',
-    'color: var(--theme-color-100); !important;',
+    'color: var(--theme-color-g500)',
   '}',
 
   '.blocklyWidgetDiv .goog-menuitem-disabled .goog-menuitem-icon, ',
@@ -1223,7 +1232,7 @@ Blockly.Css.CONTENT = [
   '.blocklyWidgetDiv .goog-menuitem-highlight,',
   '.blocklyWidgetDiv .goog-menuitem-hover {',
     'cursor: pointer;',
-    'background-color: var(--them-brand-color-p3);',
+    'background-color: var(--theme-brand-color-p3);',
   '}',
 
   '.blocklyDropDownDiv .goog-menuitem-highlight,',
@@ -1433,6 +1442,10 @@ Blockly.Css.CONTENT = [
     'position: relative;',
   '}',
 
+  '.scratchCategoryMenuItem:hover {',
+    'background: var(--theme-color-200);',
+  '}',
+
   '.scratchCategoryMenuItem::after {',
     'content: "";',
     'position: absolute;',
@@ -1448,12 +1461,8 @@ Blockly.Css.CONTENT = [
     'padding: 6px 5px;',
   '}',
 
-  '.scratchCategoryMenuItem:hover {',
-    'background: var(--theme-color-100);',
-  '}',
-
   '.scratchCategoryMenuItem.categorySelected {',
-    'background: var(--theme-brand-color);',
+    'background: var(--theme-color-b200);',
   '}',
 
   '.scratchCategoryItemBubble {',
@@ -1472,12 +1481,9 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.scratchCategoryMenuItemLabel {',
-    'font-size: 12px;',
+    'font-size: 14px;',
     'line-height: 20px;',
-  '}',
-
-  '.scratchCategoryMenuItem:hover {',
-    'color: $colour_toolboxHover !important;',
+    'color: var(--theme-text-primary);',
   '}',
   ''
 ];
