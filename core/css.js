@@ -128,7 +128,7 @@ Blockly.Css.setCursor = function(cursor) {
  */
 Blockly.Css.CONTENT = [
   '.blocklySvg {',
-    'background-color: $colour_workspace;',
+    'background-color: var(--theme-color-500, $colour_workspace);',
     'outline: none;',
     'overflow: hidden;',  /* IE overflows by default. */
     'position: absolute;',
@@ -779,7 +779,6 @@ Blockly.Css.CONTENT = [
 
   '.blocklyMainBackground {',
     'stroke-width: 1;',
-    'fill: var(--theme-color-500);',
   '}',
 
   '.blocklyMutatorBackground {',
@@ -1345,7 +1344,7 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.disabled .blocklyTouchTargetBackground {',
-    'cursor: var(--cursor_not_allowed);',
+    'cursor: var(--cursor-icon-disable);',
   '}',
 
   '.blocklyFlyoutCheckboxPath {',
@@ -1477,6 +1476,10 @@ Blockly.Css.CONTENT = [
     'height: 24px;',
     'margin: 0 auto 2px;',
     'background-size: 100%;',
+  '}',
+
+  '[theme="dark"] .scratchCategoryItemIcon, [theme="dark"] .blocklyZoom {',
+    'filter: invert(90%);',
   '}',
 
   '.scratchCategoryMenuItemLabel {',
