@@ -1479,7 +1479,11 @@ Blockly.Css.CONTENT = [
     'background-size: 100%;',
   '}',
 
-  '[theme="dark"] .scratchCategoryItemIcon, [theme="dark"] .blocklyZoom {',
+  '[theme="dark"] .blocklyZoom {',
+    'filter: invert(90%);',
+  '}',
+
+  '[theme="light"] .scratchCategoryMenuRow:nth-child(-n+9) .scratchCategoryItemIcon {',
     'filter: invert(90%);',
   '}',
 
