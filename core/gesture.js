@@ -285,7 +285,7 @@ Blockly.Gesture.prototype.updateFromEvent_ = function(e) {
   var currentXY = new goog.math.Coordinate(e.clientX, e.clientY);
   var changed = this.updateDragDelta_(currentXY);
   // Exceeded the drag radius for the first time.
-  if (changed && !Blockly.locked) {
+  if (changed) {
     this.updateIsDragging_();
     Blockly.longStop_();
   }
@@ -361,7 +361,7 @@ Blockly.Gesture.prototype.updateIsDraggingFromFlyout_ = function() {
  * @private
  */
 Blockly.Gesture.prototype.updateIsDraggingBubble_ = function() {
-  if (!this.startBubble_) {
+  if (!this.startBubble_ || Blockly.locked) {
     return false;
   }
 
@@ -380,7 +380,7 @@ Blockly.Gesture.prototype.updateIsDraggingBubble_ = function() {
  * @private
  */
 Blockly.Gesture.prototype.updateIsDraggingBlock_ = function() {
-  if (!this.targetBlock_) {
+  if (!this.targetBlock_ || Blockly.locked) {
     return false;
   }
 
