@@ -743,7 +743,7 @@ Blockly.Toolbox.prototype.onMouseEnterMenu = function() {
 };
 
 Blockly.Toolbox.prototype.onMouseLeaveToolbox = function() {
-  if(this.toolboxHeader_.toolboxIsHide_) {
+  if(this.toolboxHeader_.toolboxIsHide_ && !Blockly.DropDownDiv.onHide_ && !Blockly.WidgetDiv.owner_) {
     this.HtmlDiv.classList.add('collapsed');
     this.HtmlDiv.style.width = this.NO_FLYOUT_WIDTH + 'px';
     var that = this;
