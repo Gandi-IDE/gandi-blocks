@@ -1466,8 +1466,8 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.scratchCategoryItemBubble {',
-    'width: 1.25rem;',
-    'height: 1.25rem;',
+    'width: 24px;',
+    'height: 24px;',
     'border: 1px solid;',
     'border-radius: 100%;',
     'margin: 0 auto 2px;',
