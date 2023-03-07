@@ -1084,6 +1084,7 @@ Blockly.utils.getBlockSvgImage = function(
   const container = document.createElementNS(SVG_NS, "g");
   container.innerHTML = svgContent;
   const rootNode = container.children[0];
+  rootNode.style.display = "";
   let isChanged = false;
   let reducedDistance = 0;
   for (let index = 0; index < rootNode.children.length; index++) {
