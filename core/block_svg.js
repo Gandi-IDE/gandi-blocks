@@ -712,7 +712,7 @@ Blockly.BlockSvg.prototype.showContextMenu_ = function(e) {
     } else if(this.type === "data_listcontents") {
       type = Blockly.Msg.LIST;
     }
-    
+
     Blockly.utils.toast(Blockly.Msg.DISABLED_VARIABLE.replace('%1', type));
     return;
   }

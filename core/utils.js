@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /**
  * @license
  * Visual Blocks Editor
@@ -998,4 +999,204 @@ Blockly.utils.isTeamwork = function() {
   return false;
 };
 
+Blockly.utils.BLOCKS_ICONS = [
+  [
+    /"[\S]+?repeat\.svg"/gm,
+    "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIxLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9InJlcGVhdCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiCgkgdmlld0JveD0iMCAwIDI0IDI0IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAyNCAyNDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiNDRjhCMTc7fQoJLnN0MXtmaWxsOiNGRkZGRkY7fQo8L3N0eWxlPgo8dGl0bGU+cmVwZWF0PC90aXRsZT4KPHBhdGggY2xhc3M9InN0MCIgZD0iTTIzLjMsMTFjLTAuMywwLjYtMC45LDEtMS41LDFoLTEuNmMtMC4xLDEuMy0wLjUsMi41LTEuMSwzLjZjLTAuOSwxLjctMi4zLDMuMi00LjEsNC4xCgljLTEuNywwLjktMy42LDEuMi01LjUsMC45Yy0xLjgtMC4zLTMuNS0xLjEtNC45LTIuM2MtMC43LTAuNy0wLjctMS45LDAtMi42YzAuNi0wLjYsMS42LTAuNywyLjMtMC4ySDdjMC45LDAuNiwxLjksMC45LDIuOSwwLjkKCXMxLjktMC4zLDIuNy0wLjljMS4xLTAuOCwxLjgtMi4xLDEuOC0zLjVoLTEuNWMtMC45LDAtMS43LTAuNy0xLjctMS43YzAtMC40LDAuMi0wLjksMC41LTEuMmw0LjQtNC40YzAuNy0wLjYsMS43LTAuNiwyLjQsMEwyMyw5LjIKCUMyMy41LDkuNywyMy42LDEwLjQsMjMuMywxMXoiLz4KPHBhdGggY2xhc3M9InN0MSIgZD0iTTIxLjgsMTFoLTIuNmMwLDEuNS0wLjMsMi45LTEsNC4yYy0wLjgsMS42LTIuMSwyLjgtMy43LDMuNmMtMS41LDAuOC0zLjMsMS4xLTQuOSwwLjhjLTEuNi0wLjItMy4yLTEtNC40LTIuMQoJYy0wLjQtMC4zLTAuNC0wLjktMC4xLTEuMmMwLjMtMC40LDAuOS0wLjQsMS4yLTAuMWwwLDBjMSwwLjcsMi4yLDEuMSwzLjQsMS4xczIuMy0wLjMsMy4zLTFjMC45LTAuNiwxLjYtMS41LDItMi42CgljMC4zLTAuOSwwLjQtMS44LDAuMi0yLjhoLTIuNGMtMC40LDAtMC43LTAuMy0wLjctMC43YzAtMC4yLDAuMS0wLjMsMC4yLTAuNGw0LjQtNC40YzAuMy0wLjMsMC43LTAuMywwLjksMEwyMiw5LjgKCWMwLjMsMC4zLDAuNCwwLjYsMC4zLDAuOVMyMiwxMSwyMS44LDExeiIvPgo8L3N2Zz4K"
+  ],
+  [
+    /"[\S]+?green-flag\.svg"/gm,
+    "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIxLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9ImdyZWVuZmxhZyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiCgkgdmlld0JveD0iMCAwIDI0IDI0IiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAyNCAyNDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiM0NTk5M0Q7fQoJLnN0MXtmaWxsOiM0Q0JGNTY7fQo8L3N0eWxlPgo8dGl0bGU+Z3JlZW5mbGFnPC90aXRsZT4KPHBhdGggY2xhc3M9InN0MCIgZD0iTTIwLjgsMy43Yy0wLjQtMC4yLTAuOS0wLjEtMS4yLDAuMmMtMiwxLjYtNC44LDEuNi02LjgsMGMtMi4zLTEuOS01LjYtMi4zLTguMy0xVjIuNWMwLTAuNi0wLjUtMS0xLTEKCXMtMSwwLjQtMSwxdjE4LjhjMCwwLjUsMC41LDEsMSwxaDAuMWMwLjUsMCwxLTAuNSwxLTF2LTYuNGMxLTAuNywyLjEtMS4yLDMuNC0xLjNjMS4yLDAsMi40LDAuNCwzLjQsMS4yYzIuOSwyLjMsNywyLjMsOS44LDAKCWMwLjMtMC4yLDAuNC0wLjUsMC40LTAuOVY0LjdDMjEuNiw0LjIsMjEuMywzLjgsMjAuOCwzLjd6IE0yMC41LDEzLjlDMjAuNSwxMy45LDIwLjUsMTMuOSwyMC41LDEzLjlDMTgsMTYsMTQuNCwxNiwxMS45LDE0CgljLTEuMS0wLjktMi41LTEuNC00LTEuNGMtMS4yLDAuMS0yLjMsMC41LTMuNCwxLjFWNEM3LDIuNiwxMCwyLjksMTIuMiw0LjZjMi40LDEuOSw1LjcsMS45LDguMSwwYzAuMSwwLDAuMSwwLDAuMiwwCgljMCwwLDAuMSwwLjEsMC4xLDAuMUwyMC41LDEzLjl6Ii8+CjxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yMC42LDQuOGwtMC4xLDkuMWMwLDAsMCwwLjEsMCwwLjFjLTIuNSwyLTYuMSwyLTguNiwwYy0xLjEtMC45LTIuNS0xLjQtNC0xLjRjLTEuMiwwLjEtMi4zLDAuNS0zLjQsMS4xVjQKCUM3LDIuNiwxMCwyLjksMTIuMiw0LjZjMi40LDEuOSw1LjcsMS45LDguMSwwYzAuMSwwLDAuMSwwLDAuMiwwQzIwLjUsNC43LDIwLjYsNC43LDIwLjYsNC44eiIvPgo8L3N2Zz4K"
+  ],
+  [
+    /"[\S]+?rotate-left\.svg"/gm,
+    "data:image/svg+xml;base64,PHN2ZyBpZD0icm90YXRlLWNsb2Nrd2lzZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgMjQgMjQiPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDojM2Q3OWNjO30uY2xzLTJ7ZmlsbDojZmZmO308L3N0eWxlPjwvZGVmcz48dGl0bGU+cm90YXRlLWNsb2Nrd2lzZTwvdGl0bGU+PHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMjAuMzQsMTguMjFhMTAuMjQsMTAuMjQsMCwwLDEtOC4xLDQuMjIsMi4yNiwyLjI2LDAsMCwxLS4xNi00LjUyaDBhNS41OCw1LjU4LDAsMCwwLDQuMjUtMi41Myw1LjA2LDUuMDYsMCwwLDAsLjU0LTQuNjJBNC4yNSw0LjI1LDAsMCwwLDE1LjU1LDlhNC4zMSw0LjMxLDAsMCwwLTItLjhBNC44Miw0LjgyLDAsMCwwLDEwLjQsOWwxLjEyLDEuNDFBMS41OSwxLjU5LDAsMCwxLDEwLjM2LDEzSDIuNjdhMS41NiwxLjU2LDAsMCwxLTEuMjYtLjYzQTEuNTQsMS41NCwwLDAsMSwxLjEzLDExTDIuODUsMy41N0ExLjU5LDEuNTksMCwwLDEsNC4zOCwyLjQsMS41NywxLjU3LDAsMCwxLDUuNjIsM0w2LjcsNC4zNWExMC42NiwxMC42NiwwLDAsMSw3LjcyLTEuNjhBOS44OCw5Ljg4LDAsMCwxLDE5LDQuODEsOS42MSw5LjYxLDAsMCwxLDIxLjgzLDksMTAuMDgsMTAuMDgsMCwwLDEsMjAuMzQsMTguMjFaIi8+PHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMTkuNTYsMTcuNjVhOS4yOSw5LjI5LDAsMCwxLTcuMzUsMy44MywxLjMxLDEuMzEsMCwwLDEtLjA4LTIuNjIsNi41Myw2LjUzLDAsMCwwLDUtMi45Miw2LjA1LDYuMDUsMCwwLDAsLjY3LTUuNTEsNS4zMiw1LjMyLDAsMCwwLTEuNjQtMi4xNiw1LjIxLDUuMjEsMCwwLDAtMi40OC0xQTUuODYsNS44NiwwLDAsMCw5LDguODRMMTAuNzQsMTFhLjU5LjU5LDAsMCwxLS40MywxSDIuN2EuNi42LDAsMCwxLS42LS43NUwzLjgxLDMuODNhLjU5LjU5LDAsMCwxLDEtLjIxbDEuNjcsMi4xYTkuNzEsOS43MSwwLDAsMSw3Ljc1LTIuMDcsOC44NCw4Ljg0LDAsMCwxLDQuMTIsMS45Miw4LjY4LDguNjgsMCwwLDEsMi41NCwzLjcyQTkuMTQsOS4xNCwwLDAsMSwxOS41NiwxNy42NVoiLz48L3N2Zz4="
+  ],
+  [
+    /"[\S]+?rotate-right\.svg"/gm,
+    "data:image/svg+xml;base64,PHN2ZyBpZD0icm90YXRlLWNvdW50ZXItY2xvY2t3aXNlIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PGRlZnM+PHN0eWxlPi5jbHMtMXtmaWxsOiMzZDc5Y2M7fS5jbHMtMntmaWxsOiNmZmY7fTwvc3R5bGU+PC9kZWZzPjx0aXRsZT5yb3RhdGUtY291bnRlci1jbG9ja3dpc2U8L3RpdGxlPjxwYXRoIGNsYXNzPSJjbHMtMSIgZD0iTTIyLjY4LDEyLjJhMS42LDEuNiwwLDAsMS0xLjI3LjYzSDEzLjcyYTEuNTksMS41OSwwLDAsMS0xLjE2LTIuNThsMS4xMi0xLjQxYTQuODIsNC44MiwwLDAsMC0zLjE0LS43Nyw0LjMxLDQuMzEsMCwwLDAtMiwuOCw0LjI1LDQuMjUsMCwwLDAtMS4zNCwxLjczLDUuMDYsNS4wNiwwLDAsMCwuNTQsNC42MkE1LjU4LDUuNTgsMCwwLDAsMTIsMTcuNzRoMGEyLjI2LDIuMjYsMCwwLDEtLjE2LDQuNTJBMTAuMjUsMTAuMjUsMCwwLDEsMy43NCwxOCwxMC4xNCwxMC4xNCwwLDAsMSwyLjI1LDguNzgsOS43LDkuNywwLDAsMSw1LjA4LDQuNjQsOS45Miw5LjkyLDAsMCwxLDkuNjYsMi41YTEwLjY2LDEwLjY2LDAsMCwxLDcuNzIsMS42OGwxLjA4LTEuMzVhMS41NywxLjU3LDAsMCwxLDEuMjQtLjYsMS42LDEuNiwwLDAsMSwxLjU0LDEuMjFsMS43LDcuMzdBMS41NywxLjU3LDAsMCwxLDIyLjY4LDEyLjJaIi8+PHBhdGggY2xhc3M9ImNscy0yIiBkPSJNMjEuMzgsMTEuODNIMTMuNzdhLjU5LjU5LDAsMCwxLS40My0xbDEuNzUtMi4xOWE1LjksNS45LDAsMCwwLTQuNy0xLjU4LDUuMDcsNS4wNywwLDAsMC00LjExLDMuMTdBNiw2LDAsMCwwLDcsMTUuNzdhNi41MSw2LjUxLDAsMCwwLDUsMi45MiwxLjMxLDEuMzEsMCwwLDEtLjA4LDIuNjIsOS4zLDkuMywwLDAsMS03LjM1LTMuODJBOS4xNiw5LjE2LDAsMCwxLDMuMTcsOS4xMiw4LjUxLDguNTEsMCwwLDEsNS43MSw1LjQsOC43Niw4Ljc2LDAsMCwxLDkuODIsMy40OGE5LjcxLDkuNzEsMCwwLDEsNy43NSwyLjA3bDEuNjctMi4xYS41OS41OSwwLDAsMSwxLC4yMUwyMiwxMS4wOEEuNTkuNTksMCwwLDEsMjEuMzgsMTEuODNaIi8+PC9zdmc+"
+  ],
+  [
+    /"[\S]+?dropdown-arrow\.svg"/gm,
+    "data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMi43MSIgaGVpZ2h0PSI4Ljc5IiB2aWV3Qm94PSIwIDAgMTIuNzEgOC43OSI+PHRpdGxlPmRyb3Bkb3duLWFycm93PC90aXRsZT48ZyBvcGFjaXR5PSIwLjEiPjxwYXRoIGQ9Ik0xMi43MSwyLjQ0QTIuNDEsMi40MSwwLDAsMSwxMiw0LjE2TDguMDgsOC4wOGEyLjQ1LDIuNDUsMCwwLDEtMy40NSwwTDAuNzIsNC4xNkEyLjQyLDIuNDIsMCwwLDEsMCwyLjQ0LDIuNDgsMi40OCwwLDAsMSwuNzEuNzFDMSwwLjQ3LDEuNDMsMCw2LjM2LDBTMTEuNzUsMC40NiwxMiwuNzFBMi40NCwyLjQ0LDAsMCwxLDEyLjcxLDIuNDRaIiBmaWxsPSIjMjMxZjIwIi8+PC9nPjxwYXRoIGQ9Ik02LjM2LDcuNzlhMS40MywxLjQzLDAsMCwxLTEtLjQyTDEuNDIsMy40NWExLjQ0LDEuNDQsMCwwLDEsMC0yYzAuNTYtLjU2LDkuMzEtMC41Niw5Ljg3LDBhMS40NCwxLjQ0LDAsMCwxLDAsMkw3LjM3LDcuMzdBMS40MywxLjQzLDAsMCwxLDYuMzYsNy43OVoiIGZpbGw9IiNmZmYiLz48L3N2Zz4="
+  ]
+];
+
+Blockly.utils.CODE_HASH = {
+  "[motion_movesteps, motion_movegrids,motion_turnright,motion_turnleft,motion_gotoxy,motion_glideto,motion_sety,motion_changeyby,motion_setx,motion_changexby,motion_pointindirection,motion_glidesecstoxy,looks_goforwardbackwardlayers,looks_seteffectto,looks_changeeffectby,looks_setsizeto,looks_changesizeby,sound_setvolumeto,sound_changevolumeby,sound_seteffectto,sound_changeeffectby,data_listcontainsitem,data_itemnumoflist,data_itemoflist,data_replaceitemoflist,data_insertatlist,data_deleteoflist,data_addtolist,operator_mathop,operator_round,operator_mod,operator_equals,operator_lt,operator_gt,operator_random,operator_divide,operator_multiply,operator_subtract,operator_add,askandwait,event_whengreaterthan]": "[operator_add,operator_subtract,operator_multiply,operator_divide,operator_random,data_variable,data_listcontents,data_itemoflist,data_itemnumoflist,data_lengthoflist,operator_mod,operator_round,operator_mathop,operator_length,xposition,yposition,direction,costumenumbername,backdropnumbername,size,volume,sensing_distanceto,sensing_mousex,sensing_mousey,loudness,timer,of,current,sensing_dayssince2000,sensing_username,operator_join,operator_letter_of]",
+  "[looks_think,looks_thinkforsecs,looks_say,looks_sayforsecs,looks_switchbackdropto,switchcostumeto,askandwait,operator_join,operator_letter_of,operator_length,operator_contains]": "[operator_join,operator_letter_of,operator_length,answer,data_variable,data_listcontents,data_itemoflist,data_itemnumoflist,data_lengthoflist,operator_add,operator_subtract,operator_multiply,operator_divide,operator_random,xposition,yposition,direction,costumenumbername,backdropnumbername,size,volume,sensing_distanceto,sensing_mousex,sensing_mousey,loudness,timer,of,current,sensing_dayssince2000,sensing_username]",
+  "[control_if,control_if_else,wait_until,repeat_until]": "[operator_gt,operator_lt,operator_equals,operator_and,operator_or,operator_not,operator_contains,data_listcontainsitem,sensing_touchingobject,sensing_touchingcolor,sensing_coloristouchingcolor,sensing_keypressed,sensing_mousedown]",
+  "[event_whenflagclicked,event_whenbroadcastreceived,event_whenkeypressed,event_whenthisspriteclicked,event_whenbackdropswitchesto,event_whengreaterthan,]": "[data_setvariableto,data_changevariableby,looks_show,looks_hide,motion_gotoxy,motion_goto,control_forever,control_repeat,repeat_until,control_if,control_if_else,control_wait,data_deletealloflist]",
+  "[control_forever]": "[control_if,control_if_else]",
+  "[data_setvariableto,data_changevariableby,control_wait,control_repeat]": "[data_setvariableto,data_changevariableby,control_forever,control_repeat,repeat_until,control_if,control_if_else,control_wait,operator_add,operator_subtract,operator_multiply,operator_divide,operator_random,data_variable,data_listcontents,data_itemoflist,data_itemnumoflist,data_lengthoflist,operator_mod,operator_round,operator_mathop,operator_length,xposition,yposition,direction,costumenumbername,backdropnumbername,size,volume,sensing_distanceto,sensing_mousex,sensing_mousey,loudness,timer,of,current,sensing_dayssince2000,sensing_username,operator_join,operator_letter_of]",
+  "[operator_or,operator_and,operator_not]": "[sensing_touchingobject,sensing_touchingcolor,sensing_coloristouchingcolor,sensing_keypressed,sensing_mousedown,operator_gt,operator_lt,operator_equals,operator_and,operator_or,operator_not]"
+};
+
+
+/**
+ * Render block.
+ * @param {object} svgGroup Block's svgGroup.
+ * @param {string} allBlockIds All the block ids that need to be processed
+ * @return {object} Block' svg image.
+ */
+Blockly.utils.getBlockSvgImage = function(
+    { svgGroup_: svgGroup, type },
+    allBlockIds
+) {
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const PATH_D_LENGTH_KEY_HASH = {
+    // E shape
+    122: [41, 81],
+    108: [41, 67],
+    94: [41, 67],
+    // C shape
+    82: [41],
+    68: [41],
+    54: [41],
+  };
+  /**
+ * Opcode for type C or E blocks that require special handling.
+ */
+  const SPECIAL_BLOCK = [
+    "control_repeat",
+    "control_forever",
+    "control_if",
+    "control_if_else",
+    "control_repeat_until",
+  ];
+  const ADDONS_BLOCK_SCALE = 3 / 4;
+
+  const svgContent = svgGroup.outerHTML.replace(/&nbsp;/g, " ");
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("xmlns", SVG_NS);
+  svg.setAttribute("xmlns:html", "http://www.w3.org/1999/xhtml");
+  svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+  svg.setAttribute("version", "1.1");
+  svg.innerHTML = `
+    <style type="text/css" >
+      .blocklyDraggable {font-family: "Helvetica Neue", Helvetica, sans-serif;font-size: 12pt;font-weight: 500;}
+      .blocklyText {fill: #fff;box-sizing: border-box;}
+      .blocklyEditableText .blocklyText{fill: #000;}
+      .blocklyDropdownText.blocklyText{fill: #fff;}
+    </style>
+  `;
+
+  const container = document.createElementNS(SVG_NS, "g");
+  container.innerHTML = svgContent;
+  const rootNode = container.children[0];
+  let isChanged = false;
+  let reducedDistance = 0;
+  for (let index = 0; index < rootNode.children.length; index++) {
+    const childrenNode = rootNode.children[index];
+    if (
+      childrenNode.classList.contains("blocklyDraggable") &&
+      allBlockIds &&
+      allBlockIds.has(childrenNode.dataset.id)
+    ) {
+      childrenNode.parentNode.removeChild(childrenNode);
+      index--;
+      isChanged = true;
+    }
+  }
+  if (isChanged && SPECIAL_BLOCK.includes(type)) {
+    const path = rootNode.children[0];
+    let lastNodeReducedDistance = 0;
+    const pathArr = path.getAttribute("d").split(",");
+    const points = PATH_D_LENGTH_KEY_HASH[pathArr.length];
+    if (points) {
+      points.forEach((point) => {
+        const distance = Number(pathArr[point].split(" ")[2]) - 16;
+        reducedDistance += distance;
+        pathArr[point] = "4 v 16 a 4";
+        if (point === 41) {
+          lastNodeReducedDistance = distance;
+        }
+      });
+      path.setAttribute("d", pathArr.toString());
+    }
+    if (lastNodeReducedDistance && type !== "control_if") {
+      const node = [...rootNode.children]
+          .reverse()
+          .find((i) => i.nodeName === "text");
+      const translate = node
+          .getAttribute("transform")
+          .match(/\d+\.?\d*/g);
+      translate[1] = translate[1] - lastNodeReducedDistance;
+      node.setAttribute("transform", `translate(${translate.toString()}) `);
+    }
+  }
+  rootNode.setAttribute("transform", "");
+  const dataShape = rootNode.getAttribute("data-shapes");
+  const hasHat = dataShape.includes("hat");
+  const hasFunc = dataShape !== "hat" && hasHat;
+  const box = (svgGroup.children[0]).getBBox();
+  let offset = hasHat ? 18 : 0;
+  offset = hasFunc ? 21 : offset;
+  const width = box.width + 1;
+  const height = box.height - reducedDistance;
+  svg.appendChild(container);
+  svg.setAttribute("width", String(width));
+  svg.setAttribute("height", String(height));
+  svg.setAttribute(
+      "viewBox",
+      ""
+          .concat("-1", " ")
+          .concat(hasHat ? `${-offset}` : "0", " ")
+          .concat(String(width), " ")
+          .concat(String(height))
+  );
+  let svgData = svg.outerHTML;
+  // resolve image path
+  this.BLOCKS_ICONS.forEach(([value, key]) => {
+    svgData = svgData.replace(key, `"${value}"`);
+  });
+
+  const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+  return {
+    url: URL.createObjectURL(svgBlob),
+    height: height * ADDONS_BLOCK_SCALE,
+    width: width * ADDONS_BLOCK_SCALE,
+  };
+};
+
+Blockly.utils.getBlocks = function(workspace) {
+  const getItem = (block,doms) => {
+    var desc = "";
+    var process = ({ inputList }) => {
+      for (const input of inputList) {
+        const fields = input.fieldRow;
+        for (const field of fields) {
+          const text = field.getText();
+          desc = (desc ? `${desc} ` : "") + text;
+        }
+        if (input.connection) {
+          const innerBlock = input.connection.targetBlock();
+          if (innerBlock) {
+            process(innerBlock); // Recursive process connected child blocks...
+          }
+        }
+      }
+    };
+    process(block);
+    return {
+      desc: desc,
+      block: block,
+      dom: doms[block.id],
+      svg: this.getBlockSvgImage(block),
+    };
+  };
+  const toolbox = workspace.getToolbox();
+  const toolboxWorkspace = toolbox.flyout_.getWorkspace();
+  const topBlocks = toolboxWorkspace.getTopBlocks();
+  const fullDom = Blockly.Xml.workspaceToDom(toolboxWorkspace);
+  const doms = {};
+  for (const x of fullDom.children) {
+    if (x.tagName === "BLOCK") {
+      const id = x.getAttribute("id");
+      doms[id] = x;
+    }
+  }
+  const allBlocks = topBlocks.map(block => getItem(block, doms));
+  return allBlocks;
+};
 

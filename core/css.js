@@ -251,10 +251,21 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.blocklyDropDownContent {',
-    'max-height: 300px;', // @todo: spec for maximum height.
-    'overflow: auto;',
+    'max-height: 330px;', // @todo: spec for maximum height.
+    'position: relative;',
+    'box-sizing: border-box;',
+    'min-width: 120px;',
+    'max-width: 300px;',
+    'overflow: hidden',
   '}',
-
+  '.blocklyDropdownInput {',
+    'position: absolute;',
+    'top: 0;',
+    'left: 0;',
+    'height: 26px;',
+    'width: 100%;',
+    'box-sizing: border-box;',
+  '}',
   '.blocklyDropDownArrow {',
     'position: absolute;',
     'left: 0;',
@@ -900,6 +911,17 @@ Blockly.Css.CONTENT = [
 
   '.blocklyDropdownMenu {',
     'padding: 0 !important;',
+    'max-height: 300px !important;',
+    'overflow: auto !important;',
+  '}',
+  '.blocklyDropdownMenuWithSearch {',
+    'margin-top: 30px;',
+  '}',
+  '.blocklyDropdownMenu::-webkit-scrollbar {',
+    ' display: none;',
+  '}',
+  '.blocklyDropdownSearchInput',
+    'padding: 8px !important;',
   '}',
 
   '.blocklyDropDownNumPad {',
@@ -1176,9 +1198,12 @@ Blockly.Css.CONTENT = [
     'list-style: none;',
     'margin: 0;',
     'min-height: 24px;',
-     /* 28px on the left for icon or checkbox; 7em on the right for shortcut. */
-    'padding: 4px 7em 4px 28px;',
+    'padding: 4px 4px 4px 28px;',
     'white-space: nowrap;',
+  '}',
+
+  '.inputBlocklyDropdownMenu .goog-menuitem {',
+    'padding: 4px;',
   '}',
 
   /* BiDi override for the resting state. */
@@ -1355,7 +1380,7 @@ Blockly.Css.CONTENT = [
     'stroke-linecap: round;',
     'stroke-linejoin: round;',
   '}',
-  
+
   '.toolboxHeader {',
     'flex-shrink: 0;',
     'position: relative;',

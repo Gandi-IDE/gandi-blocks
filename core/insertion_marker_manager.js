@@ -366,7 +366,6 @@ Blockly.InsertionMarkerManager.prototype.getCandidate_ = function(dxy) {
   var radius = this.getStartRadius_();
   var candidateClosest = null;
   var candidateLocal = null;
-
   for (var i = 0; i < this.availableConnections_.length; i++) {
     var myConnection = this.availableConnections_[i];
     var neighbour = myConnection.closest(radius, dxy);

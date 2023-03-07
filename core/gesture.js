@@ -635,7 +635,7 @@ Blockly.Gesture.prototype.cancel = function() {
  */
 Blockly.Gesture.prototype.handleRightClick = function(e) {
   if (Blockly.locked) return;
-  
+
   if (this.targetBlock_) {
     this.bringBlockToFront_();
     Blockly.hideChaff(this.flyout_);
