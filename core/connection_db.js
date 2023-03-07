@@ -238,7 +238,6 @@ Blockly.ConnectionDB.prototype.searchForClosest = function(conn, maxRadius,
   if (!this.connections_.length) {
     return {connection: null, radius: maxRadius};
   }
-
   // Stash the values of x and y from before the drag.
   var baseY = conn.y_;
   var baseX = conn.x_;

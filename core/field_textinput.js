@@ -27,12 +27,14 @@
 goog.provide('Blockly.FieldTextInput');
 
 goog.require('Blockly.BlockSvg.render');
+goog.require('Blockly.DropDownDiv');
 goog.require('Blockly.Colours');
+goog.require('Blockly.Xml');
 goog.require('Blockly.Field');
 goog.require('Blockly.Msg');
 goog.require('Blockly.scratchBlocksUtils');
 goog.require('Blockly.utils');
-
+goog.require('goog.ui.LabelInput');
 goog.require('goog.asserts');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
@@ -59,6 +61,41 @@ Blockly.FieldTextInput = function(text, opt_validator, opt_restrictor) {
   this.addArgType('text');
 };
 goog.inherits(Blockly.FieldTextInput, Blockly.Field);
+
+Blockly.FieldTextInput.DROP_DOWN_CODE = [
+  'operator_add',
+  'operator_subtract',
+  'operator_multiply',
+  'operator_divide',
+  'operator_random',
+  'data_variable',
+  'data_listcontents',
+  'data_itemoflist',
+  'data_itemnumoflist',
+  'data_lengthoflist',
+  'operator_mod',
+  'operator_round',
+  'operator_mathop',
+  'operator_length',
+  'xposition',
+  'yposition',
+  'direction',
+  'costumenumbername',
+  'backdropnumbername',
+  'size',
+  'volume',
+  'sensing_distanceto',
+  'sensing_mousex',
+  'sensing_mousey',
+  'loudness',
+  'timer',
+  'of',
+  'current',
+  'sensing_dayssince2000',
+  'sensing_username',
+  'operator_join',
+  'operator_letter_of'
+];
 
 /**
  * Construct a FieldTextInput from a JSON arg object,
@@ -208,6 +245,167 @@ Blockly.FieldTextInput.prototype.setRestrictor = function(restrictor) {
   this.restrictor_ = restrictor;
 };
 
+Blockly.FieldTextInput.prototype.showDropDown = function() {
+  const _this = this;
+  let showMenuOptions = [];
+  this.dropDownOpen_ = true;
+  // hide else dropDown and clear it.
+  Blockly.DropDownDiv.hideWithoutAnimation();
+  Blockly.DropDownDiv.clearContent();
+  const contentDiv = Blockly.DropDownDiv.getContentDiv();
+  // set dropDown background color
+  var primaryColour = (this.sourceBlock_.isShadow()) ?
+  this.sourceBlock_.parentBlock_.getColour() : this.sourceBlock_.getColour();
+  Blockly.DropDownDiv.setColour(primaryColour, this.sourceBlock_.getColourTertiary());
+
+  var category = (this.sourceBlock_.isShadow()) ?
+  this.sourceBlock_.parentBlock_.getCategory() : this.sourceBlock_.getCategory();
+  Blockly.DropDownDiv.setCategory(category);
+
+  // Calculate positioning based on the field position.
+  var scale = this.workspace_.scale;
+  var bBox = {width: this.size_.width, height: this.size_.height};
+  bBox.width *= scale;
+  bBox.height *= scale;
+  var position = this.fieldGroup_.getBoundingClientRect();
+  var primaryX = position.left + bBox.width / 2;
+  var primaryY = position.top + bBox.height;
+  var secondaryX = primaryX;
+  var secondaryY = position.top;
+
+  var highlightIndex = -1;
+  // Set bounds to workspace; show the drop-down.
+  Blockly.DropDownDiv.setBoundsElement(this.workspace_.getParentSvg().parentNode);
+  Blockly.DropDownDiv.show(
+      this, primaryX, primaryY, secondaryX, secondaryY, this.onHide.bind(this));
+  // Update colour to look selected.
+  if (!this.disableColourChange_) {
+    if (this.sourceBlock_.isShadow()) {
+      this.sourceBlock_.setShadowColour(this.sourceBlock_.getColourTertiary());
+    } else if (this.box_) {
+      this.box_.setAttribute('fill', this.sourceBlock_.getColourTertiary());
+    }
+  }
+
+  const menu = new goog.ui.Menu();
+  function createMenus(menuOptions) {
+    showMenuOptions = menuOptions;
+    for (var i = 0; i < menuOptions.length; i++) {
+      var {svg, desc} = menuOptions[i]; // Human-readable text or image.
+      // An image, not text.
+      var image = new Image(svg['width'], svg['height']);
+      image.src = svg['url'];
+      image.alt = desc;
+      var menuItem = new goog.ui.MenuItem(image);
+      menuItem.setValue(i);
+      menu.addChild(menuItem, true);
+    }
+  }
+  // get blocks
+  const blocks = Blockly.utils.getBlocks(this.workspace_);
+  var tempOptions = [];
+  blocks.forEach((item) => {
+    const idx = Blockly.FieldTextInput.DROP_DOWN_CODE.findIndex((i) => i === item.block.type);
+    if (idx !== -1) {
+      if (tempOptions[idx]) {
+        tempOptions[idx].push(item);
+      } else {
+        tempOptions[idx] = [item];
+      }
+    }
+  });
+  const newOptions = tempOptions.reduce((t, i) => {
+    if (i) {
+      return [...t, ...i];
+    }
+    return t;
+  }, []);
+  this._options = newOptions;
+  createMenus(newOptions);
+  const labelInput = new goog.ui.LabelInput('');
+
+  function handleSetValueToBlock(option) {
+    const xml = document.implementation.createDocument(null, "xml");
+    const x = xml.firstChild;
+    x.appendChild(option.dom);
+    const ids = Blockly.Xml.domToWorkspace(x, _this.workspace_);
+    const block = _this.workspace_.getBlockById(ids[0]);
+    // bug.
+    const sourceBlockConnections = _this.sourceBlock_.getConnections_()[0];
+    const localConnection_ = block.getConnections_()[0];
+    Blockly.WidgetDiv.hide(true);
+    const closestConnection_ = sourceBlockConnections.dbOpposite_.connections_.find(it =>
+      it.x_ === sourceBlockConnections.x_ && it.y_ === sourceBlockConnections.y_);
+    localConnection_.connect(closestConnection_);
+    Blockly.DropDownDiv.hide();
+    Blockly.Events.setGroup(false);
+  }
+
+  function handleKeyDown(event) {
+    var highlightClassName = 'goog-menuitem-highlight';
+    if (event.key === "ArrowDown" || event.key === 'ArrowUp') {
+      event.preventDefault();
+      event.stopPropagation();
+      var totalChild = menu.getChildCount();
+      if (totalChild === 0) {
+        return;
+      }
+      highlightIndex !== -1 &&
+      Blockly.utils.removeClass(menu.getChildAt(highlightIndex).getElement(), highlightClassName);
+      if (event.key === 'ArrowDown') {
+        highlightIndex = (highlightIndex + 1) % totalChild;
+      } else {
+        highlightIndex = (highlightIndex + totalChild - 1) % totalChild;
+      }
+      var currentMenu = menu.getChildAt(highlightIndex).getElement();
+      Blockly.utils.addClass(currentMenu, highlightClassName);
+      // 计算scroll滚动
+      var menuContent = menu.getElement();
+      var currentMenuTop = currentMenu.offsetTop;
+      // var currentMenuBottom = currentMenu.offsetTop + currentMenu.offsetHeight;
+
+      var scrollTop = menuContent.scrollTop;
+      var scrollHeight = menuContent.offsetHeight;
+      var scrollEnd = scrollTop + scrollHeight;
+      if (scrollTop > currentMenuTop - 30) {
+        menuContent.scrollTop = currentMenuTop - 30;
+      } else if (currentMenuTop > scrollEnd) {
+        menuContent.scrollTop = currentMenuTop - scrollHeight;
+      }
+      return;
+    }
+    if (event.key === 'Enter') {
+      const option = showMenuOptions[highlightIndex];
+      handleSetValueToBlock(option);
+      return;
+    }
+  }
+  function handleInputChange() {
+    var temporaryOptions = _this._options.filter(function(opt) {
+      return opt.desc.includes(goog.string.trim(labelInput.getValue()));
+    });
+    menu.removeChildren(true);
+    highlightIndex = -1;
+    createMenus(temporaryOptions);
+  }
+  labelInput.render(contentDiv);
+  Blockly.utils.addClass(labelInput.getElement(), 'blocklyDropdownInput');
+  goog.events.listen(labelInput.getElement(), goog.events.EventType.INPUT, handleInputChange);
+  goog.events.listen(labelInput.getElement(), goog.events.EventType.KEYDOWN, handleKeyDown);
+
+  menu.render(contentDiv);
+  var menuDom = menu.getElement();
+  function callback(e) {
+    var menuItem = e.target;
+    if (menuItem) {
+      const option = showMenuOptions[menuItem.getValue()];
+      handleSetValueToBlock(option);
+    }
+  }
+  goog.events.listen(menu, goog.ui.Component.EventType.ACTION, callback);
+  Blockly.utils.addClass(menuDom, 'blocklyDropdownMenu inputBlocklyDropdownMenu blocklyDropdownMenuWithSearch');
+};
+
 /**
  * Show the inline free-text editor on top of the text.
  * @param {boolean=} opt_quietInput True if editor should be created without
@@ -221,6 +419,7 @@ Blockly.FieldTextInput.prototype.setRestrictor = function(restrictor) {
 Blockly.FieldTextInput.prototype.showEditor_ = function(
     opt_quietInput, opt_readOnly, opt_withArrow, opt_arrowCallback) {
   if (Blockly.locked) return;
+
   this.workspace_ = this.sourceBlock_.workspace;
   var quietInput = opt_quietInput || false;
   var readOnly = opt_readOnly || false;
@@ -298,6 +497,25 @@ Blockly.FieldTextInput.prototype.showEditor_ = function(
   // The animated properties themselves
   htmlInput.style.fontSize = Blockly.BlockSvg.FIELD_TEXTINPUT_FONTSIZE_FINAL + 'pt';
   div.style.boxShadow = '0px 0px 0px 4px ' + Blockly.Colours.fieldShadow;
+  // Show drop-down box in the main workspace
+  if (this.workspace_.useWorkspaceDragSurface_ && Blockly.showDropdownSearchableDataType) {
+    this.showDropDown();
+  }
+};
+
+/**
+ * Callback for when the drop-down is hidden.
+ */
+Blockly.FieldTextInput.prototype.onHide = function() {
+  this.dropDownOpen_ = false;
+  // Update colour to look selected.
+  if (!this.disableColourChange_ && this.sourceBlock_) {
+    if (this.sourceBlock_.isShadow()) {
+      this.sourceBlock_.clearShadowColour();
+    } else if (this.box_) {
+      this.box_.setAttribute('fill', this.sourceBlock_.getColour());
+    }
+  }
 };
 
 /**
@@ -557,7 +775,9 @@ Blockly.FieldTextInput.prototype.resizeEditor_ = function() {
     borderRadius = Blockly.BlockSvg.TEXT_FIELD_CORNER_RADIUS + 0.5;
     div.style.borderRadius = borderRadius + 'px';
     Blockly.FieldTextInput.htmlInput_.style.borderRadius = borderRadius + 'px';
-    var list = this.sourceBlock_.procCode_.split(' %').filter(str => !(str === 'b' || str === 's'));
+    var list = this.sourceBlock_.procCode_.split(' %').filter(function(str) {
+      return !(str === 'b' || str === 's');
+    });
     if (list.length === 1) { //CCW: only adjust layout when there is only one text label
       div.style.marginLeft = '10px';
       div.style.marginTop = '5px';

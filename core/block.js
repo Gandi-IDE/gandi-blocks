@@ -369,6 +369,7 @@ Blockly.Block.prototype.unplug = function(opt_healStack) {
  */
 Blockly.Block.prototype.getConnections_ = function() {
   var myConnections = [];
+
   if (this.outputConnection) {
     myConnections.push(this.outputConnection);
   }

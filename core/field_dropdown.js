@@ -35,7 +35,10 @@ goog.require('goog.events');
 goog.require('goog.style');
 goog.require('goog.ui.Menu');
 goog.require('goog.ui.MenuItem');
+goog.require('goog.ui.LabelInput');
+goog.require('goog.events.EventType');
 goog.require('goog.userAgent');
+goog.require('goog.string');
 
 
 /**
@@ -60,6 +63,7 @@ Blockly.FieldDropdown = function(menuGenerator, opt_validator) {
       opt_validator);
   this.addArgType('dropdown');
 };
+
 goog.inherits(Blockly.FieldDropdown, Blockly.Field);
 
 /**
@@ -164,6 +168,8 @@ Blockly.FieldDropdown.prototype.init = function() {
  */
 Blockly.FieldDropdown.prototype.showEditor_ = function() {
   var options = this.getOptions();
+  var menu = new goog.ui.Menu();
+  var labelInput;
   if (options.length == 0 || Blockly.locked) return;
 
   this.dropDownOpen_ = true;
@@ -174,6 +180,87 @@ Blockly.FieldDropdown.prototype.showEditor_ = function() {
   var contentDiv = Blockly.DropDownDiv.getContentDiv();
 
   var thisField = this;
+  var highlightIndex = -1;
+
+  function createMenus(menuOptions) {
+    for (var i = 0; i < menuOptions.length; i++) {
+      var content = menuOptions[i][0]; // Human-readable text or image.
+      var value = menuOptions[i][1];   // Language-neutral value.
+      if (typeof content == 'object') {
+        // An image, not text.
+        var image = new Image(content['width'], content['height']);
+        image.src = content['src'];
+        image.alt = content['alt'] || '';
+        content = image;
+      }
+      var menuItem = new goog.ui.MenuItem(content);
+      menuItem.setValue(value);
+      menuItem.setCheckable(true);
+      menu.addChild(menuItem, true);
+      var checked = (value == thisField.value_);
+      menuItem.setChecked(checked);
+      if (checked) {
+        thisField.selectedItem = menuItem;
+      }
+    }
+  }
+
+  function handleInputChange() {
+    var temporaryOptions = options.filter(function(opt) {
+      return opt[0].includes(goog.string.trim(labelInput.getValue()));
+    });
+    menu.removeChildren(true);
+    highlightIndex = -1;
+    createMenus(temporaryOptions);
+  }
+
+  function handleKeyDown(event) {
+    var highlightClassName = 'goog-menuitem-highlight';
+    if (event.key === "ArrowDown" || event.key === 'ArrowUp') {
+      event.preventDefault();
+      event.stopPropagation();
+      var totalChild = menu.getChildCount();
+      if (totalChild === 0) {
+        return;
+      }
+      highlightIndex !== -1 &&
+      Blockly.utils.removeClass(menu.getChildAt(highlightIndex).getElement(), highlightClassName);
+      if (event.key === 'ArrowDown') {
+        highlightIndex = (highlightIndex + 1) % totalChild;
+      } else {
+        highlightIndex = (highlightIndex + totalChild - 1) % totalChild;
+      }
+      var currentMenu = menu.getChildAt(highlightIndex).getElement();
+      Blockly.utils.addClass(currentMenu, highlightClassName);
+      // 计算scroll滚动
+      var menuContent = menu.getElement();
+      var currentMenuTop = currentMenu.offsetTop;
+      // var currentMenuBottom = currentMenu.offsetTop + currentMenu.offsetHeight;
+
+      var scrollTop = menuContent.scrollTop;
+      var scrollHeight = menuContent.offsetHeight;
+      var scrollEnd = scrollTop + scrollHeight;
+      if (scrollTop > currentMenuTop - 30) {
+        menuContent.scrollTop = currentMenuTop - 30;
+      } else if (currentMenuTop > scrollEnd) {
+        menuContent.scrollTop = currentMenuTop - scrollHeight;
+      }
+      return;
+    }
+    if (event.key === 'Enter') {
+      thisField.onItemSelected(menu, menu.getChildAt(highlightIndex));
+      Blockly.DropDownDiv.hide();
+      Blockly.Events.setGroup(false);
+      return;
+    }
+  }
+  if (Blockly.showDropdownSearchableDropdowns) {
+    labelInput = new goog.ui.LabelInput('');
+    labelInput.render(contentDiv);
+    Blockly.utils.addClass(labelInput.getElement(), 'blocklyDropdownInput');
+    goog.events.listen(labelInput.getElement(), goog.events.EventType.INPUT, handleInputChange);
+    goog.events.listen(labelInput.getElement(), goog.events.EventType.KEYDOWN, handleKeyDown);
+  }
 
   function callback(e) {
     var menu = this;
@@ -184,30 +271,7 @@ Blockly.FieldDropdown.prototype.showEditor_ = function() {
     Blockly.DropDownDiv.hide();
     Blockly.Events.setGroup(false);
   }
-
-  var menu = new goog.ui.Menu();
-  menu.setRightToLeft(this.sourceBlock_.RTL);
-  for (var i = 0; i < options.length; i++) {
-    var content = options[i][0]; // Human-readable text or image.
-    var value = options[i][1];   // Language-neutral value.
-    if (typeof content == 'object') {
-      // An image, not text.
-      var image = new Image(content['width'], content['height']);
-      image.src = content['src'];
-      image.alt = content['alt'] || '';
-      content = image;
-    }
-    var menuItem = new goog.ui.MenuItem(content);
-    menuItem.setRightToLeft(this.sourceBlock_.RTL);
-    menuItem.setValue(value);
-    menuItem.setCheckable(true);
-    menu.addChild(menuItem, true);
-    var checked = (value == this.value_);
-    menuItem.setChecked(checked);
-    if (checked) {
-      this.selectedItem = menuItem;
-    }
-  }
+  createMenus(options);
   // Listen for mouse/keyboard events.
   goog.events.listen(menu, goog.ui.Component.EventType.ACTION, callback);
 
@@ -215,6 +279,9 @@ Blockly.FieldDropdown.prototype.showEditor_ = function() {
   menu.render(contentDiv);
   var menuDom = menu.getElement();
   Blockly.utils.addClass(menuDom, 'blocklyDropdownMenu');
+  if (Blockly.showDropdownSearchableDropdowns) {
+    Blockly.utils.addClass(menuDom, 'blocklyDropdownMenuWithSearch');
+  }
   // Record menuSize after adding menu.
   var menuSize = goog.style.getSize(menuDom);
   // Recalculate height for the total content, not only box height.
