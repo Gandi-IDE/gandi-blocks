@@ -70,7 +70,9 @@ goog.inherits(Blockly.FieldTextInput, Blockly.Field);
  * @nocollapse
  */
 Blockly.FieldTextInput.fromJson = function(options) {
-  var text = Blockly.utils.replaceMessageReferences(options['text']);
+  // Default to empty string instead of "undefined" in FieldTextInput 
+  // https://github.com/TurboWarp/extensions/issues/51
+  var text = Blockly.utils.replaceMessageReferences(options['text']) || '';
   var field = new Blockly.FieldTextInput(text, options['class']);
   if (typeof options['spellcheck'] === 'boolean') {
     field.setSpellcheck(options['spellcheck']);
