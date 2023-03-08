@@ -498,7 +498,7 @@ Blockly.FieldTextInput.prototype.showEditor_ = function(
   htmlInput.style.fontSize = Blockly.BlockSvg.FIELD_TEXTINPUT_FONTSIZE_FINAL + 'pt';
   div.style.boxShadow = '0px 0px 0px 4px ' + Blockly.Colours.fieldShadow;
   // Show drop-down box in the main workspace
-  if (this.workspace_.useWorkspaceDragSurface_ && Blockly.showDropdownSearchableDataType) {
+  if (!this.workspace_.isFlyout && Blockly.showDropdownSearchableDataType) {
     this.showDropDown();
   }
 };
