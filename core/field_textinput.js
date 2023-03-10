@@ -304,7 +304,7 @@ Blockly.FieldTextInput.prototype.showDropDown = function() {
     }
   }
   // get blocks
-  const blocks = Blockly.utils.getBlocks(this.workspace_);
+  const blocks = Blockly.utils.getDropDownBlocks(this.workspace_);
   var tempOptions = [];
   blocks.forEach((item) => {
     const idx = Blockly.FieldTextInput.DROP_DOWN_CODE.findIndex((i) => i === item.block.type);
