@@ -1148,7 +1148,7 @@ Blockly.utils.getBlockSvgImage = function(
   );
   let svgData = svg.outerHTML;
   // resolve image path
-  this.BLOCKS_ICONS.forEach(([value, key]) => {
+  this.BLOCKS_ICONS.forEach(([key, value]) => {
     svgData = svgData.replace(key, `"${value}"`);
   });
 
@@ -1160,7 +1160,7 @@ Blockly.utils.getBlockSvgImage = function(
   };
 };
 
-Blockly.utils.getBlocks = function(workspace) {
+Blockly.utils.getDropDownBlocks = function(workspace) {
   const getItem = (block,doms) => {
     var desc = "";
     var process = ({ inputList }) => {
