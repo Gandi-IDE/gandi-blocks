@@ -107,7 +107,7 @@ Blockly.FieldTextInput.DROP_DOWN_CODE = [
  * @nocollapse
  */
 Blockly.FieldTextInput.fromJson = function(options) {
-  // Default to empty string instead of "undefined" in FieldTextInput 
+  // Default to empty string instead of "undefined" in FieldTextInput
   // https://github.com/TurboWarp/extensions/issues/51
   var text = Blockly.utils.replaceMessageReferences(options['text']) || '';
   var field = new Blockly.FieldTextInput(text, options['class']);
@@ -500,7 +500,10 @@ Blockly.FieldTextInput.prototype.showEditor_ = function(
   htmlInput.style.fontSize = Blockly.BlockSvg.FIELD_TEXTINPUT_FONTSIZE_FINAL + 'pt';
   div.style.boxShadow = '0px 0px 0px 4px ' + Blockly.Colours.fieldShadow;
   // Show drop-down box in the main workspace
-  if (!this.workspace_.isFlyout && Blockly.showDropdownSearchableDataType) {
+  if (this.workspace_ &&
+      this.workspace_.config &&
+      this.workspace_.config.useInputDropdown &&
+      Blockly.showDropdownSearchableDataType) {
     this.showDropDown();
   }
 };

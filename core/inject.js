@@ -43,9 +43,11 @@ goog.require('goog.userAgent');
  * @param {!Element|string} container Containing element, or its ID,
  *     or a CSS selector.
  * @param {Object=} opt_options Optional dictionary of options.
+ * @param {Object} config Use some configuration items to control extensions and addons and ...
+ * @param {boolean} config.useInputDropdown open input dropdown menu
  * @return {!Blockly.Workspace} Newly created main workspace.
  */
-Blockly.inject = function(container, opt_options) {
+Blockly.inject = function(container, opt_options, config = {}) {
   if (goog.isString(container)) {
     container = document.getElementById(container) ||
         document.querySelector(container);
@@ -68,9 +70,9 @@ Blockly.inject = function(container, opt_options) {
   // so that the broowser does not repaint during the drag.
   var blockDragSurface = new Blockly.BlockDragSurfaceSvg(subContainer);
   var workspaceDragSurface = null;
-
   var workspace = Blockly.createMainWorkspace_(svg, options, blockDragSurface,
       workspaceDragSurface);
+  workspace.config = config;
   Blockly.init_(workspace);
   Blockly.mainWorkspace = workspace;
 
