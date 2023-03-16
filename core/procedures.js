@@ -189,6 +189,14 @@ Blockly.Procedures.isNameUsed = function(name, workspace, opt_exclude) {
       }
     }
   }
+
+  var globalProcedureProcCodes = Object.keys(workspace.globalProcedureMap_.procedureMap_)
+  for (var i = 0; i < globalProcedureProcCodes.length; i++) {
+    if (Blockly.Names.equals(globalProcedureProcCodes[i], name)) {
+      return true;
+    }
+  }
+
   return false;
 };
 

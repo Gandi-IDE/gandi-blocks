@@ -7,7 +7,7 @@ goog.provide('Blockly.ProcedureMap');
 // goog.require('Blockly.VariableModel');
 Blockly.ProcedureMap = function(workspace) {
   this.procedureMap_ = {};
-  this.workspace =   this.workspace = workspace;
+  this.workspace = workspace;
 };
 
 Blockly.ProcedureMap.prototype.clear = function() {
