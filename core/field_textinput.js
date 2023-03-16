@@ -384,7 +384,9 @@ Blockly.FieldTextInput.prototype.showDropDown = function() {
   }
   function handleInputChange() {
     var temporaryOptions = _this._options.filter(function(opt) {
-      return opt.desc.includes(goog.string.trim(labelInput.getValue()));
+      return goog.string.trim(opt.desc).toLocaleUpperCase().includes(
+          goog.string.trim(labelInput.getValue()).toLocaleUpperCase()
+      );
     });
     menu.removeChildren(true);
     highlightIndex = -1;
