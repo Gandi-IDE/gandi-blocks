@@ -175,10 +175,9 @@ Blockly.Xml.allFieldsToDom_ = function(block, element) {
  * Encode a block subtree as XML.
  * @param {!Blockly.Block} block The root block to encode.
  * @param {boolean=} opt_noId True if the encoder should skip the block ID.
- * @param {string} endBlockId End of the block
  * @return {!Element} Tree of XML elements.
  */
-Blockly.Xml.blockToDom = function(block, opt_noId, endBlockId) {
+Blockly.Xml.blockToDom = function(block, opt_noId) {
   var element = goog.dom.createDom(block.isShadow() ? 'shadow' : 'block');
   // powered by xigua start
   if (block.hidden) {
@@ -258,9 +257,9 @@ Blockly.Xml.blockToDom = function(block, opt_noId, endBlockId) {
   }
 
   var nextBlock = block.getNextBlock();
-  if (nextBlock && nextBlock.id !== endBlockId) {
+  if (nextBlock) {
     var container = goog.dom.createDom('next', null,
-        Blockly.Xml.blockToDom(nextBlock, opt_noId, endBlockId));
+        Blockly.Xml.blockToDom(nextBlock, opt_noId));
     element.appendChild(container);
   }
   var shadow = block.nextConnection && block.nextConnection.getShadowDom();

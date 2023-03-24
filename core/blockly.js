@@ -110,14 +110,6 @@ Blockly.clipboardXml_ = null;
 Blockly.clipboardSource_ = null;
 
 /**
- * @description a
- * @type {Blockly.Block[]}
- * @private
- */
-Blockly.batchClipboardBlocks = null;
-
-
-/**
  * Cached value for whether 3D is supported.
  * @type {!boolean}
  * @private
@@ -204,7 +196,6 @@ Blockly.onKeyDown_ = function(e) {
     return;
   }
   var deleteBlock = false;
-  var batchDeleteBlocks = false;
   if (e.keyCode == 27) {
     // Pressing esc closes the context menu and any drop-down
     Blockly.hideChaff();
@@ -219,10 +210,7 @@ Blockly.onKeyDown_ = function(e) {
     if (Blockly.mainWorkspace.isDragging()) {
       return;
     }
-
-    if (Blockly.batchSelectedBlocks && Blockly.batchSelectedBlocks.length > 0) {
-      batchDeleteBlocks = true;
-    } else if (Blockly.selected && Blockly.selected.isDeletable()) {
+    if (Blockly.selected && Blockly.selected.isDeletable()) {
       deleteBlock = true;
     }
   } else if (e.altKey || e.ctrlKey || e.metaKey) {
@@ -230,23 +218,7 @@ Blockly.onKeyDown_ = function(e) {
     if (Blockly.mainWorkspace.isDragging()) {
       return;
     }
-    // batch selected blocks copy or cut.
-    if (Blockly.batchSelectedBlocks && Blockly.batchSelectedBlocks.length > 0) {
-      // 'c' or 'x' need set Blockly.clipboardXml_ to null.
-      if (e.keyCode == 67) {
-        // 'c' for batch copy.
-        Blockly.hideChaff();
-        // set batchSelectedBlocks to batchClipboardBlocks
-        Blockly.batchClipboardBlocks = Blockly.batchSelectedBlocks;
-        Blockly.clipboardXml_ = null;
-      } else if (e.keyCode == 88 && !Blockly.selected.workspace.isFlyout) {
-        // 'x' for batch cut, but not in a flyout.
-        // set batchSelectedBlocks to batchClipboardBlocks
-        Blockly.batchClipboardBlocks = Blockly.batchSelectedBlocks;
-        Blockly.clipboardXml_ = null;
-        batchDeleteBlocks = true;
-      }
-    } else if (Blockly.selected &&
+    if (Blockly.selected &&
         Blockly.selected.isDeletable() && Blockly.selected.isMovable()) {
       // Don't allow copying immovable or undeletable blocks. The next step
       // would be to paste, which would create additional undeletable/immovable
@@ -287,17 +259,6 @@ Blockly.onKeyDown_ = function(e) {
     Blockly.Events.setGroup(true);
     Blockly.hideChaff();
     Blockly.selected.dispose(/* heal */ true, true);
-    Blockly.Events.setGroup(false);
-  }
-
-  if (batchDeleteBlocks) {
-    Blockly.Events.setGroup(true);
-    Blockly.batchSelectedBlocks.map((bl) => {
-      setTimeout(function() {
-        Blockly.mainWorkspace.fireDeletionListeners(bl);
-      });
-      bl.dispose(true, true);
-    });
     Blockly.Events.setGroup(false);
   }
 };
