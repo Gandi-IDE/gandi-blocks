@@ -251,9 +251,10 @@ Blockly.Field.prototype.init = function() {
         'y': size.height / 2 + Blockly.BlockSvg.FIELD_TOP_PADDING,
         'dominant-baseline': 'middle',
         'dy': goog.userAgent.EDGE_OR_IE ? Blockly.Field.IE_TEXT_OFFSET : '0',
-        'text-anchor': 'middle'
+        'text-anchor': 'middle',
       }, this.fieldGroup_);
 
+  this.textElement_.tooltip = this.sourceBlock_;
   this.updateEditable();
   this.sourceBlock_.getSvgRoot().appendChild(this.fieldGroup_);
   // Force a render.

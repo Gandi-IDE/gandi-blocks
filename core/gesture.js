@@ -590,7 +590,7 @@ Blockly.Gesture.prototype.handleUp = function(e) {
     this.doBubbleClick_();
   } else if (this.isFieldClick_()) {
     this.doFieldClick_();
-  } else if (this.isBlockClick_()) {
+  } else if (this.isBlockClick_() && !Blockly.utils.isDisableBlockClickWithKeyCode(e)) {
     this.doBlockClick_();
   } else if (this.isWorkspaceClick_()) {
     this.doWorkspaceClick_();

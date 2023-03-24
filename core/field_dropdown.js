@@ -140,6 +140,8 @@ Blockly.FieldDropdown.prototype.init = function() {
   this.className_ += ' blocklyDropdownText';
 
   Blockly.FieldDropdown.superClass_.init.call(this);
+
+  this.textElement_.tooltip = this.sourceBlock_;
   // If not in a shadow block, draw a box.
   if (!this.sourceBlock_.isShadow()) {
     this.box_ = Blockly.utils.createSvgElement('rect', {

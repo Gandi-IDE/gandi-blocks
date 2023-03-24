@@ -164,11 +164,12 @@ Blockly.scratchBlocksUtils.blockIsRecyclable = function(block) {
  * releases the new dragging block.
  * @param {!Blockly.BlockSvg} oldBlock The block that will be duplicated.
  * @param {!Event} event Event that caused the context menu to open.
+ * @param {string} endBlockId End of the duplicate block
  * @return {Function} A callback function that duplicates the block and starts a
  *     drag.
  * @package
  */
-Blockly.scratchBlocksUtils.duplicateAndDragCallback = function(oldBlock, event) {
+Blockly.scratchBlocksUtils.duplicateAndDragCallback = function(oldBlock, event, endBlockId) {
   var isMouseEvent = Blockly.Touch.getTouchIdentifierFromEvent(event) === 'mouse';
   return function(e) {
     // Give the context menu a chance to close.
@@ -180,7 +181,7 @@ Blockly.scratchBlocksUtils.duplicateAndDragCallback = function(oldBlock, event) 
       }
 
       // Create the new block by cloning the block in the flyout (via XML).
-      var xml = Blockly.Xml.blockToDom(oldBlock);
+      var xml = Blockly.Xml.blockToDom(oldBlock, false, endBlockId);
       // The target workspace would normally resize during domToBlock, which
       // will lead to weird jumps.
       // Resizing will be enabled when the drag ends.
