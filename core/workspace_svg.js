@@ -51,6 +51,7 @@ goog.require('Blockly.WorkspaceDragSurfaceSvg');
 goog.require('Blockly.Xml');
 goog.require('Blockly.ZoomControls');
 goog.require('Blockly.IntersectionObserver');
+goog.require('Blockly.Frame');
 
 goog.require('goog.array');
 goog.require('goog.dom');
@@ -305,6 +306,13 @@ Blockly.WorkspaceSvg.prototype.inverseScreenCTM_ = null;
  * @private
  */
 Blockly.WorkspaceSvg.prototype.inverseScreenCTMDirty_ = true;
+
+/**
+ * Whether the frame should be created on the next click.
+ * @type {Boolean}
+ * @private
+ */
+Blockly.WorkspaceSvg.prototype.createFrameOnNextMouseDown = false;
 
 /**
  * Getter for the inverted screen CTM.
@@ -1388,7 +1396,8 @@ Blockly.WorkspaceSvg.prototype.onMouseWheel_ = function(e) {
 Blockly.WorkspaceSvg.prototype.getBlocksBoundingBox = function() {
   var topBlocks = this.getTopBlocks(false);
   var topComments = this.getTopComments(false);
-  var topElements = topBlocks.concat(topComments);
+  var topFrames = this.getTopFrames(false);
+  var topElements = topBlocks.concat(topComments, topFrames);
   // There are no blocks, return empty rectangle.
   if (!topElements.length) {
     return {x: 0, y: 0, width: 0, height: 0};
@@ -1464,6 +1473,9 @@ Blockly.WorkspaceSvg.prototype.showContextMenu_ = function(e) {
   // Options to undo/redo previous action.
   menuOptions.push(Blockly.ContextMenu.wsUndoOption(this));
   menuOptions.push(Blockly.ContextMenu.wsRedoOption(this));
+
+  // Option to create a frame.
+  menuOptions.push(Blockly.ContextMenu.wsCreateFrameOption(this));
 
   // Option to clean up blocks.
   if (this.scrollbar) {

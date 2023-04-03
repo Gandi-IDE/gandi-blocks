@@ -1111,6 +1111,41 @@ Blockly.Css.CONTENT = [
     'float: left;',
   '}',
 
+  '.blocklyFrame .frameResizeButtons {',
+    'visibility: hidden;',
+  '}',
+
+  '.blocklyFrame:hover .frameResizeButtons {',
+    'visibility: visible;',
+  '}',
+
+  '.blocklyFrameTitleBody {',
+    'background: transparent !important;',
+  '}',
+
+  '.blocklyFrameTitleTextarea {',
+    'background-color: transparent;',
+    'font-size: 12px;',
+    'line-height: 20px;',
+    'width: 100%;',
+    'height: 20px;',
+    'color: var(--theme-brand-color, #2D8CFF);',
+    'border: 0;',
+    'outline: 0;',
+    'margin: 0;',
+    'padding: 0 0;',
+    'resize: none;',
+    'overflow: hidden;',
+  '}',
+
+  '.blocklyResizeButtonNW,.blocklyResizeButtonSE{',
+    'cursor: nwse-resize;',
+  '}',
+
+  '.blocklyResizeButtonNE,.blocklyResizeButtonSW{',
+    'cursor: nesw-resize;',
+  '}',
+
   '.scratchNotePickerKeyLabel {',
     'font-family: "Helvetica Neue", Helvetica, sans-serif;',
     'font-size: 0.75rem;',

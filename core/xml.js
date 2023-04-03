@@ -46,6 +46,7 @@ goog.require('goog.dom');
 Blockly.Xml.workspaceToDom = function(workspace, opt_noId) {
   var xml = goog.dom.createDom('xml');
   xml.appendChild(Blockly.Xml.variablesToDom(workspace.getAllVariables()));
+  xml.appendChild(Blockly.Xml.framesToDom(workspace.getAllFrames()));
   var comments = workspace.getTopComments(true).filter(function(topComment) {
     return topComment instanceof Blockly.WorkspaceComment;
   });
@@ -76,6 +77,29 @@ Blockly.Xml.variablesToDom = function(variableList) {
     variables.appendChild(element);
   }
   return variables;
+};
+
+/**
+ * Encode a list of frames as XML.
+ * @param {!Array.<!Blockly.FrameModel>} framesList List of all frames
+ *     models.
+ * @return {!Element} List of XML elements.
+ */
+Blockly.Xml.framesToDom = function(framesList) {
+  var frames = goog.dom.createDom('frames');
+  for (var i = 0, frame; frame = framesList[i]; i++) {
+    var element = goog.dom.createDom('frame', null, frame.name);
+    var rect = frame.rect_;
+    element.setAttribute('title', frame.type);
+    element.setAttribute('id', frame.id);
+    element.setAttribute('blocks', Object.keys(frame.blockDB_));
+    element.setAttribute('x', rect.left);
+    element.setAttribute('y', rect.top);
+    element.setAttribute('width', rect.width);
+    element.setAttribute('height', rect.height);
+    frames.appendChild(element);
+  }
+  return frames;
 };
 
 /**
@@ -482,6 +506,8 @@ Blockly.Xml.domToWorkspace = function(xml, workspace) {
           }
         }
         variablesFirst = false;
+      } else if (name == 'frames') {
+        Blockly.Xml.domToFrames(xmlChild, workspace);
       } else if (name == 'shadow') {
         goog.asserts.fail('Shadow block cannot be a top-level block.');
         variablesFirst = false;
@@ -645,6 +671,34 @@ Blockly.Xml.domToBlock = function(xmlBlock, workspace) {
     Blockly.Events.fire(new Blockly.Events.BlockCreate(topBlock));
   }
   return topBlock;
+};
+
+/**
+ * Decode an XML list of frames and add the frames to the workspace.
+ * @param {!Element} xmlFrames List of XML frame elements.
+ * @param {!Blockly.Workspace} workspace The workspace to which the frame
+ *     should be added.
+ */
+Blockly.Xml.domToFrames = function(xmlFrames, workspace) {
+  for (var i = 0, xmlChild; xmlChild = xmlFrames.children[i]; i++) {
+    var title = xmlChild.getAttribute('title');
+    var id = xmlChild.getAttribute('id');
+    var blocks = xmlChild.getAttribute('blocks');
+
+    var x = xmlChild.getAttribute('x');
+    var y = xmlChild.getAttribute('y');
+    var width = xmlChild.getAttribute('width');
+    var height = xmlChild.getAttribute('height');
+    workspace.createFrame({
+      title: title,
+      id: id,
+      blocks: blocks ? blocks.split(' ') : [],
+      x: Number(x),
+      y: Number(y),
+      width: Number(width),
+      height: Number(height)
+    });
+  }
 };
 
 /**

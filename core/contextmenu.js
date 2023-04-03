@@ -320,6 +320,57 @@ Blockly.ContextMenu.wsUndoOption = function(ws) {
 };
 
 /**
+ * Make a context menu option for crate a frame on the workspace.
+ * @param {Blockly.WorkspaceSvg} ws The workspace where the right-click
+ *     originated.
+ * @return {!Object} A menu option, containing text, enabled, and a callback.
+ * @package
+ */
+Blockly.ContextMenu.wsCreateFrameOption = function(ws) {
+  return {
+    text: Blockly.Msg.CREATE_FRAME,
+    enabled: true,
+    callback: ws.onSelectCreateFrameOption.bind(ws)
+  };
+};
+
+/**
+ * Make a context menu option for deleting the current frame.
+ * @param {!Blockly.BlockSvg} frame The frame where the right-click originated.
+ * @return {!Object} A menu option, containing text, enabled, and a callback.
+ * @package
+ */
+Blockly.ContextMenu.frameDeleteOption = function(frame) {
+  var deleteOption = {
+    text: Blockly.Msg.DELETE_FRAME,
+    enabled: true,
+    callback: function() {
+      Blockly.Events.setGroup(true);
+      frame.dispose(true, true);
+      Blockly.Events.setGroup(false);
+    }
+  };
+  return deleteOption;
+};
+
+/**
+ * Make a context menu option for duplicating the current frame.
+ * @param {!Blockly.BlockSvg} frame The frame where the right-click originated.
+ * @param {!Event} event Event that caused the context menu to open.
+ * @return {!Object} A menu option, containing text, enabled, and a callback.
+ * @package
+ */
+Blockly.ContextMenu.frameDuplicateOption = function(frame, event) {
+  var duplicateOption = {
+    text: Blockly.Msg.DUPLICATE,
+    enabled: true,
+    callback:
+        Blockly.scratchBlocksUtils.duplicateAndDragCallback(frame, event)
+  };
+  return duplicateOption;
+};
+
+/**
  * Make a context menu option for redoing the most recent action on the
  * workspace.
  * @param {!Blockly.WorkspaceSvg} ws The workspace where the right-click

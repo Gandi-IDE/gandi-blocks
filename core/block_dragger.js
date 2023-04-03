@@ -97,7 +97,7 @@ Blockly.BlockDragger = function(block, workspace) {
    * @type {!goog.math.Coordinate}
    * @private
    */
-  this.startXY_ = this.draggingBlock_.getRelativeToSurfaceXY();
+  this.startXY_ = this.draggingBlock_.getRelativeToSurfaceXY(true);
 
   /**
    * A list of all of the icons (comment, warning, and mutator) that are
@@ -157,9 +157,10 @@ Blockly.BlockDragger.initIconData_ = function(block) {
  * @param {!Event} e The most recent move event.
  * @param {!goog.math.Coordinate} currentDragDeltaXY How far the pointer has
  *     moved from the position at mouse down, in pixel units.
+ * @param {!boolean} notUseDragSurface True if not using drag surface
  * @package
  */
-Blockly.BlockDragger.prototype.startBlockDrag = function(e, currentDragDeltaXY) {
+Blockly.BlockDragger.prototype.startBlockDrag = function(e, currentDragDeltaXY, notUseDragSurface) {
   this.rootDiv = document.getElementsByClassName('injectionDiv')[0];
   if(Blockly.locked) return;
   if (!Blockly.Events.getGroup()) {
@@ -173,7 +174,9 @@ Blockly.BlockDragger.prototype.startBlockDrag = function(e, currentDragDeltaXY) 
     this.draggingBlock_.unplug();
     var delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
     var newLoc = goog.math.Coordinate.sum(this.startXY_, delta);
-
+    if (this.draggingBlock_.frame_) {
+      newLoc = goog.math.Coordinate.sum(newLoc, this.draggingBlock_.frame_.getBlockGroupRelativeXY());
+    }
     this.draggingBlock_.translate(newLoc.x, newLoc.y);
     Blockly.BlockAnimations.disconnectUiEffect(this.draggingBlock_);
   }
@@ -181,7 +184,9 @@ Blockly.BlockDragger.prototype.startBlockDrag = function(e, currentDragDeltaXY) 
   // For future consideration: we may be able to put moveToDragSurface inside
   // the block dragger, which would also let the block not track the block drag
   // surface.
-  this.draggingBlock_.moveToDragSurface_(e);
+  if(!notUseDragSurface) {
+    this.draggingBlock_.moveToDragSurface_(e);
+  }
 
   var toolbox = this.workspace_.getToolbox();
   if (toolbox) {
@@ -206,13 +211,17 @@ Blockly.BlockDragger.prototype.startBlockDrag = function(e, currentDragDeltaXY) 
  * @param {!Event} e The most recent move event.
  * @param {!goog.math.Coordinate} currentDragDeltaXY How far the pointer has
  *     moved from the position at the start of the drag, in pixel units.
+ * @param {!boolean} notUseDragSurface True if not using drag surface
  * @package
  * @return {boolean} True if the event should be propagated, false if not.
  */
-Blockly.BlockDragger.prototype.dragBlock = function(e, currentDragDeltaXY) {
+Blockly.BlockDragger.prototype.dragBlock = function(e, currentDragDeltaXY, notUseDragSurface) {
   var delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
   var newLoc = goog.math.Coordinate.sum(this.startXY_, delta);
-  this.draggingBlock_.moveDuringDrag(newLoc);
+  if (this.draggingBlock_.frame_) {
+    newLoc = goog.math.Coordinate.sum(newLoc, this.draggingBlock_.frame_.getBlockGroupRelativeXY());
+  }
+  this.draggingBlock_.moveDuringDrag(newLoc, notUseDragSurface);
   this.dragIcons_(delta);
 
   this.deleteArea_ = this.workspace_.isDeleteArea(e);
@@ -232,9 +241,10 @@ Blockly.BlockDragger.prototype.dragBlock = function(e, currentDragDeltaXY) {
  * @param {!Event} e The mouseup/touchend event.
  * @param {!goog.math.Coordinate} currentDragDeltaXY How far the pointer has
  *     moved from the position at the start of the drag, in pixel units.
+ * @param {!boolean} notUseDragSurface True if not using drag surface
  * @package
  */
-Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
+Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY, notUseDragSurface) {
   // Make sure internal state is fresh.
   this.dragBlock(e, currentDragDeltaXY);
   let delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
@@ -295,7 +305,12 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
 
   // var delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
   var newLoc = goog.math.Coordinate.sum(this.startXY_, delta);
-  this.draggingBlock_.moveOffDragSurface_(newLoc);
+  if (this.draggingBlock_.frame_) {
+    newLoc = goog.math.Coordinate.sum(newLoc, this.draggingBlock_.frame_.getBlockGroupRelativeXY());
+  }
+  if (!notUseDragSurface) {
+    this.draggingBlock_.moveOffDragSurface_(newLoc);
+  }
 
   // Scratch-specific: note possible illegal definition deletion for rollback below.
   var isDeletingProcDef = this.wouldDeleteBlock_ &&
@@ -310,6 +325,7 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
     // These are expensive and don't need to be done if we're deleting.
     this.draggingBlock_.moveConnections_(delta.x, delta.y);
     this.draggingBlock_.setDragging(false);
+    this.draggingBlock_.handleStopDrag_();
     this.fireMoveEvent_();
     if (this.draggedConnectionManager_.wouldConnectBlock()) {
       // Applying connections also rerenders the relevant blocks.

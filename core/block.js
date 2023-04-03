@@ -67,6 +67,8 @@ Blockly.Block = function(workspace, prototypeName, opt_id) {
   this.id = (opt_id && !workspace.getBlockById(opt_id) &&
       (!flyoutWorkspace || !flyoutWorkspace.getBlockById(opt_id))) ?
       opt_id : Blockly.utils.genUid();
+  /** @type {string} */
+  this.frame_ = null;
   workspace.blockDB_[this.id] = this;
   /** @type {Blockly.Connection} */
   this.outputConnection = null;
@@ -423,6 +425,14 @@ Blockly.Block.prototype.bumpNeighbours_ = function() {
 Blockly.Block.prototype.getParent = function() {
   // Look at the DOM to see if we are nested in another block.
   return this.parentBlock_;
+};
+
+/**
+ * Return null or the frame if this block is at some frame.
+ * @return {Blockly.Frame} The frame that holds the current block.
+ */
+Blockly.Block.prototype.getBlockFrame = function() {
+  return this.frame_;
 };
 
 /**

@@ -328,6 +328,17 @@ Blockly.BlockSvg.prototype.setParent = function(newParent) {
   Blockly.BlockSvg.superClass_.setParent.call(this, newParent);
   Blockly.Field.stopCache();
 
+  if (this.getRemovableToFrame()) {
+    if ((newParent && !oldParent) || (!newParent && oldParent)) {
+      if (newParent && !oldParent) {
+        this.requestMoveOutFrame();
+        this.requestMoveInFrame();
+      } else if (!newParent && oldParent) {
+        this.requestMoveInFrame();
+      }
+    }
+  }
+
   var svgRoot = this.getSvgRoot();
 
   // Bail early if workspace is clearing, or we aren't rendered.
@@ -338,10 +349,10 @@ Blockly.BlockSvg.prototype.setParent = function(newParent) {
 
   this.updateIntersectionObserver();
 
-  var oldXY = this.getRelativeToSurfaceXY();
+  var oldXY = this.getRelativeToSurfaceXY(true);
   if (newParent) {
     newParent.getSvgRoot().appendChild(svgRoot);
-    var newXY = this.getRelativeToSurfaceXY();
+    var newXY = this.getRelativeToSurfaceXY(true);
     // Move the connections to match the child's new position.
     this.moveConnections_(newXY.x - oldXY.x, newXY.y - oldXY.y);
     // If we are a shadow block, inherit tertiary colour.
@@ -365,10 +376,11 @@ Blockly.BlockSvg.prototype.setParent = function(newParent) {
  * If the block is on the workspace, (0, 0) is the origin of the workspace
  * coordinate system.
  * This does not change with workspace scale.
+ * @param {boolean} notIgnoreFrame Whether frames should be treated as surfaces.
  * @return {!goog.math.Coordinate} Object with .x and .y properties in
  *     workspace coordinates.
  */
-Blockly.BlockSvg.prototype.getRelativeToSurfaceXY = function() {
+Blockly.BlockSvg.prototype.getRelativeToSurfaceXY = function(notIgnoreFrame) {
   // The drawing surface is relative to either the workspace canvas
   // or to the drag surface group.
   var x = 0;
@@ -393,10 +405,18 @@ Blockly.BlockSvg.prototype.getRelativeToSurfaceXY = function() {
         y += surfaceTranslation.y;
       }
       element = element.parentNode;
+      if (element && notIgnoreFrame && Blockly.utils.hasClass(element, 'blocklyFrameBlockCanvas')) {
+        break;
+      }
     } while (element && element != this.workspace.getCanvas() &&
         element != dragSurfaceGroup);
   }
   return new goog.math.Coordinate(x, y);
+};
+
+Blockly.BlockSvg.prototype.getRemovableToFrame = function() {
+  return !this.isShadow_ && !this.isInsertionMarker_ && !this.parentBlock_ &&
+        this.workspace && this.workspace.options.hasCategories;
 };
 
 /**
@@ -410,7 +430,7 @@ Blockly.BlockSvg.prototype.moveBy = function(dx, dy) {
   if (eventsEnabled) {
     var event = new Blockly.Events.BlockMove(this);
   }
-  var xy = this.getRelativeToSurfaceXY();
+  var xy = this.getRelativeToSurfaceXY(true);
   this.translate(xy.x + dx, xy.y + dy);
   this.moveConnections_(dx, dy);
   if (eventsEnabled) {
@@ -418,6 +438,43 @@ Blockly.BlockSvg.prototype.moveBy = function(dx, dy) {
     Blockly.Events.fire(event);
   }
   this.workspace.resizeContents();
+};
+
+/**
+ * Move out a block from a frame.
+ */
+Blockly.BlockSvg.prototype.requestMoveInFrame = function() {
+  if (this.getRemovableToFrame()) {
+    var frame = this.workspace.requestAddBlockToFrame(this);
+    if (frame && this.frame_ !== frame) {
+      this.frame_ = frame;
+      var root = this.getSvgRoot();
+      goog.dom.removeNode(root);
+      var xy = Blockly.utils.getRelativeXY(root);
+      var blockGroupXY = this.frame_.getBlockGroupRelativeXY();
+      this.translate(xy.x - blockGroupXY.x, xy.y - blockGroupXY.y);
+      this.frame_.blocksGroup_.appendChild(root);
+    }
+  }
+};
+
+/**
+ * Move out a block from a frame.
+ */
+Blockly.BlockSvg.prototype.requestMoveOutFrame = function() {
+  if (this.frame_) {
+    this.frame_.removeBlock(this);
+
+    var root = this.getSvgRoot();
+    goog.dom.removeNode(root);
+
+    var xy = Blockly.utils.getRelativeXY(root);
+    var blockGroupXY = this.frame_.getBlockGroupRelativeXY();
+    this.translate(xy.x + blockGroupXY.x, xy.y + blockGroupXY.y);
+    this.workspace.getCanvas().appendChild(root);
+
+    this.frame_ = null;
+  }
 };
 
 /**
@@ -446,8 +503,12 @@ Blockly.BlockSvg.prototype.moveToDragSurface_ = function(e) {
   // is equal to the current relative-to-surface position,
   // to keep the position in sync as it move on/off the surface.
   // This is in workspace coordinates.
-  var xy = this.getRelativeToSurfaceXY();
+  var xy = this.getRelativeToSurfaceXY(true);
   this.clearTransformAttributes_();
+  
+  if (this.frame_) {
+    xy = goog.math.Coordinate.sum(xy, this.frame_.getBlockGroupRelativeXY());
+  }
   this.workspace.blockDragSurface_.translateSurface(xy.x, xy.y);
   // Execute the move on the top-level SVG component
   this.workspace.blockDragSurface_.setBlocksAndShow(this.getSvgRoot(), this.isBatchBlock, e);
@@ -538,7 +599,7 @@ Blockly.BlockSvg.prototype.snapToGrid = function() {
  *    Object with top left and bottom right coordinates of the bounding box.
  */
 Blockly.BlockSvg.prototype.getBoundingRectangle = function() {
-  var blockXY = this.getRelativeToSurfaceXY(this);
+  var blockXY = this.getRelativeToSurfaceXY(true);
   var blockBounds = this.getHeightWidth();
   var topLeft;
   var bottomRight;
@@ -801,6 +862,16 @@ Blockly.BlockSvg.prototype.setDragging = function(adding) {
 };
 
 /**
+ * Handle the situation when block stop dragging.
+ * @package
+ */
+Blockly.BlockSvg.prototype.handleStopDrag_ = function() {
+  if (this.getRemovableToFrame()) {
+    this.requestMoveInFrame();
+  }
+};
+
+/**
  * Add or remove the UI indicating if this block is movable or not.
  */
 Blockly.BlockSvg.prototype.updateMovable = function() {
@@ -873,6 +944,9 @@ Blockly.BlockSvg.prototype.dispose = function(healStack, animate) {
   if (!this.workspace) {
     // The block has already been deleted.
     return;
+  }
+  if (this.getRemovableToFrame() && this.frame_) {
+    this.frame_.removeBlock(this);
   }
   Blockly.Tooltip.hide();
   Blockly.Field.startCache();

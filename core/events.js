@@ -123,6 +123,37 @@ Blockly.Events.BLOCK_HIDDEN = 'blockHidden';
 // powered by xigua end
 
 /**
+ * Name of event that creates a frame.
+ * @const
+ */
+Blockly.Events.FRAME_CREATE = 'frame_create';
+
+/**
+ * Name of event that deletes a frame.
+ * @const
+ */
+Blockly.Events.FRAME_DELETE = 'frame_delete';
+
+/**
+ * Name of event that moves a frame.
+ * @const
+ */
+Blockly.Events.FRAME_MOVE = 'frame_move';
+
+/**
+ * Name of event that retitle a frame.
+ * @const
+ */
+Blockly.Events.FRAME_RETITLE = 'frame_retitle';
+
+/**
+ * Name of event that changes a frame's property
+ * (contained blocks, size, or minimized state).
+ * @const
+ */
+Blockly.Events.FRAME_CHANGE = 'frame_change';
+
+/**
  * Name of event that creates a variable.
  * @const
  */

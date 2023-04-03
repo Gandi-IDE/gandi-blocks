@@ -384,6 +384,7 @@ Blockly.Events.Move = function(block) {
   }
   Blockly.Events.Move.superClass_.constructor.call(this, block);
   var location = this.currentLocation_();
+  this.oldFrameId = location.frameId;
   this.oldParentId = location.parentId;
   this.oldInputName = location.inputName;
   this.oldCoordinate = location.coordinate;
@@ -410,6 +411,9 @@ Blockly.Events.Move.prototype.type = Blockly.Events.MOVE;
  */
 Blockly.Events.Move.prototype.toJson = function() {
   var json = Blockly.Events.Move.superClass_.toJson.call(this);
+  if (this.newFrameId) {
+    json['newFrameId'] = this.newFrameId;
+  }
   if (this.newParentId) {
     json['newParentId'] = this.newParentId;
   }
@@ -429,6 +433,7 @@ Blockly.Events.Move.prototype.toJson = function() {
  */
 Blockly.Events.Move.prototype.fromJson = function(json) {
   Blockly.Events.Move.superClass_.fromJson.call(this, json);
+  this.newFrameId = json['newFrameId'];
   this.newParentId = json['newParentId'];
   this.newInputName = json['newInputName'];
   if (json['newCoordinate']) {
@@ -443,6 +448,7 @@ Blockly.Events.Move.prototype.fromJson = function(json) {
  */
 Blockly.Events.Move.prototype.recordNew = function() {
   var location = this.currentLocation_();
+  this.newFrameId = location.frameId;
   this.newParentId = location.parentId;
   this.newInputName = location.inputName;
   this.newCoordinate = location.coordinate;
@@ -458,6 +464,10 @@ Blockly.Events.Move.prototype.currentLocation_ = function() {
   var workspace = Blockly.Workspace.getById(this.workspaceId);
   var block = workspace.getBlockById(this.blockId);
   var location = {};
+  var frame = block.getBlockFrame();
+  if (frame) {
+    location.frameId = frame.id;
+  }
   var parent = block.getParent();
   if (parent) {
     location.parentId = parent.id;
@@ -481,6 +491,7 @@ Blockly.Events.Move.prototype.currentLocation_ = function() {
  */
 Blockly.Events.Move.prototype.isNull = function() {
   return this.oldParentId == this.newParentId &&
+      this.oldFrameId == this.newFrameId &&
       this.oldInputName == this.newInputName &&
       goog.math.Coordinate.equals(this.oldCoordinate, this.newCoordinate);
 };
