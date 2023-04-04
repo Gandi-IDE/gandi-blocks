@@ -46,8 +46,6 @@ goog.require('goog.dom');
 Blockly.Frame = function(workspace, opt_options) {
   this.workspace = workspace;
 
-  workspace.addTopFrame(this);
-
   this.options = opt_options || {
     title: '',
     x: 0,
@@ -107,6 +105,8 @@ Blockly.Frame = function(workspace, opt_options) {
     bl: null,
     br: null,
   };
+
+  workspace.addTopFrame(this);
 
   this.createDom_();
 
@@ -180,7 +180,6 @@ Blockly.Frame.prototype.beforeCreateSuccess = function() {
     this.updateResizeButtonsPosition();
     this.updateOwnedBlocks();
     this.fireFrameRectChange();
-    this.workspace.addFrame(this);
     this.workspace.onFrameCreationComplete();
   }
   this.onStopResizeRect_();

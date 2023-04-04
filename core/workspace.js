@@ -432,14 +432,6 @@ Blockly.Workspace.prototype.onFrameCreationComplete = function() {
   });
 };
 
-Blockly.Workspace.prototype.addFrame = function(frame) {
-  this.frameDB_[frame.id] = frame;
-};
-
-Blockly.Workspace.prototype.removeFrame = function(frame) {
-  delete this.frameDB_[frame.id];
-};
-
 /* Begin functions that are just pass-throughs to the variable map. */
 /**
  * Rename a variable by updating its name in the variable map. Identify the

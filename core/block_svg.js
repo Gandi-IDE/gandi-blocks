@@ -320,6 +320,9 @@ Blockly.BlockSvg.prototype.updateIntersectionObserver = function() {
  * @param {Blockly.BlockSvg} newParent New parent block.
  */
 Blockly.BlockSvg.prototype.setParent = function(newParent) {
+  if (window.debuggingBlockly) {
+    console.trace('setParent', newParent);
+  }
   var oldParent = this.parentBlock_;
   if (newParent == oldParent) {
     return;
@@ -328,11 +331,10 @@ Blockly.BlockSvg.prototype.setParent = function(newParent) {
   Blockly.BlockSvg.superClass_.setParent.call(this, newParent);
   Blockly.Field.stopCache();
 
-  if (this.getRemovableToFrame()) {
+  if (this.getRemovableToFrame(true)) {
     if ((newParent && !oldParent) || (!newParent && oldParent)) {
       if (newParent && !oldParent) {
         this.requestMoveOutFrame();
-        this.requestMoveInFrame();
       } else if (!newParent && oldParent) {
         this.requestMoveInFrame();
       }
@@ -414,9 +416,13 @@ Blockly.BlockSvg.prototype.getRelativeToSurfaceXY = function(notIgnoreFrame) {
   return new goog.math.Coordinate(x, y);
 };
 
-Blockly.BlockSvg.prototype.getRemovableToFrame = function() {
-  return !this.isShadow_ && !this.isInsertionMarker_ && !this.parentBlock_ &&
-        this.workspace && this.workspace.options.hasCategories;
+Blockly.BlockSvg.prototype.getRemovableToFrame = function(ignoreParentBlock) {
+  var tag = !this.isShadow_ && !this.isInsertionMarker_ && this.workspace
+    && this.workspace.options.hasCategories;
+  if (ignoreParentBlock) {
+    return tag;
+  }
+  return tag && !this.parentBlock_;
 };
 
 /**
@@ -454,6 +460,8 @@ Blockly.BlockSvg.prototype.requestMoveInFrame = function() {
       var blockGroupXY = this.frame_.getBlockGroupRelativeXY();
       this.translate(xy.x - blockGroupXY.x, xy.y - blockGroupXY.y);
       this.frame_.blocksGroup_.appendChild(root);
+    } else {
+      this.frame_ = frame;
     }
   }
 };
@@ -464,15 +472,15 @@ Blockly.BlockSvg.prototype.requestMoveInFrame = function() {
 Blockly.BlockSvg.prototype.requestMoveOutFrame = function() {
   if (this.frame_) {
     this.frame_.removeBlock(this);
-
-    var root = this.getSvgRoot();
-    goog.dom.removeNode(root);
-
-    var xy = Blockly.utils.getRelativeXY(root);
-    var blockGroupXY = this.frame_.getBlockGroupRelativeXY();
-    this.translate(xy.x + blockGroupXY.x, xy.y + blockGroupXY.y);
-    this.workspace.getCanvas().appendChild(root);
-
+    if (!this.parentBlock_) {
+      var root = this.getSvgRoot();
+      goog.dom.removeNode(root);
+  
+      var xy = Blockly.utils.getRelativeXY(root);
+      var blockGroupXY = this.frame_.getBlockGroupRelativeXY();
+      this.translate(xy.x + blockGroupXY.x, xy.y + blockGroupXY.y);
+      this.workspace.getCanvas().appendChild(root);
+    }
     this.frame_ = null;
   }
 };
