@@ -435,9 +435,10 @@ Blockly.BlockSvg.prototype.translate = function(x, y) {
  * Move this block to its workspace's drag surface, accounting for positioning.
  * Generally should be called at the same time as setDragging_(true).
  * Does nothing if useDragSurface_ is false.
+ * @param {!Event} e The most recent move event.
  * @private
  */
-Blockly.BlockSvg.prototype.moveToDragSurface_ = function() {
+Blockly.BlockSvg.prototype.moveToDragSurface_ = function(e) {
   if (!this.useDragSurface_) {
     return;
   }
@@ -449,7 +450,7 @@ Blockly.BlockSvg.prototype.moveToDragSurface_ = function() {
   this.clearTransformAttributes_();
   this.workspace.blockDragSurface_.translateSurface(xy.x, xy.y);
   // Execute the move on the top-level SVG component
-  this.workspace.blockDragSurface_.setBlocksAndShow(this.getSvgRoot());
+  this.workspace.blockDragSurface_.setBlocksAndShow(this.getSvgRoot(), this.isBatchBlock, e);
 };
 
 /**
@@ -475,15 +476,16 @@ Blockly.BlockSvg.prototype.moveOffDragSurface_ = function(newXY) {
  * This block must be a top-level block.
  * @param {!goog.math.Coordinate} newLoc The location to translate to, in
  *     workspace coordinates.
+ * @param {boolean} selfDrag Whether}
  * @package
  */
-Blockly.BlockSvg.prototype.moveDuringDrag = function(newLoc) {
-  if (this.useDragSurface_) {
+Blockly.BlockSvg.prototype.moveDuringDrag = function(newLoc, selfDrag) {
+  if (this.useDragSurface_ && !selfDrag) {
     this.workspace.blockDragSurface_.translateSurface(newLoc.x, newLoc.y);
   } else {
     this.svgGroup_.translate_ = 'translate(' + newLoc.x + ',' + newLoc.y + ')';
     this.svgGroup_.setAttribute('transform',
-        this.svgGroup_.translate_ + this.svgGroup_.skew_);
+        this.svgGroup_.translate_);
   }
 };
 
@@ -783,7 +785,6 @@ Blockly.BlockSvg.prototype.setDragging = function(adding) {
   if (adding) {
     var group = this.getSvgRoot();
     group.translate_ = '';
-    group.skew_ = '';
     Blockly.draggingConnections_ =
         Blockly.draggingConnections_.concat(this.getConnections_(true));
     Blockly.utils.addClass(
@@ -909,7 +910,6 @@ Blockly.BlockSvg.prototype.dispose = function(healStack, animate) {
   if (blockWorkspace.intersectionObserver) {
     blockWorkspace.intersectionObserver.unobserve(this);
   }
-
   goog.dom.removeNode(this.svgGroup_);
   blockWorkspace.resizeContents();
   // Sever JavaScript to DOM connections.

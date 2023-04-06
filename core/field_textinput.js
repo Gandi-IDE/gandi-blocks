@@ -292,18 +292,19 @@ Blockly.FieldTextInput.prototype.createMenus = function(menuOptions) {
 };
 
 Blockly.FieldTextInput.prototype.handleSetValueToBlock = function(option) {
+  Blockly.Events.setGroup(true);
   const xml = document.implementation.createDocument(null, "xml");
   const x = xml.firstChild;
   x.appendChild(option.dom);
   const ids = Blockly.Xml.domToWorkspace(x, this.workspace_);
   const block = this.workspace_.getBlockById(ids[0]);
-  // bug.
   const sourceBlockConnections = this.sourceBlock_.getConnections_()[0];
   const localConnection_ = block.getConnections_()[0];
-  Blockly.WidgetDiv.hide(true);
+  // _this.widgetDispose_()();
   const closestConnection_ = sourceBlockConnections.dbOpposite_.connections_.find(it =>
     it.x_ === sourceBlockConnections.x_ && it.y_ === sourceBlockConnections.y_);
   localConnection_.connect(closestConnection_);
+  Blockly.WidgetDiv.hide(true);
   Blockly.DropDownDiv.hide();
   Blockly.Events.setGroup(false);
 };
@@ -481,9 +482,9 @@ Blockly.FieldTextInput.prototype.showEditor_ = function(
   div.style.boxShadow = '0px 0px 0px 4px ' + Blockly.Colours.fieldShadow;
   // Show drop-down box in the main workspace
   if (this.workspace_ &&
-      this.workspace_.config &&
-      this.workspace_.config.useInputDropdown &&
-      Blockly.showDropdownSearchableDataType) {
+  this.workspace_.config &&
+  this.workspace_.config.useInputDropdown &&
+  Blockly.showDropdownSearchableDataType) {
     this.showDropDown();
   }
 };
@@ -854,7 +855,10 @@ Blockly.FieldTextInput.prototype.widgetDispose_ = function() {
     if (htmlInput.dropDownArrowMouseWrapper_) {
       Blockly.unbindEvent_(htmlInput.dropDownArrowMouseWrapper_);
     }
-    Blockly.Events.setGroup(false);
+    if (!Blockly.showDropdownSearchableDataType) {
+      Blockly.Events.setGroup(false);
+    }
+
 
     // Animation of disposal
     htmlInput.style.fontSize = Blockly.BlockSvg.FIELD_TEXTINPUT_FONTSIZE_INITIAL + 'pt';

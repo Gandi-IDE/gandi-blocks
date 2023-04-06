@@ -58,12 +58,27 @@ Blockly.BlockDragSurfaceSvg = function(container) {
 Blockly.BlockDragSurfaceSvg.prototype.SVG_ = null;
 
 /**
+ * The SVG drag surface. Set once by Blockly.Block batches drag.
+ * @type {Element}
+ * @private
+ */
+Blockly.BlockDragSurfaceSvg.prototype.BatchSVG_ = null;
+
+
+/**
  * This is where blocks live while they are being dragged if the drag surface
  * is enabled.
  * @type {Element}
  * @private
  */
 Blockly.BlockDragSurfaceSvg.prototype.dragGroup_ = null;
+
+/**
+ * Really drag and drop data sources
+ * @type {Element}
+ * @private
+ */
+Blockly.BlockDragSurfaceSvg.prototype.dragGroupRealElement_ = null;
 
 /**
  * Containing HTML element; parent of the workspace and the drag surface.
@@ -176,13 +191,44 @@ Blockly.BlockDragSurfaceSvg.prototype.createDropShadowDom_ = function(defs) {
  * Set the SVG blocks on the drag surface's group and show the surface.
  * Only one block group should be on the drag surface at a time.
  * @param {!Element} blocks Block or group of blocks to place on the drag
+ * @param {boolean} isBatchBlock is drag batch block.
+ * @param {!Event} e The most recent move event.
  * surface.
  */
-Blockly.BlockDragSurfaceSvg.prototype.setBlocksAndShow = function(blocks) {
+Blockly.BlockDragSurfaceSvg.prototype.setBlocksAndShow = function(blocks, isBatchBlock, e) {
   goog.asserts.assert(
       this.dragGroup_.childNodes.length == 0, 'Already dragging a block.');
-  // appendChild removes the blocks from the previous parent
-  this.dragGroup_.appendChild(blocks);
+  if (isBatchBlock) {
+    // Simulate batch selection movement
+    blocks.style.display = 'none';
+    const batchMoveBlock = Blockly.utils.createSvgElement('image',
+        {
+          'width': Blockly.WorkspaceCommentSvg.MINIMIZE_ICON_SIZE * 2 / this.scale_,
+          'height': Blockly.WorkspaceCommentSvg.MINIMIZE_ICON_SIZE * 2 / this.scale_
+        });
+    batchMoveBlock.setAttributeNS('http://www.w3.org/1999/xlink',
+        'xlink:href', Blockly.mainWorkspace.options.pathToMedia + 'drag-diagram.svg');
+    this.BatchSVG_ = batchMoveBlock;
+    if (e) {
+      const mouseRelativePosition = Blockly.utils.getMouseVectorPosition(
+          {
+            clientX: e.clientX,
+            clientY: e.clientY,
+          },
+          Blockly.mainWorkspace
+      );
+      const mouseSurfaceXY = new goog.math.Coordinate(
+          mouseRelativePosition.x * this.scale_, mouseRelativePosition.y * this.scale_);
+
+      batchMoveBlock.setAttribute('transform', `translate(${(mouseSurfaceXY.x - this.surfaceXY_.x) / this.scale_},
+       ${(mouseSurfaceXY.y - this.surfaceXY_.y) / this.scale_})`);
+    }
+    this.dragGroup_.appendChild(batchMoveBlock);
+  } else {
+    // appendChild removes the blocks from the previous parent
+    this.dragGroup_.appendChild(blocks);
+  }
+  this.dragGroupRealElement_ = blocks;
   this.SVG_.style.display = 'block';
   this.surfaceXY_ = new goog.math.Coordinate(0, 0);
   // This allows blocks to be dragged outside of the blockly svg space.
@@ -266,7 +312,7 @@ Blockly.BlockDragSurfaceSvg.prototype.getGroup = function() {
  * if no blocks exist.
  */
 Blockly.BlockDragSurfaceSvg.prototype.getCurrentBlock = function() {
-  return this.dragGroup_.firstChild;
+  return this.dragGroupRealElement_;
 };
 
 /**
@@ -281,7 +327,14 @@ Blockly.BlockDragSurfaceSvg.prototype.getCurrentBlock = function() {
 Blockly.BlockDragSurfaceSvg.prototype.clearAndHide = function(opt_newSurface) {
   if (opt_newSurface) {
     // appendChild removes the node from this.dragGroup_
+    if (this.BatchSVG_) {
+      this.BatchSVG_.remove();
+    }
+    if (this.dragGroupRealElement_.style.display === 'none') {
+      this.dragGroupRealElement_.style.display = 'block';
+    }
     opt_newSurface.appendChild(this.getCurrentBlock());
+    this.dragGroupRealElement_ = null;
   } else {
     this.dragGroup_.removeChild(this.getCurrentBlock());
   }

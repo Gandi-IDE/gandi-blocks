@@ -148,6 +148,7 @@ Blockly.WidgetDiv.repositionForWindowResize = function() {
  * @param {boolean=} opt_noAnimate If set, animation will not be run for the hide.
  */
 Blockly.WidgetDiv.hide = function(opt_noAnimate) {
+
   if (Blockly.WidgetDiv.disposeAnimationTimer_) {
     // An animation timer is set already.
     // This happens when a previous widget was animating out,
@@ -274,7 +275,7 @@ Blockly.WidgetDiv.positionWithAnchor = function(viewportBBox, anchorBBox,
   var y = Blockly.WidgetDiv.calculateY_(viewportBBox, anchorBBox, widgetSize);
   var x = Blockly.WidgetDiv.calculateX_(viewportBBox, anchorBBox, widgetSize,
       rtl);
-  
+
   if (y < 0) {
     Blockly.WidgetDiv.positionInternal_(x, 0, widgetSize.height + y);
   }

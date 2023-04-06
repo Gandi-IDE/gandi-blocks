@@ -384,7 +384,7 @@ Blockly.WorkspaceCommentSvg.prototype.moveDuringDrag = function(dragSurface, new
   } else {
     this.svgGroup_.translate_ = 'translate(' + newLoc.x + ',' + newLoc.y + ')';
     this.svgGroup_.setAttribute('transform',
-        this.svgGroup_.translate_ + this.svgGroup_.skew_);
+        this.svgGroup_.translate_);
   }
 };
 
@@ -490,7 +490,6 @@ Blockly.WorkspaceCommentSvg.prototype.setDragging = function(adding) {
   if (adding) {
     var group = this.getSvgRoot();
     group.translate_ = '';
-    group.skew_ = '';
     Blockly.utils.addClass(
         /** @type {!Element} */ (this.svgGroup_), 'blocklyDragging');
   } else {

@@ -206,14 +206,23 @@ Blockly.onKeyDown_ = function(e) {
     // Do this first to prevent an error in the delete code from resulting in
     // data loss.
     e.preventDefault();
+    // Don't allow delete while the batchSelector is running.
+    if (Blockly.batchSelectedBlocks && Blockly.batchSelectedBlocks.length > 0) {
+      return;
+    }
     // Don't delete while dragging.  Jeez.
     if (Blockly.mainWorkspace.isDragging()) {
       return;
     }
+
     if (Blockly.selected && Blockly.selected.isDeletable()) {
       deleteBlock = true;
     }
   } else if (e.altKey || e.ctrlKey || e.metaKey) {
+    // Don't allow delete while the batchSelector is running.
+    if (Blockly.batchSelectedBlocks && Blockly.batchSelectedBlocks.length > 0) {
+      return;
+    }
     // Don't use meta keys during drags.
     if (Blockly.mainWorkspace.isDragging()) {
       return;
@@ -227,6 +236,7 @@ Blockly.onKeyDown_ = function(e) {
         // 'c' for copy.
         Blockly.hideChaff();
         Blockly.copy_(Blockly.selected);
+        Blockly.clipboardBatchBlocks = null;
       } else if (e.keyCode == 88 && !Blockly.selected.workspace.isFlyout) {
         // 'x' for cut, but not in a flyout.
         // Don't even copy the selected item in the flyout.
@@ -236,6 +246,9 @@ Blockly.onKeyDown_ = function(e) {
     }
     if (e.keyCode == 86) {
       // 'v' for paste.
+      if (Blockly.clipboardBatchBlocks && Blockly.clipboardBatchBlocks.length > 0) {
+        return;
+      }
       if (Blockly.clipboardXml_) {
         Blockly.Events.setGroup(true);
         // Pasting always pastes to the main workspace, even if the copy started

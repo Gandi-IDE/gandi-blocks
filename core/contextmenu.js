@@ -270,7 +270,7 @@ Blockly.ContextMenu.blockDuplicateOption = function(block, event) {
     text: Blockly.Msg.DUPLICATE,
     enabled: true,
     callback:
-        Blockly.scratchBlocksUtils.duplicateAndDragCallback(block, event)
+        Blockly.scratchBlocksUtils.duplicateAndDragCallback(block, event, undefined, true)
   };
   return duplicateOption;
 };
@@ -481,7 +481,6 @@ Blockly.ContextMenu.workspaceCommentOption = function(ws, e) {
     // are in pixels relative to the upper left corner of the visible browser
     // window.  These coordinates change when you scroll the browser window.
     var boundingRect = injectionDiv.getBoundingClientRect();
-
     // The client coordinates offset by the injection div's upper left corner.
     var clientOffsetPixels = new goog.math.Coordinate(
         e.clientX - boundingRect.left, e.clientY - boundingRect.top);

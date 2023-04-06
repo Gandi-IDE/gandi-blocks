@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
     <title>Vertical Playground</title>
+    <button id="testaaa" onclick="a()">test</button>
 
     <script src="../blockly_uncompressed_vertical.js"></script>
     <script src="../msg/messages.js"></script>
@@ -30,6 +31,26 @@
 
     <script>
       'use strict';
+
+      // function a () {
+        // console.log(1234);
+        document.addEventListener('keydown', function(event){
+          if (event.metaKey) {
+            var a = workspace.getAllBlocks().filter((it) => !it.isShadow_ && it.intersects_);
+            const copyBlock = a[0];
+            console.log('copyBlock', copyBlock);
+            Blockly.scratchBlocksUtils.duplicateAndDragCallback(
+              copyBlock,
+              {
+                ...event,
+                clientX: 400,
+                clientY: 60,
+              },
+              // nextBlock?.id
+            )(event, {x: 400, y: 60});
+          }
+        })
+      // }
 
       var workspace = null;
       Blockly.showDropdownSearchableDataType = true;
