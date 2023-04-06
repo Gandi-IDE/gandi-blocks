@@ -286,6 +286,7 @@ Blockly.Gesture.prototype.updateFromEvent_ = function(e) {
   var changed = this.updateDragDelta_(currentXY);
   // Exceeded the drag radius for the first time.
   if (changed) {
+    // TODO don't need transmit params
     this.updateIsDragging_(e);
     Blockly.longStop_();
   }
