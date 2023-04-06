@@ -164,13 +164,15 @@ Blockly.scratchBlocksUtils.blockIsRecyclable = function(block) {
  * releases the new dragging block.
  * @param {!Blockly.BlockSvg} oldBlock The block that will be duplicated.
  * @param {!Event} event Event that caused the context menu to open.
+ * @param {string} endBlockId End of the duplicate block
+ * @param {boolean=} clearClipboard clear the clipboard
  * @return {Function} A callback function that duplicates the block and starts a
  *     drag.
  * @package
  */
-Blockly.scratchBlocksUtils.duplicateAndDragCallback = function(oldBlock, event) {
+Blockly.scratchBlocksUtils.duplicateAndDragCallback = function(oldBlock, event, endBlockId, clearClipboard) {
   var isMouseEvent = Blockly.Touch.getTouchIdentifierFromEvent(event) === 'mouse';
-  return function(e) {
+  return function(e, mouseRelativePosition) {
     // Give the context menu a chance to close.
     setTimeout(function() {
       var ws = oldBlock.workspace;
@@ -203,7 +205,7 @@ Blockly.scratchBlocksUtils.duplicateAndDragCallback = function(oldBlock, event) 
         }
 
         // The position of the old block in workspace coordinates.
-        var oldBlockPosWs = oldBlock.getRelativeToSurfaceXY();
+        var oldBlockPosWs = mouseRelativePosition || oldBlock.getRelativeToSurfaceXY();
 
         // Place the new block as the same position as the old block.
         // TODO: Offset by the difference between the mouse position and the upper
@@ -217,10 +219,10 @@ Blockly.scratchBlocksUtils.duplicateAndDragCallback = function(oldBlock, event) 
       } finally {
         Blockly.Events.enable();
       }
+
       if (Blockly.Events.isEnabled()) {
         Blockly.Events.fire(new Blockly.Events.BlockCreate(newBlock));
       }
-
       if (isMouseEvent) {
         // e is not a real mouseEvent/touchEvent/pointerEvent.  It's an event
         // created by the context menu and has the coordinates of the mouse
@@ -238,6 +240,9 @@ Blockly.scratchBlocksUtils.duplicateAndDragCallback = function(oldBlock, event) 
           target: e.target
         };
         ws.startDragWithFakeEvent(fakeEvent, newBlock);
+      }
+      if (clearClipboard) {
+        Blockly.clipboardBatchBlocks = null;
       }
     }, 0);
   };

@@ -219,6 +219,37 @@ Blockly.utils.getInjectionDivXY_ = function(element) {
   return new goog.math.Coordinate(x, y);
 };
 
+Blockly.utils.getMouseVectorPosition = function(event, workspace) {
+  var injectionDiv = workspace.getInjectionDiv();
+  // Bounding rect coordinates are in client coordinates, meaning that they
+  // are in pixels relative to the upper left corner of the visible browser
+  // window.  These coordinates change when you scroll the browser window.
+  var boundingRect = injectionDiv.getBoundingClientRect();
+
+  // The client coordinates offset by the injection div's upper left corner.
+  var clientOffsetPixels = new goog.math.Coordinate(
+      event.clientX - boundingRect.left, event.clientY - boundingRect.top);
+
+    // The offset in pixels between the main workspace's origin and the upper
+    // left corner of the injection div.
+  var mainOffsetPixels = workspace.getOriginOffsetInPixels();
+
+  // The position of the new comment in pixels relative to the origin of the
+  // main workspace.
+  var finalOffsetPixels = goog.math.Coordinate.difference(clientOffsetPixels,
+      mainOffsetPixels);
+
+    // The position of the new comment in main workspace coordinates.
+  var finalOffsetMainWs = finalOffsetPixels.scale(1 / workspace.scale);
+
+  var commentX = finalOffsetMainWs.x;
+  var commentY = finalOffsetMainWs.y;
+  return {
+    x: commentX,
+    y: commentY
+  };
+};
+
 /**
  * Return the scale of this element.
  * @param {!Element} element  The element to find the coordinates of.

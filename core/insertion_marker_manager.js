@@ -277,7 +277,7 @@ Blockly.InsertionMarkerManager.prototype.createMarkerBlock_ = function(sourceBlo
     Blockly.Events.enable();
   }
 
-  return result;
+  return Object.assign(result, {isBatchBlock: sourceBlock.isBatchBlock});
 };
 
 /**
@@ -654,6 +654,9 @@ Blockly.InsertionMarkerManager.prototype.connectMarker_ = function() {
 
   var isLastInStack = this.lastOnStack_ && local == this.lastOnStack_;
   var imBlock = isLastInStack ? this.lastMarker_ : this.firstMarker_;
+  if (imBlock.isBatchBlock) {
+    return;
+  }
   var imConn = imBlock.getMatchingConnection(local.sourceBlock_, local);
 
   goog.asserts.assert(imConn != this.markerConnection_,

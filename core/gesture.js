@@ -286,7 +286,7 @@ Blockly.Gesture.prototype.updateFromEvent_ = function(e) {
   var changed = this.updateDragDelta_(currentXY);
   // Exceeded the drag radius for the first time.
   if (changed) {
-    this.updateIsDragging_();
+    this.updateIsDragging_(e);
     Blockly.longStop_();
   }
   this.mostRecentEvent_ = e;
@@ -376,10 +376,11 @@ Blockly.Gesture.prototype.updateIsDraggingBubble_ = function() {
  * drag radius is exceeded.  It should be called no more than once per gesture.
  * If a block should be dragged, either from the flyout or in the workspace,
  * this function creates the necessary BlockDragger and starts the drag.
+ * @param {!Event} e The most recent mouse or touch event.
  * @return {boolean} true if a block is being dragged.
  * @private
  */
-Blockly.Gesture.prototype.updateIsDraggingBlock_ = function() {
+Blockly.Gesture.prototype.updateIsDraggingBlock_ = function(e) {
   if (!this.targetBlock_ || Blockly.locked) {
     return false;
   }
@@ -391,7 +392,7 @@ Blockly.Gesture.prototype.updateIsDraggingBlock_ = function() {
   }
 
   if (this.isDraggingBlock_) {
-    this.startDraggingBlock_();
+    this.startDraggingBlock_(e);
     return true;
   }
   return false;
@@ -427,9 +428,10 @@ Blockly.Gesture.prototype.updateIsDraggingWorkspace_ = function() {
  * Update this gesture to record whether anything is being dragged.
  * This function should be called on a mouse/touch move event the first time the
  * drag radius is exceeded.  It should be called no more than once per gesture.
+ * @param {!Event} e The most recent mouse or touch event.
  * @private
  */
-Blockly.Gesture.prototype.updateIsDragging_ = function() {
+Blockly.Gesture.prototype.updateIsDragging_ = function(e) {
   // Sanity check.
   goog.asserts.assert(!this.calledUpdateIsDragging_,
       'updateIsDragging_ should only be called once per gesture.');
@@ -440,7 +442,7 @@ Blockly.Gesture.prototype.updateIsDragging_ = function() {
     return;
   }
   // Then check if it was a block drag.
-  if (this.updateIsDraggingBlock_()) {
+  if (this.updateIsDraggingBlock_(e)) {
     return;
   }
   // Then check if it's a workspace drag.
@@ -449,9 +451,10 @@ Blockly.Gesture.prototype.updateIsDragging_ = function() {
 
 /**
  * Create a block dragger and start dragging the selected block.
+ * @param {!Event} e The most recent mouse or touch event.
  * @private
  */
-Blockly.Gesture.prototype.startDraggingBlock_ = function() {
+Blockly.Gesture.prototype.startDraggingBlock_ = function(e) {
   if (this.shouldDuplicateOnDrag_) {
     this.duplicateOnDrag_();
   }
@@ -598,8 +601,8 @@ Blockly.Gesture.prototype.handleUp = function(e) {
 
   e.preventDefault();
   e.stopPropagation();
-
   this.dispose();
+  //
 };
 
 /**
