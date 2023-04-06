@@ -48,16 +48,18 @@ goog.require('goog.userAgent');
  *     to validate any constraints on what the user entered.  Takes the new
  *     text as an argument and returns the accepted text or null to abort
  *     the change.
+ * @param {?boolean} verify_when_blur Verify when the input box loses focus
  * @extends {Blockly.FieldTextInput}
  * @constructor
  */
 Blockly.FieldNumber = function(opt_value, opt_min, opt_max, opt_precision,
-    opt_validator) {
+    opt_validator, verify_when_blur) {
   var numRestrictor = this.getNumRestrictor(opt_min, opt_max, opt_precision);
   opt_value = (opt_value && !isNaN(opt_value)) ? String(opt_value) : '0';
   Blockly.FieldNumber.superClass_.constructor.call(
-      this, opt_value, opt_validator, numRestrictor);
+      this, opt_value, opt_validator, numRestrictor, verify_when_blur);
   this.addArgType('number');
+  this.setValidator((value) => /^-?\d+(\.\d+)?$/.test(value) ? value : null);
 };
 goog.inherits(Blockly.FieldNumber, Blockly.FieldTextInput);
 
@@ -71,7 +73,7 @@ goog.inherits(Blockly.FieldNumber, Blockly.FieldTextInput);
  */
 Blockly.FieldNumber.fromJson = function(options) {
   return new Blockly.FieldNumber(options['value'],
-      options['min'], options['max'], options['precision']);
+      options['min'], options['max'], options['precision'], undefined, true);
 };
 
 /**
