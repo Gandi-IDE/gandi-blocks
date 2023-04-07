@@ -286,7 +286,6 @@ Blockly.Gesture.prototype.updateFromEvent_ = function(e) {
   var changed = this.updateDragDelta_(currentXY);
   // Exceeded the drag radius for the first time.
   if (changed) {
-    // TODO don't need transmit params
     this.updateIsDragging_(e);
     Blockly.longStop_();
   }
@@ -381,7 +380,7 @@ Blockly.Gesture.prototype.updateIsDraggingBubble_ = function() {
  * @return {boolean} true if a block is being dragged.
  * @private
  */
-Blockly.Gesture.prototype.updateIsDraggingBlock_ = function(e) {
+Blockly.Gesture.prototype.updateIsDraggingBlock_ = function() {
   if (!this.targetBlock_ || Blockly.locked) {
     return false;
   }
@@ -393,7 +392,7 @@ Blockly.Gesture.prototype.updateIsDraggingBlock_ = function(e) {
   }
 
   if (this.isDraggingBlock_) {
-    this.startDraggingBlock_(e);
+    this.startDraggingBlock_();
     return true;
   }
   return false;
@@ -432,7 +431,7 @@ Blockly.Gesture.prototype.updateIsDraggingWorkspace_ = function() {
  * @param {!Event} e The most recent mouse or touch event.
  * @private
  */
-Blockly.Gesture.prototype.updateIsDragging_ = function(e) {
+Blockly.Gesture.prototype.updateIsDragging_ = function() {
   // Sanity check.
   goog.asserts.assert(!this.calledUpdateIsDragging_,
       'updateIsDragging_ should only be called once per gesture.');
@@ -443,7 +442,7 @@ Blockly.Gesture.prototype.updateIsDragging_ = function(e) {
     return;
   }
   // Then check if it was a block drag.
-  if (this.updateIsDraggingBlock_(e)) {
+  if (this.updateIsDraggingBlock_()) {
     return;
   }
   // Then check if it's a workspace drag.
@@ -452,10 +451,9 @@ Blockly.Gesture.prototype.updateIsDragging_ = function(e) {
 
 /**
  * Create a block dragger and start dragging the selected block.
- * @param {!Event} e The most recent mouse or touch event.
  * @private
  */
-Blockly.Gesture.prototype.startDraggingBlock_ = function(e) {
+Blockly.Gesture.prototype.startDraggingBlock_ = function() {
   if (this.shouldDuplicateOnDrag_) {
     this.duplicateOnDrag_();
   }
@@ -594,7 +592,7 @@ Blockly.Gesture.prototype.handleUp = function(e) {
     this.doBubbleClick_();
   } else if (this.isFieldClick_()) {
     this.doFieldClick_();
-  } else if (this.isBlockClick_()) {
+  } else if (this.isBlockClick_() && !Blockly.utils.isDisableBlockClickWithKeyCode(e)) {
     this.doBlockClick_();
   } else if (this.isWorkspaceClick_()) {
     this.doWorkspaceClick_();

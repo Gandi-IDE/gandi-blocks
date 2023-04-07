@@ -182,7 +182,7 @@ Blockly.scratchBlocksUtils.duplicateAndDragCallback = function(oldBlock, event, 
       }
 
       // Create the new block by cloning the block in the flyout (via XML).
-      var xml = Blockly.Xml.blockToDom(oldBlock);
+      var xml = Blockly.Xml.blockToDom(oldBlock, false, endBlockId);
       // The target workspace would normally resize during domToBlock, which
       // will lead to weird jumps.
       // Resizing will be enabled when the drag ends.
