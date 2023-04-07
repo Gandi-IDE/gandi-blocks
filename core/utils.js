@@ -340,6 +340,23 @@ Blockly.utils.isRightButton = function(e) {
 };
 
 /**
+ * is disabled
+ * @param {!Event} e Mouse event.
+ * @return {boolean} True if disable block click.
+ */
+Blockly.utils.isDisableBlockClickWithKeyCode = function(e) {
+  if (e.metaKey && goog.userAgent.MAC) {
+    // Control-clicking on Mac OS X disable gesture
+    return true;
+  }
+  if (e.ctrlKey) {
+    // Control-clicking on windows disable gesture
+    return true;
+  }
+  return false;
+};
+
+/**
  * Whether the object is a dom object
  * @param {Object} object Object.
  * @return {boolean} True if the object is a dom object.
