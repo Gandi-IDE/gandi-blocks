@@ -428,12 +428,28 @@ Blockly.Block.prototype.getParent = function() {
 };
 
 /**
- * Return null or the frame if this block is at some frame.
- * @return {Blockly.Frame} The frame that holds the current block.
+ * Get the frame of the current block.
+ * @return {Blockly.Frame} The current block's frame.
  */
-Blockly.Block.prototype.getBlockFrame = function() {
+Blockly.Block.prototype.getSelfFrame = function() {
   return this.frame_;
 };
+
+/**
+ * Get the frame of the current block or its top-level parent block.
+ * @return {Blockly.Frame} The current block's frame, or the frame of its top-level parent block.
+ */
+Blockly.Block.prototype.getTopFrame = function() {
+  var block = this;
+  while (block) {
+    if (block.frame_) {
+      return block.frame_;
+    }
+    block = block.parentBlock_;
+  }
+  return null;
+};
+
 
 /**
  * Return the input that connects to the specified block.

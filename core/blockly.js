@@ -200,6 +200,8 @@ Blockly.onKeyDown_ = function(e) {
     // Pressing esc closes the context menu and any drop-down
     Blockly.hideChaff();
     Blockly.DropDownDiv.hide();
+    // Pressing esc cancel frame creation
+    Blockly.mainWorkspace.setCreatingFrame(false);
   } else if (e.keyCode == 8 || e.keyCode == 46) {
     // Delete or backspace.
     // Stop the browser from going back to the previous page.

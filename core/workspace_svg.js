@@ -312,7 +312,7 @@ Blockly.WorkspaceSvg.prototype.inverseScreenCTMDirty_ = true;
  * @type {Boolean}
  * @private
  */
-Blockly.WorkspaceSvg.prototype.createFrameOnNextMouseDown = false;
+Blockly.WorkspaceSvg.prototype.creatingFrame = false;
 
 /**
  * Getter for the inverted screen CTM.
@@ -1437,13 +1437,18 @@ Blockly.WorkspaceSvg.prototype.cleanUp = function() {
   this.setResizesEnabled(false);
   Blockly.Events.setGroup(true);
   var topBlocks = this.getTopBlocks(true);
+  var topFrames = this.getTopFrames(true);
   var cursorY = 0;
+  for (var i = 0, frame; frame = topFrames[i]; i++) {
+    var xy = frame.getFrameGroupRelativeXY();
+    frame.moveBy(-xy.x, cursorY - xy.y);
+    cursorY = frame.getFrameGroupRelativeXY().y +
+    frame.getHeight() + Blockly.BlockSvg.MIN_BLOCK_Y;
+  }
   for (var i = 0, block; block = topBlocks[i]; i++) {
-    // powered by xigua start
-    if (block.hidden) {
+    if (block.hidden || block.getSelfFrame()) {
       continue;
     }
-    // powered by xigua end
     var xy = block.getRelativeToSurfaceXY();
     block.moveBy(-xy.x, cursorY - xy.y);
     block.snapToGrid();

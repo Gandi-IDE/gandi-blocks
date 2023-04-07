@@ -330,7 +330,7 @@ Blockly.ContextMenu.wsCreateFrameOption = function(ws) {
   return {
     text: Blockly.Msg.CREATE_FRAME,
     enabled: true,
-    callback: ws.onSelectCreateFrameOption.bind(ws)
+    callback: ws.setCreatingFrame.bind(ws, true)
   };
 };
 

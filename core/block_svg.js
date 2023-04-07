@@ -320,9 +320,7 @@ Blockly.BlockSvg.prototype.updateIntersectionObserver = function() {
  * @param {Blockly.BlockSvg} newParent New parent block.
  */
 Blockly.BlockSvg.prototype.setParent = function(newParent) {
-  if (window.debuggingBlockly) {
-    console.trace('setParent', newParent);
-  }
+
   var oldParent = this.parentBlock_;
   if (newParent == oldParent) {
     return;
@@ -330,16 +328,6 @@ Blockly.BlockSvg.prototype.setParent = function(newParent) {
   Blockly.Field.startCache();
   Blockly.BlockSvg.superClass_.setParent.call(this, newParent);
   Blockly.Field.stopCache();
-
-  if (this.getRemovableToFrame(true)) {
-    if ((newParent && !oldParent) || (!newParent && oldParent)) {
-      if (newParent && !oldParent) {
-        this.requestMoveOutFrame();
-      } else if (!newParent && oldParent) {
-        this.requestMoveInFrame();
-      }
-    }
-  }
 
   var svgRoot = this.getSvgRoot();
 
@@ -351,10 +339,10 @@ Blockly.BlockSvg.prototype.setParent = function(newParent) {
 
   this.updateIntersectionObserver();
 
-  var oldXY = this.getRelativeToSurfaceXY(true);
+  var oldXY = this.getRelativeToSurfaceXY();
   if (newParent) {
     newParent.getSvgRoot().appendChild(svgRoot);
-    var newXY = this.getRelativeToSurfaceXY(true);
+    var newXY = this.getRelativeToSurfaceXY();
     // Move the connections to match the child's new position.
     this.moveConnections_(newXY.x - oldXY.x, newXY.y - oldXY.y);
     // If we are a shadow block, inherit tertiary colour.
@@ -453,16 +441,14 @@ Blockly.BlockSvg.prototype.requestMoveInFrame = function() {
   if (this.getRemovableToFrame()) {
     var frame = this.workspace.requestAddBlockToFrame(this);
     if (frame && this.frame_ !== frame) {
-      this.frame_ = frame;
       var root = this.getSvgRoot();
       goog.dom.removeNode(root);
       var xy = Blockly.utils.getRelativeXY(root);
-      var blockGroupXY = this.frame_.getBlockGroupRelativeXY();
+      var blockGroupXY = frame.getBlockGroupRelativeXY();
       this.translate(xy.x - blockGroupXY.x, xy.y - blockGroupXY.y);
-      this.frame_.blocksGroup_.appendChild(root);
-    } else {
-      this.frame_ = frame;
+      frame.blocksGroup_.appendChild(root);
     }
+    this.frame_ = frame;
   }
 };
 
@@ -513,9 +499,9 @@ Blockly.BlockSvg.prototype.moveToDragSurface_ = function(e) {
   // This is in workspace coordinates.
   var xy = this.getRelativeToSurfaceXY(true);
   this.clearTransformAttributes_();
-  
-  if (this.frame_) {
-    xy = goog.math.Coordinate.sum(xy, this.frame_.getBlockGroupRelativeXY());
+  var frame = this.getTopFrame();
+  if (frame) {
+    xy = goog.math.Coordinate.sum(xy, frame.getBlockGroupRelativeXY());
   }
   this.workspace.blockDragSurface_.translateSurface(xy.x, xy.y);
   // Execute the move on the top-level SVG component
@@ -549,7 +535,7 @@ Blockly.BlockSvg.prototype.moveOffDragSurface_ = function(newXY) {
  * @package
  */
 Blockly.BlockSvg.prototype.moveDuringDrag = function(newLoc, selfDrag) {
-  if (this.useDragSurface_ && !selfDrag) {
+  if (this.useDragSurface_ && !selfDrag && this.workspace) {
     this.workspace.blockDragSurface_.translateSurface(newLoc.x, newLoc.y);
   } else {
     this.svgGroup_.translate_ = 'translate(' + newLoc.x + ',' + newLoc.y + ')';
@@ -869,15 +855,6 @@ Blockly.BlockSvg.prototype.setDragging = function(adding) {
   }
 };
 
-/**
- * Handle the situation when block stop dragging.
- * @package
- */
-Blockly.BlockSvg.prototype.handleStopDrag_ = function() {
-  if (this.getRemovableToFrame()) {
-    this.requestMoveInFrame();
-  }
-};
 
 /**
  * Add or remove the UI indicating if this block is movable or not.

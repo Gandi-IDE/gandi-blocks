@@ -229,6 +229,12 @@ Blockly.Workspace.prototype.removeTopFrame = function(frame) {
   }
 };
 
+Blockly.Workspace.prototype.resetFrameAndTopBlocksMap = function() {
+  this.topFrames_.forEach(frame => {
+    frame.updateOwnedBlocks();
+  });
+};
+
 /**
  * Finds the top-level frames and returns them.  Frames are optionally sorted
  * by position; top to bottom (with slight LTR or RTL bias).
@@ -245,12 +251,26 @@ Blockly.Workspace.prototype.getTopFrames = function(ordered) {
       offset *= -1;
     }
     frames.sort(function(a, b) {
-      var aXY = a.getRelativeToSurfaceXY();
-      var bXY = b.getRelativeToSurfaceXY();
+      var aXY = a.getFrameGroupRelativeXY();
+      var bXY = b.getFrameGroupRelativeXY();
       return (aXY.y + offset * aXY.x) - (bXY.y + offset * bXY.x);
     });
   }
   return frames;
+};
+
+/**
+ * Move this frame to the front of the workspace.
+ * @param {!Blockly.Frame} frame Frame to move.
+ * @package
+ */
+Blockly.Workspace.prototype.setFrameToFront = function(frame) {
+  var index = this.topFrames_.indexOf(frame);
+  if(index !== -1) {
+    this.topFrames_.splice(index, 1, frame);
+    var frameGroup = frame.getSvgRoot();
+    frameGroup.parentNode.appendChild(frameGroup);
+  }
 };
 
 /**
@@ -414,22 +434,13 @@ Blockly.Workspace.prototype.clear = function() {
   this.isClearing = false;
 };
 
-Blockly.Workspace.prototype.onSelectCreateFrameOption = function() {
-  this.createFrameOnNextMouseDown = true;
-  this.svgGroup_.style.cursor = 'crosshair';
-  var frames = this.frameDB_;
-  Object.keys(frames).find(function(frameId) {
-    frames[frameId].getSvgRoot().style.cursor = 'not-allowed';
-  });
-};
-
-Blockly.Workspace.prototype.onFrameCreationComplete = function() {
-  this.createFrameOnNextMouseDown = false;
-  this.svgGroup_.style.cursor = '';
-  var frames = this.frameDB_;
-  Object.keys(frames).find(function(frameId) {
-    frames[frameId].getSvgRoot().style.cursor = '';
-  });
+Blockly.Workspace.prototype.setCreatingFrame = function(visible) {
+  this.creatingFrame = visible;
+  if(visible) {
+    this.svgGroup_.classList.add('creatingFrame');
+  } else {
+    this.svgGroup_.classList.remove('creatingFrame');
+  }
 };
 
 /* Begin functions that are just pass-throughs to the variable map. */

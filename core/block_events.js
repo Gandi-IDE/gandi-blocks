@@ -464,7 +464,7 @@ Blockly.Events.Move.prototype.currentLocation_ = function() {
   var workspace = Blockly.Workspace.getById(this.workspaceId);
   var block = workspace.getBlockById(this.blockId);
   var location = {};
-  var frame = block.getBlockFrame();
+  var frame = block.getSelfFrame();
   if (frame) {
     location.frameId = frame.id;
   }

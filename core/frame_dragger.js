@@ -62,7 +62,7 @@ Blockly.FrameDragger = function(frame, workspace) {
    * @type {!goog.math.Coordinate}
    * @private
    */
-  this.startXY_ = this.draggingFrame_.getRelativeToSurfaceXY();
+  this.startXY_ = this.draggingFrame_.getFrameGroupRelativeXY();
 };
 
 /**
@@ -72,7 +72,6 @@ Blockly.FrameDragger = function(frame, workspace) {
 Blockly.FrameDragger.prototype.dispose = function() {
   this.draggingFrame_ = null;
   this.workspace_ = null;
-  this.startWorkspace_ = null;
 };
 
 
@@ -92,7 +91,7 @@ Blockly.FrameDragger.prototype.startFrameDrag = function() {
   }
 
   this.draggingFrame_.oldBoundingFrameRect_ = this.draggingFrame_.getBoundingFrameRect();
-  this.draggingFrame_.bringToFront();
+  this.workspace_.setFrameToFront(this.draggingFrame_);
   this.workspace_.setResizesEnabled(false);
   this.draggingFrame_.setDragging(true);
 };
@@ -133,12 +132,12 @@ Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
   for (let index = 0; index < blocks.length; index++) {
     blocks[index].moveConnections_(delta.x, delta.y);
   }
-  this.draggingFrame_.updateOwnedBlocks();
   var isOutside = this.wasOutside_;
   this.fireEndDragEvent_(isOutside);
   this.draggingFrame_.setMouseThroughStyle(false);
   this.draggingFrame_.setDragging(false);
   this.workspace_.setResizesEnabled(true);
+  this.workspace_.resetFrameAndTopBlocksMap();
   Blockly.Events.setGroup(false);
 };
 

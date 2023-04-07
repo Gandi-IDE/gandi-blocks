@@ -1111,6 +1111,14 @@ Blockly.Css.CONTENT = [
     'float: left;',
   '}',
 
+  '.creatingFrame {',
+    'cursor: crosshair;',
+  '}',
+
+  '.creatingFrame .blocklyFrame {',
+    'cursor: not-allowed;',
+  '}',
+
   '.blocklyFrame .frameResizeButtons {',
     'visibility: hidden;',
   '}',
@@ -1295,8 +1303,9 @@ Blockly.Css.CONTENT = [
   /* State: hover. */
   '.blocklyWidgetDiv .goog-menuitem-highlight,',
   '.blocklyWidgetDiv .goog-menuitem-hover {',
+    'color: white;',
     'cursor: pointer;',
-    'background-color: var(--theme-brand-color-p3);',
+    'background-color: var(--theme-brand-color);',
   '}',
 
   '.blocklyDropDownDiv .goog-menuitem-highlight,',

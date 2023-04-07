@@ -129,7 +129,15 @@ Blockly.Events.FrameCreate.prototype.fromJson = function(json) {
 Blockly.Events.FrameCreate.prototype.run = function(forward) {
   var workspace = this.getEventWorkspace_();
   if (forward) {
-    workspace.createFrame(this.frameId, this.title, this.blocks,  this.x, this.y, this.width, this.height);
+    workspace.createFrame({
+      id: this.frameId,
+      title: this.title,
+      blocks: this.blocks,
+      x: this.x,
+      y: this.y,
+      width: this.width,
+      height: this.height
+    });
   } else {
     workspace.deleteFrameById(this.frameId);
   }
@@ -200,7 +208,15 @@ Blockly.Events.FrameDelete.prototype.run = function(forward) {
   if (forward) {
     workspace.deleteFrameById(this.frameId);
   } else {
-    workspace.createFrame(this.frameId, this.title, this.blocks,  this.x, this.y, this.width, this.height);
+    workspace.createFrame({
+      id: this.frameId,
+      title: this.title,
+      blocks: this.blocks,
+      x: this.x,
+      y: this.y,
+      width: this.width,
+      height: this.height
+    });
   }
 };
 
@@ -266,24 +282,20 @@ Blockly.Events.FrameRetitle.prototype.run = function(forward) {
  * Class for a frame change event.
  * @param {Blockly.Frame} frame
  *     The frame that is being changed. Null for a blank event.
- * @param {!object} oldProperties Object containing previous state of a frame's
- *     properties. The possible properties can be: 'blocks', 'x', 'y', or
- *     'width' and 'height' together. Must contain the same property (or in the
- *     case of 'width' and 'height' properties) as the 'newProperties' param.
- * @param {!object} newProperties Object containing the new state of a frame's
- *     properties. The possible properties can be: 'blocks', 'x', 'y', or
- *     'width' and 'height' together. Must contain the same property (or in the
- *     case of 'width' and 'height' properties) as the 'oldProperties' param.
+ * @param {string} element One of 'rect', 'blocks', 'disabled', etc.
+ * @param {*} oldValue Previous value of element.
+ * @param {*} newValue New value of element.
  * @extends {Blockly.Events.FrameBase}
  * @constructor
  */
-Blockly.Events.FrameChange = function(frame, oldProperties, newProperties) {
+Blockly.Events.FrameChange = function(frame, element, oldValue, newValue) {
   if (!frame) {
     return;  // Blank event to be populated by fromJson.
   }
   Blockly.Events.FrameChange.superClass_.constructor.call(this, frame);
-  this.oldProperties = oldProperties;
-  this.newProperties = newProperties;
+  this.element = element;
+  this.oldValue = oldValue;
+  this.newValue = newValue;
 };
 goog.inherits(Blockly.Events.FrameChange, Blockly.Events.FrameBase);
 
@@ -299,7 +311,8 @@ Blockly.Events.FrameChange.prototype.type = Blockly.Events.FRAME_CHANGE;
  */
 Blockly.Events.FrameChange.prototype.toJson = function() {
   var json = Blockly.Events.FrameChange.superClass_.toJson.call(this);
-  json['newProperties'] = this.newProperties;
+  json['element'] = this.element;
+  json['newValue'] = this.newValue;
   return json;
 };
 
@@ -309,7 +322,8 @@ Blockly.Events.FrameChange.prototype.toJson = function() {
  */
 Blockly.Events.FrameChange.prototype.fromJson = function(json) {
   Blockly.Events.FrameChange.superClass_.fromJson.call(this, json);
-  this.newProperties = json['newValue'];
+  this.element = json['element'];
+  this.newValue = json['newValue'];
 };
 
 /**
@@ -317,7 +331,7 @@ Blockly.Events.FrameChange.prototype.fromJson = function(json) {
  * @return {boolean} False if something changed.
  */
 Blockly.Events.FrameChange.prototype.isNull = function() {
-  return this.oldProperties == this.newProperties;
+  return JSON.stringify(this.oldValue) == JSON.stringify(this.newValue);
 };
 
 /**
@@ -325,19 +339,26 @@ Blockly.Events.FrameChange.prototype.isNull = function() {
  * @param {boolean} forward True if run forward, false if run backward (undo).
  */
 Blockly.Events.FrameChange.prototype.run = function(forward) {
-  // var frame = this.getFrame_();
-  // if (!frame) {
-  //   console.warn('Can\'t change non-existent frame: ' + this.frameId);
-  //   return;
-  // }
-  // var contents = forward ? this.newProperties : this.oldProperties;
-  // if (contents.hasOwnProperty('minimized')) {
-  //   frame.setMinimized(contents.minimized);
-  // }
-  // if (contents.hasOwnProperty('width') && contents.hasOwnProperty('height')) {
-  //   frame.setSize(contents.width, contents.height);
-  // }
-  // if (contents.hasOwnProperty('text')) {
-  //   frame.setText(contents.text);
-  // }
+  var workspace = this.getEventWorkspace_();
+  var frame = workspace.getFrameById(this.frameId);
+  if (!frame) {
+    console.warn('Can\'t change non-existent frame: ' + this.frameId);
+    return;
+  }
+  var properties = forward ? this.newProperties : this.oldProperties;
+
+  if (properties) {
+    frame.resetFrameRect(properties);
+  }
+  var value = forward ? this.newValue : this.oldValue;
+  switch (this.element) {
+    case 'blocks':
+      frame.resetFrameBlocks(value);
+      break;
+    case 'rect':
+      frame.resetFrameRect(value);
+      break;
+    default:
+      console.warn('Unknown change type: ' + this.element);
+  }
 };

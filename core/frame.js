@@ -106,8 +106,6 @@ Blockly.Frame = function(workspace, opt_options) {
     br: null,
   };
 
-  workspace.addTopFrame(this);
-
   this.createDom_();
 
   if (this.options.blocks) {
@@ -116,6 +114,8 @@ Blockly.Frame = function(workspace, opt_options) {
     });
   }
 
+  workspace.addTopFrame(this);
+  Blockly.Events.setGroup(true);
   Blockly.Events.fire(new Blockly.Events.FrameCreate(this));
 };
 
@@ -168,22 +168,6 @@ Blockly.Frame.prototype.titleTextTextareaHeight_ = 20;
  */
 Blockly.Frame.prototype.borderColor_ = 'var(--theme-brand-color, #2D8CFF)';
 
-/**
- * Called before the frame is successfully created。
- */
-Blockly.Frame.prototype.beforeCreateSuccess = function() {
-  if(this.getWidth() < 2 && this.getHeight() < 2) {
-    this.dispose();
-  } else {
-    this.checkRect_();
-    this.createResizeGroup_();
-    this.updateResizeButtonsPosition();
-    this.updateOwnedBlocks();
-    this.fireFrameRectChange();
-    this.workspace.onFrameCreationComplete();
-  }
-  this.onStopResizeRect_();
-};
 
 /**
  * Move this frame to the front of the workspace.
@@ -254,6 +238,8 @@ Blockly.Frame.prototype.createDom_ = function() {
   Blockly.bindEventWithChecks_(
       this.svgRect_, 'mousedown', null, this.onRectMouseDown_.bind(this));
 
+  this.createResizeGroup_();
+
   this.createTitleEditor_();
 };
 
@@ -265,7 +251,6 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
   this.foreignObject_ = Blockly.utils.createSvgElement('foreignObject', {
     'x': this.resizeButtonWidth_ / 2, 'y': 0, height: 0, width: 0
   }, this.frameGroup_);
-  this.onStartResizeRect_();
   var body = document.createElementNS(Blockly.HTML_NS, 'body');
   body.setAttribute('xmlns', Blockly.HTML_NS);
   body.className = 'blocklyMinimalBody blocklyFrameTitleBody';
@@ -314,7 +299,7 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
     'class': 'blocklyResizeButtonNE',
     'stroke': this.borderColor_,
     'fill': 'var(--theme-text-primary, #FFFFFF)',
-    'x': this.resizeButtonWidth_,
+    'x': this.getWidth(),
     'y': this.titleTextTextareaHeight_,
     'height': this.resizeButtonHeight_,
     'width': this.resizeButtonWidth_
@@ -326,7 +311,7 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
     'stroke': this.borderColor_,
     'fill': 'var(--theme-text-primary, #FFFFFF)',
     'x': '0',
-    'y': this.resizeButtonHeight_ + this.titleTextTextareaHeight_,
+    'y': this.getHeight() + this.titleTextTextareaHeight_,
     'height': this.resizeButtonHeight_,
     'width': this.resizeButtonWidth_
   }, this.resizeGroup_);
@@ -336,8 +321,8 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
     'class': 'blocklyResizeButtonSE',
     'stroke': this.borderColor_,
     'fill': 'var(--theme-text-primary, #FFFFFF)',
-    'x': this.resizeButtonWidth_,
-    'y': this.resizeButtonHeight_ + this.titleTextTextareaHeight_,
+    'x': this.getWidth(),
+    'y': this.getHeight() + this.titleTextTextareaHeight_,
     'height': this.resizeButtonHeight_,
     'width': this.resizeButtonWidth_
   }, this.resizeGroup_);
@@ -345,8 +330,16 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
   return this.resizeGroup_;
 };
 
+Blockly.Frame.prototype.fireFrameChange = function(element, oldValue, newValue) {
+  Blockly.Events.fire(new Blockly.Events.FrameChange(this, element, oldValue, newValue));
+};
+
 Blockly.Frame.prototype.fireFrameRectChange = function() {
-  Blockly.Events.fire(new Blockly.Events.FrameChange(this, this.oldBoundingFrameRect_, this.getBoundingFrameRect()));
+  this.fireFrameChange('rect', this.oldBoundingFrameRect_, this.getBoundingFrameRect());
+};
+
+Blockly.Frame.prototype.fireFrameBlocksChange = function() {
+  this.fireFrameChange('blocks', this.oldBlocks_, this.getBlockIds());
 };
 
 /**
@@ -357,7 +350,7 @@ Blockly.Frame.prototype.fireFrameRectChange = function() {
  *    Object with top left and bottom right coordinates of the bounding box.
  */
 Blockly.Frame.prototype.getBoundingRectangle = function() {
-  var frame = this.getRelativeToSurfaceXY(true);
+  var frame = this.getFrameGroupRelativeXY(true);
   var width = this.getWidth();
   var height = this.getHeight();
   var topLeft;
@@ -385,7 +378,7 @@ Blockly.Frame.prototype.getBoundingRectangle = function() {
  * @return {!goog.math.Coordinate} Object with .x and .y properties in
  *     workspace coordinates.
  */
-Blockly.Frame.prototype.getRelativeToSurfaceXY = function() {
+Blockly.Frame.prototype.getFrameGroupRelativeXY = function() {
   return Blockly.utils.getRelativeXY(this.frameGroup_);
 };
 
@@ -436,7 +429,7 @@ Blockly.Frame.prototype.getBoundingFrameRect = function() {
   };
 };
 
-Blockly.Frame.prototype.getIncludeBlocks = function() {
+Blockly.Frame.prototype.getBlockIds = function() {
   return Object.keys(this.blockDB_);
 };
 
@@ -472,16 +465,45 @@ Blockly.Frame.prototype.moveDuringDrag = function(newLoc) {
   this.translateFrameGroup();
 };
 
+/**
+ * Move a frame by a relative offset.
+ * @param {number} dx Horizontal offset in workspace units.
+ * @param {number} dy Vertical offset in workspace units.
+ */
+Blockly.Frame.prototype.moveBy = function(dx, dy) {
+  var eventsEnabled = Blockly.Events.isEnabled();
+  if (eventsEnabled) {
+    this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
+  }
+  var xy = this.getFrameGroupRelativeXY();
+
+  this.rect_.left += dx;
+  this.rect_.top += dy;
+  this.rect_.right += dx;
+  this.rect_.bottom += dy;
+
+  this.translate(xy.x + dx, xy.y + dy);
+  
+  if (eventsEnabled) {
+    this.fireFrameRectChange();
+  }
+  this.workspace.resizeContents();
+};
+
 Blockly.Frame.prototype.addBlock = function(block) {
-  var oldBlocks = this.getIncludeBlocks();
-  this.blockDB_[block.id] = block;
-  Blockly.Events.fire(new Blockly.Events.FrameChange(this, {blocks: oldBlocks}, {blocks: this.getIncludeBlocks()}));
+  if (!this.blockDB_[block.id]) {
+    this.oldBlocks_ = this.getBlockIds();
+    this.blockDB_[block.id] = block;
+    this.fireFrameBlocksChange();
+  }
 };
   
 Blockly.Frame.prototype.removeBlock = function(block) {
-  var oldBlocks = this.getIncludeBlocks();
-  delete this.blockDB_[block.id];
-  Blockly.Events.fire(new Blockly.Events.FrameChange(this, {blocks: oldBlocks}, {blocks: this.getIncludeBlocks()}));
+  if (this.blockDB_[block.id]) {
+    this.oldBlocks_ = this.getBlockIds();
+    delete this.blockDB_[block.id];
+    this.fireFrameBlocksChange();
+  }
 };
 
 /**
@@ -491,10 +513,12 @@ Blockly.Frame.prototype.removeBlock = function(block) {
  */
 Blockly.Frame.prototype.onStartResizeRect_ = function() {
   this.foreignObject_.style['pointer-events'] = 'none';
+  this.resizeGroup_.style.display = 'none';
 };
 
 Blockly.Frame.prototype.onStopResizeRect_ = function() {
-  this.foreignObject_.style['pointer-events'] = 'auto';
+  this.foreignObject_.style['pointer-events'] = '';
+  this.resizeGroup_.style.display = '';
 };
 
 /**
@@ -503,13 +527,13 @@ Blockly.Frame.prototype.onStopResizeRect_ = function() {
  * @private
  */
 Blockly.Frame.prototype.onRectMouseDown_ = function(e) {
-  if (this.workspace.createFrameOnNextMouseDown) {
-    this.workspace.onFrameCreationComplete();
+  if (this.workspace.creatingFrame) {
     e.stopPropagation();
-  }
-  var gesture = this.workspace && this.workspace.getGesture(e);
-  if (gesture) {
-    gesture.handleFrameStart(e, this);
+  } else {
+    var gesture = this.workspace && this.workspace.getGesture(e);
+    if (gesture) {
+      gesture.handleFrameStart(e, this);
+    }
   }
 };
 
@@ -517,16 +541,25 @@ Blockly.Frame.prototype.onRectMouseDown_ = function(e) {
  * Create the resize group.
  * @param {String} dir The direction of the button.
  * @param {!Event} e Mouse down event or touch start event.
+ * @param {Boolean} takeOverSubEvents Whether to take over subsequent events.
  * @private
  */
-Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e) {
+Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e, takeOverSubEvents) {
   this.mostRecentEvent_ = e;
   this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
+  this.frameGroup_.style.cursor = 'pointer';
   this.onStartResizeRect_();
-  this.resizeButtonMouseMoveBindData_ =
-    Blockly.bindEventWithChecks_(document, 'mousemove', null,  this.resizeButtonMouseMove_.bind(this, dir));
-  this.resizeButtonMouseUpBindData_ =
-    Blockly.bindEventWithChecks_(document, 'mouseup', null,  this.resizeButtonMouseUp_.bind(this, dir));
+
+  if(takeOverSubEvents) {
+    var wsRelativeXY = Blockly.utils.getRelativeXY(this.workspace.svgBlockCanvas_);
+    this.rect_.left = this.rect_.right = (e.offsetX - wsRelativeXY.x) / this.workspace.scale;
+    this.rect_.top = this.rect_.bottom = (e.offsetY - wsRelativeXY.y) / this.workspace.scale;
+  } else {
+    this.resizeButtonMouseMoveBindData_ =
+      Blockly.bindEventWithChecks_(document, 'mousemove', null,  this.resizeButtonMouseMove_.bind(this, dir));
+    this.resizeButtonMouseUpBindData_ =
+      Blockly.bindEventWithChecks_(document, 'mouseup', null,  this.resizeButtonMouseUp_.bind(this, dir));
+  }
   
   e.preventDefault();
   e.stopPropagation();
@@ -555,25 +588,68 @@ Blockly.Frame.prototype.resizeButtonMouseMove_ = function(dir, e) {
  * Create the resize group.
  * @param {String} dir The direction of the button.
  * @param {!Event} e Mouse down event or touch start event.
+ * @param {Boolean} takeOverSubEvents Whether to take over subsequent events.
  * @private
  */
-Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e) {
+Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvents) {
+  this.frameGroup_.style.cursor = '';
   this.resizeButtonMouseMove_(dir,e);
   this.checkRect_();
   this.updateOwnedBlocks();
   this.onStopResizeRect_();
   this.fireFrameRectChange();
-  Blockly.unbindEvent_(this.resizeButtonMouseMoveBindData_);
-  Blockly.unbindEvent_(this.resizeButtonMouseUpBindData_);
+  if (takeOverSubEvents) {
+    this.workspace.setCreatingFrame(false);
+    Blockly.Events.setGroup(false);
+  } else {
+    Blockly.unbindEvent_(this.resizeButtonMouseMoveBindData_);
+    Blockly.unbindEvent_(this.resizeButtonMouseUpBindData_);
+  }
 };
 
 /**
- * If a block is within the range of the frame, it can be collected..
+ * Create the resize group.
+ * @param {!Object} rect Mouse down event or touch start event.
+ * @private
+ */
+Blockly.Frame.prototype.resetFrameRect = function(rect) {
+  this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
+  this.rect_.left = rect.x + this.resizeButtonWidth_ / 2;
+  this.rect_.top = rect.y + (this.titleTextTextareaHeight_ + this.resizeButtonHeight_ / 2);
+  this.rect_.bottom = this.rect_.top + rect.height;
+  this.rect_.right = this.rect_.left + rect.width;
+  this.rect_.width = rect.width;
+  this.rect_.height = rect.height;
+  this.translate(rect.x, rect.y);
+  this.updateFrameRectSize();
+  this.updateResizeButtonsPosition();
+  this.fireFrameRectChange();
+};
+
+Blockly.Frame.prototype.resetFrameBlocks = function(blockIds) {
+  const blocks = {};
+  blockIds.forEach(blockId => {
+    const block = this.workspace.getBlockById(blockId);
+    if(block) {
+      blocks[block.id] = block;
+    }
+  });
+
+  this.oldBlocks_ = this.getBlockIds();
+  this.blockDB_ = blocks;
+
+  if(JSON.stringify(this.oldBlockIds) !== JSON.stringify(blockIds)) {
+    this.fireFrameBlocksChange();
+  }
+};
+
+/**
+ * If a block is within the range of the frame, it can be collected.
  * @param {Blockly.BlockSvg} block Mouse down event or touch start event.
  * @return {boolean} true if the block was successfully added.
  */
 Blockly.Frame.prototype.requestMoveInBlock = function(block) {
-  const {x,y} = Blockly.utils.getRelativeXY(block.svgGroup_);
+  const {x,y} = block.getRelativeToSurfaceXY(true);
   const {left, right, top, bottom, width, height} = this.rect_;
   let removeAble = false;
   if (block.frame_ === this) {
@@ -589,25 +665,6 @@ Blockly.Frame.prototype.requestMoveInBlock = function(block) {
   return removeAble;
 };
 
-Blockly.Frame.prototype.resizeMouseDown_ = function(e) {
-  this.mostRecentEvent_ = e;
-  var wsRelativeXY = Blockly.utils.getRelativeXY(this.workspace.svgBlockCanvas_);
-  this.rect_.left = this.rect_.right = (e.offsetX - wsRelativeXY.x) / this.workspace.scale;
-  this.rect_.top = this.rect_.bottom = (e.offsetY - wsRelativeXY.y) / this.workspace.scale;
-};
-
-Blockly.Frame.prototype.resizeMouseMove_ = function(dir, e) {
-  var diffX = (e.offsetX - this.mostRecentEvent_.offsetX) / this.workspace.scale;
-  var diffY = (e.offsetY - this.mostRecentEvent_.offsetY) / this.workspace.scale;
-  this.mostRecentEvent_ = e;
-  var xDir = dir === 'tr' || dir === 'br' ? 'ltr' : 'rtl';
-  var yDir = dir === 'tl' || dir === 'tr' ? 'btt' : 'ttb';
-  this.updateBoundingClientRect(diffX, diffY, xDir, yDir);
-  this.translateFrameGroup();
-  this.updateFrameRectSize();
-  this.updateTitleBoxSize();
-};
-
 /**
  * Recursively adds or removes the dragging class to this node.
  * @param {boolean} adding True if adding, false if removing.
@@ -618,7 +675,6 @@ Blockly.Frame.prototype.setDragging = function(adding) {
     this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
     var group = this.getSvgRoot();
     group.translate_ = '';
-    group.skew_ = '';
     Blockly.utils.addClass(
         /** @type {!Element} */ (this.frameGroup_), 'blocklyDragging');
     this.onStartResizeRect_();
@@ -681,7 +737,18 @@ Blockly.Frame.prototype.translateFrameGroup = function() {
   var ry = this.rect_.top < this.rect_.bottom ? this.rect_.top : this.rect_.bottom;
   var tx = rx - this.resizeButtonWidth_ / 2;
   var ty = ry - this.resizeButtonHeight_ / 2 - this.titleTextTextareaHeight_;
-  this.frameGroup_.setAttribute('transform', `translate(${tx},${ty})`);
+  this.translate(tx, ty);
+};
+
+/**
+ * Transforms a frame by setting the translation on the transform attribute
+ * of the frame's SVG.
+ * @param {number} x The x coordinate of the translation in workspace units.
+ * @param {number} y The y coordinate of the translation in workspace units.
+ */
+Blockly.Frame.prototype.translate = function(x, y) {
+  this.getSvgRoot().setAttribute('transform',
+      'translate(' + x + ',' + y + ')');
 };
 
 Blockly.Frame.prototype.updateFrameRectSize = function() {
