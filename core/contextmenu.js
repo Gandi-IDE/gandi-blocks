@@ -354,6 +354,26 @@ Blockly.ContextMenu.frameDeleteOption = function(frame) {
 };
 
 /**
+ * Make a context menu option for cleaning up blocks on the frame, by
+ * aligning them vertically.
+ * @param {!Blockly.BlockSvg} frame The frame where the right-click originated.
+ * @return {!Object} A menu option, containing text, enabled, and a callback.
+ * @package
+ */
+Blockly.ContextMenu.frameCleanupOption = function(frame) {
+  var deleteOption = {
+    text: Blockly.Msg.CLEAN_UP,
+    enabled: true,
+    callback: function() {
+      Blockly.Events.setGroup(true);
+      frame.cleanUp();
+      Blockly.Events.setGroup(false);
+    }
+  };
+  return deleteOption;
+};
+
+/**
  * Make a context menu option for duplicating the current frame.
  * @param {!Blockly.BlockSvg} frame The frame where the right-click originated.
  * @param {!Event} event Event that caused the context menu to open.

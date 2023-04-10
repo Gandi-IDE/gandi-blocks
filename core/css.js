@@ -219,6 +219,11 @@ Blockly.Css.CONTENT = [
     'right: 0;',
     'bottom: 0;',
     'overflow: visible !important;',
+    /*
+        Fix an issue where the drag surface was preventing hover events for sharing blocks.
+        This does not prevent user interaction on the blocks themselves.
+    */
+    'pointer-events: none;',
     'z-index: 50;', /* Display above the toolbox */
   '}',
 

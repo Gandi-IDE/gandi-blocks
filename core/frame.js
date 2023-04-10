@@ -44,6 +44,7 @@ goog.require('goog.dom');
  * @constructor
  */
 Blockly.Frame = function(workspace, opt_options) {
+  /** @type {!Blockly.Workspace} */
   this.workspace = workspace;
 
   this.options = opt_options || {
@@ -67,6 +68,12 @@ Blockly.Frame = function(workspace, opt_options) {
    * @private
    */
   this.editable_ = true;
+
+  /**
+   * @type {boolean}
+   * @private
+   */
+  this.deletable_ = true;
   
   /**
    * The frame's title
@@ -98,6 +105,8 @@ Blockly.Frame = function(workspace, opt_options) {
    * @private
    */
   this.blockDB_ = {};
+
+  this.tempBlocksXY_ = {};
 
   this.resizeButtons = {
     tl: null,
@@ -330,16 +339,82 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
   return this.resizeGroup_;
 };
 
+
+/**
+ * Clean up the frame by ordering all the blocks in a column.
+ */
+Blockly.Frame.prototype.cleanUp = function() {
+  this.workspace.setResizesEnabled(false);
+  if (!Blockly.Events.getGroup()) {
+    Blockly.Events.setGroup(true);
+  }
+  var blocks = Object.values(this.blockDB_);
+  var height = 10;
+  var width = 0;
+  for (var i = 0, block; block = blocks[i]; i++) {
+    if (block.hidden) {
+      continue;
+    }
+    var xy = block.getRelativeToSurfaceXY(true);
+    block.moveBy(-xy.x + 10, height - xy.y);
+    block.snapToGrid();
+    var blockHeightWidth = block.getHeightWidth();
+    width = Math.max(width, blockHeightWidth.width + 20);
+    height = block.getRelativeToSurfaceXY(true).y + blockHeightWidth.height
+      + Blockly.BlockSvg.MIN_BLOCK_Y;
+  }
+
+  this.resetFrameRect({
+    x: this.rect_.left - this.resizeButtonWidth_ / 2,
+    y: this.rect_.top - (this.titleTextTextareaHeight_ + this.resizeButtonHeight_ / 2),
+    height: height,
+    width: width
+  });
+
+  Blockly.Events.setGroup(false);
+  this.workspace.setResizesEnabled(true);
+};
+
 Blockly.Frame.prototype.fireFrameChange = function(element, oldValue, newValue) {
   Blockly.Events.fire(new Blockly.Events.FrameChange(this, element, oldValue, newValue));
 };
 
 Blockly.Frame.prototype.fireFrameRectChange = function() {
   this.fireFrameChange('rect', this.oldBoundingFrameRect_, this.getBoundingFrameRect());
+  // When the position of a Frame changes, it needs to update the position information of the blocks it contains.
+  this.fireBlocksMove();
 };
 
 Blockly.Frame.prototype.fireFrameBlocksChange = function() {
-  this.fireFrameChange('blocks', this.oldBlocks_, this.getBlockIds());
+  this.fireFrameChange('blocks', this.oldBlockIdList_, this.getBlockIds());
+};
+
+/**
+ * Fire a move event at the end of a frame drag.
+ * @param {!Blockly.BlockSvg} block The root block that is being moved.
+ * @private
+ */
+Blockly.Frame.prototype.fireBlockMoveEvent_ = function(block) {
+  var event = new Blockly.Events.BlockMove(block);
+  event.oldCoordinate = this.tempBlocksXY_[block.id];
+  event.recordNew();
+  Blockly.Events.fire(event);
+};
+
+Blockly.Frame.prototype.onBlocksStartMove = function() {
+  // Recode the old coordinates of the blocks
+  Object.values(this.blockDB_).forEach((block) => {
+    const startXY = block.getRelativeToSurfaceXY();
+    this.tempBlocksXY_[block.id] = startXY;
+  });
+};
+
+Blockly.Frame.prototype.fireBlocksMove = function() {
+  Object.values(this.blockDB_).forEach((block) => {
+    this.fireBlockMoveEvent_(block);
+  });
+
+  this.tempBlocksXY_ = {};
 };
 
 /**
@@ -451,6 +526,14 @@ Blockly.Frame.prototype.isEditable = function() {
 };
 
 /**
+ * Get whether this frame is deletable or not.
+ * @return {boolean} True if deletable.
+ */
+Blockly.Frame.prototype.isDeletable = function() {
+  return this.deletable_ && !(this.workspace && this.workspace.options.readOnly);
+};
+
+/**
  * Move this frame during a drag, taking into account whether we are using a
  * drag surface to translate frame.
  * @param {!goog.math.Coordinate} newLoc The location to translate to, in
@@ -492,7 +575,7 @@ Blockly.Frame.prototype.moveBy = function(dx, dy) {
 
 Blockly.Frame.prototype.addBlock = function(block) {
   if (!this.blockDB_[block.id]) {
-    this.oldBlocks_ = this.getBlockIds();
+    this.oldBlockIdList_ = this.getBlockIds();
     this.blockDB_[block.id] = block;
     this.fireFrameBlocksChange();
   }
@@ -500,10 +583,20 @@ Blockly.Frame.prototype.addBlock = function(block) {
   
 Blockly.Frame.prototype.removeBlock = function(block) {
   if (this.blockDB_[block.id]) {
-    this.oldBlocks_ = this.getBlockIds();
+    this.oldBlockIdList_ = this.getBlockIds();
     delete this.blockDB_[block.id];
     this.fireFrameBlocksChange();
   }
+};
+
+Blockly.Frame.prototype.onStartDrag = function() {
+  this.setDragging(true);
+  this.onBlocksStartMove();
+};
+
+Blockly.Frame.prototype.onStopDrag = function() {
+  this.fireFrameRectChange();
+  this.setDragging(false);
 };
 
 /**
@@ -549,6 +642,7 @@ Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e, takeOverSubEve
   this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
   this.frameGroup_.style.cursor = 'pointer';
   this.onStartResizeRect_();
+  this.onBlocksStartMove();
 
   if(takeOverSubEvents) {
     var wsRelativeXY = Blockly.utils.getRelativeXY(this.workspace.svgBlockCanvas_);
@@ -620,6 +714,7 @@ Blockly.Frame.prototype.resetFrameRect = function(rect) {
   this.rect_.right = this.rect_.left + rect.width;
   this.rect_.width = rect.width;
   this.rect_.height = rect.height;
+
   this.translate(rect.x, rect.y);
   this.updateFrameRectSize();
   this.updateResizeButtonsPosition();
@@ -627,18 +722,14 @@ Blockly.Frame.prototype.resetFrameRect = function(rect) {
 };
 
 Blockly.Frame.prototype.resetFrameBlocks = function(blockIds) {
-  const blocks = {};
+  this.oldBlockIds_ = this.getBlockIds();
   blockIds.forEach(blockId => {
     const block = this.workspace.getBlockById(blockId);
     if(block) {
-      blocks[block.id] = block;
+      block.requestMoveInFrame();
     }
   });
-
-  this.oldBlocks_ = this.getBlockIds();
-  this.blockDB_ = blocks;
-
-  if(JSON.stringify(this.oldBlockIds) !== JSON.stringify(blockIds)) {
+  if(JSON.stringify(this.oldBlockIds_) !== JSON.stringify(blockIds)) {
     this.fireFrameBlocksChange();
   }
 };
@@ -718,11 +809,12 @@ Blockly.Frame.prototype.showContextMenu_ = function(e) {
   if (this.workspace.options.readOnly) {
     return;
   }
-  // Save the current block in a variable for use in closures.
-  var block = this;
+  // Save the current frame in a variable for use in closures.
+  var frame = this;
   var menuOptions = [];
   if (this.isEditable()) {
-    menuOptions.push(Blockly.ContextMenu.frameDeleteOption(block, e));
+    menuOptions.push(Blockly.ContextMenu.frameDeleteOption(frame, e));
+    menuOptions.push(Blockly.ContextMenu.frameCleanupOption(frame, e));
   }
   Blockly.ContextMenu.show(e, menuOptions, this.RTL);
   Blockly.ContextMenu.currentFrame = this;
@@ -772,8 +864,7 @@ Blockly.Frame.prototype.updateTitleBoxSize = function() {
  * Update the owned blocks
  */
 Blockly.Frame.prototype.updateOwnedBlocks = function() {
-  var oldBlocks = this.blockDB_;
-  this.blockDB_ = {};
+  var oldBlocks = Object.assign({}, this.blockDB_);
   const allTopBlocks = this.workspace.getTopBlocks();
   for (let index = 0; index < allTopBlocks.length; index++) {
     allTopBlocks[index].requestMoveInFrame();
@@ -830,18 +921,26 @@ Blockly.Frame.prototype.dispose = function() {
     return;
   }
 
-  for (const key in this.blockDB_) {
-    if (Object.hasOwnProperty.call(this.blockDB_, key)) {
-      const block = this.blockDB_[key];
-      block.dispose();
-    }
+  this.oldBlockIdList_ = this.getBlockIds();
+  var oldBlocks = Object.assign({}, this.blockDB_);
+  this.blockDB_ = {};
+
+  // Remove all blocks;
+  this.fireFrameBlocksChange();
+
+  for (const key in oldBlocks) {
+    const block = oldBlocks[key];
+    var ws = block.workspace;
+    setTimeout(function() {
+      ws.fireDeletionListeners(block);
+    });
+    block.dispose(true, true);
   }
 
   Blockly.Events.fire(new Blockly.Events.FrameDelete(this));
 
   goog.dom.removeNode(this.frameGroup_);
   this.frameGroup_ = null;
-  this.blockDB_ = null;
   this.rect_ = null;
   this.svgRect_ = null;
 

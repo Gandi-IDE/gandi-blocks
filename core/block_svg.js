@@ -320,7 +320,6 @@ Blockly.BlockSvg.prototype.updateIntersectionObserver = function() {
  * @param {Blockly.BlockSvg} newParent New parent block.
  */
 Blockly.BlockSvg.prototype.setParent = function(newParent) {
-
   var oldParent = this.parentBlock_;
   if (newParent == oldParent) {
     return;
@@ -354,10 +353,15 @@ Blockly.BlockSvg.prototype.setParent = function(newParent) {
   // If we are losing a parent, we want to move our DOM element to the
   // root of the workspace.
   else if (oldParent) {
-    this.workspace.getCanvas().appendChild(svgRoot);
-    this.translate(oldXY.x, oldXY.y);
+    if(this.frame_) {
+      var blockGroupXY = this.frame_.getBlockGroupRelativeXY();
+      this.frame_.blocksGroup_.appendChild(svgRoot);
+      this.translate(oldXY.x - blockGroupXY.x, oldXY.y - blockGroupXY.y);
+    } else {
+      this.workspace.getCanvas().appendChild(svgRoot);
+      this.translate(oldXY.x, oldXY.y);
+    }
   }
-
 };
 
 /**
@@ -448,7 +452,7 @@ Blockly.BlockSvg.prototype.requestMoveInFrame = function() {
       this.translate(xy.x - blockGroupXY.x, xy.y - blockGroupXY.y);
       frame.blocksGroup_.appendChild(root);
     }
-    this.frame_ = frame;
+    this.frame_ = frame || null;
   }
 };
 

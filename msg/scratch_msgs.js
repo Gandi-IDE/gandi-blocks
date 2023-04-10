@@ -258,6 +258,8 @@ Blockly.ScratchMsgs.locales["en"] =
   "HELP": "Help",
   "UNDO": "Undo",
   "REDO": "Redo",
+  "FRAME": "Frame",
+  "CREATE_FRAME": "Create Frame",
   "EDIT_PROCEDURE": "Edit",
   "SHOW_PROCEDURE_DEFINITION": "Go to definition",
   "WORKSPACE_COMMENT_DEFAULT_TEXT": "Say something...",

@@ -92,7 +92,7 @@ Blockly.Xml.framesToDom = function(framesList) {
     var rect = frame.rect_;
     element.setAttribute('title', frame.title);
     element.setAttribute('id', frame.id);
-    element.setAttribute('blocks', Object.keys(frame.blockDB_));
+    element.setAttribute('blocks', Object.keys(frame.blockDB_).join(' '));
     element.setAttribute('x', rect.left);
     element.setAttribute('y', rect.top);
     element.setAttribute('width', rect.width);

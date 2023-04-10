@@ -93,7 +93,7 @@ Blockly.FrameDragger.prototype.startFrameDrag = function() {
   this.draggingFrame_.oldBoundingFrameRect_ = this.draggingFrame_.getBoundingFrameRect();
   this.workspace_.setFrameToFront(this.draggingFrame_);
   this.workspace_.setResizesEnabled(false);
-  this.draggingFrame_.setDragging(true);
+  this.draggingFrame_.onStartDrag();
 };
 
 /**
@@ -132,26 +132,10 @@ Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
   for (let index = 0; index < blocks.length; index++) {
     blocks[index].moveConnections_(delta.x, delta.y);
   }
-  var isOutside = this.wasOutside_;
-  this.fireEndDragEvent_(isOutside);
-  this.draggingFrame_.setMouseThroughStyle(false);
-  this.draggingFrame_.setDragging(false);
+  this.draggingFrame_.onStopDrag();
   this.workspace_.setResizesEnabled(true);
   this.workspace_.resetFrameAndTopBlocksMap();
   Blockly.Events.setGroup(false);
-};
-
-/**
- * Fire an end drag event at the end of a frame drag.
- * @param {?boolean} isOutside True if the drag is going outside the visible area.
- * @private
- */
-Blockly.FrameDragger.prototype.fireEndDragEvent_ = function() {
-  if(Blockly.locked) return;
-  var oldRect = this.draggingFrame_.oldBoundingFrameRect_;
-  var newRect = this.draggingFrame_.getBoundingFrameRect();
-  var event = new Blockly.Events.FrameChange(this.draggingFrame_, oldRect, newRect);
-  Blockly.Events.fire(event);
 };
 
 /**
