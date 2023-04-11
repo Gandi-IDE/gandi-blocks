@@ -236,7 +236,8 @@ Blockly.Frame.prototype.createDom_ = function() {
   /** @type {SVGElement} */
   this.svgRect_ = Blockly.utils.createSvgElement('rect',
       {
-        'stroke': this.borderColor_,
+        'class': 'blocklyFrameRectangle',
+        'stroke': 'transparent',
         'fill': 'var(--theme-color-400, rgba(0,0,0,0.3))',
         'x': 0 ,
         'y': 0,
@@ -606,12 +607,10 @@ Blockly.Frame.prototype.onStopDrag = function() {
  */
 Blockly.Frame.prototype.onStartResizeRect_ = function() {
   this.foreignObject_.style['pointer-events'] = 'none';
-  this.resizeGroup_.style.display = 'none';
 };
 
 Blockly.Frame.prototype.onStopResizeRect_ = function() {
   this.foreignObject_.style['pointer-events'] = '';
-  this.resizeGroup_.style.display = '';
 };
 
 /**
@@ -641,6 +640,7 @@ Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e, takeOverSubEve
   this.mostRecentEvent_ = e;
   this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
   this.frameGroup_.style.cursor = 'pointer';
+  this.setResizing(true);
   this.onStartResizeRect_();
   this.onBlocksStartMove();
 
@@ -691,6 +691,7 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
   this.checkRect_();
   this.updateOwnedBlocks();
   this.onStopResizeRect_();
+  this.setResizing(false);
   this.fireFrameRectChange();
   if (takeOverSubEvents) {
     this.workspace.setCreatingFrame(false);
@@ -772,6 +773,26 @@ Blockly.Frame.prototype.setDragging = function(adding) {
   } else {
     Blockly.utils.removeClass(
         /** @type {!Element} */ (this.frameGroup_), 'blocklyDragging');
+    this.onStopResizeRect_();
+  }
+};
+
+/**
+ * Recursively adds or removes the resizing class to this node.
+ * @param {boolean} adding True if adding, false if removing.
+ * @package
+ */
+Blockly.Frame.prototype.setResizing = function(adding) {
+  if (adding) {
+    this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
+    var group = this.getSvgRoot();
+    group.translate_ = '';
+    Blockly.utils.addClass(
+        /** @type {!Element} */ (this.frameGroup_), 'frameResizing');
+    this.onStartResizeRect_();
+  } else {
+    Blockly.utils.removeClass(
+        /** @type {!Element} */ (this.frameGroup_), 'frameResizing');
     this.onStopResizeRect_();
   }
 };

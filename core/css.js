@@ -1132,6 +1132,14 @@ Blockly.Css.CONTENT = [
     'visibility: visible;',
   '}',
 
+  '.blocklyFrame:hover .blocklyFrameRectangle,.frameResizing .blocklyFrameRectangle {',
+    'stroke: var(--theme-brand-color, #2D8CFF);',
+  '}',
+
+  '.blocklyFrame:hover .blocklyFrameTitleTextarea,.frameResizing .blocklyFrameTitleTextarea {',
+    'color: var(--theme-brand-color, #2D8CFF);',
+  '}',
+
   '.blocklyFrameTitleBody {',
     'background: transparent !important;',
   '}',
@@ -1142,13 +1150,18 @@ Blockly.Css.CONTENT = [
     'line-height: 20px;',
     'width: 100%;',
     'height: 20px;',
-    'color: var(--theme-brand-color, #2D8CFF);',
+    'color: var(--theme-color-g300, #D1D5DB);',
     'border: 0;',
     'outline: 0;',
     'margin: 0;',
-    'padding: 0 0;',
+    'padding: 0px 2px;',
     'resize: none;',
     'overflow: hidden;',
+  '}',
+
+  '.blocklyFrame .blocklyFrameTitleTextarea:focus {',
+    'background-color: white;',
+    'color: #000000',
   '}',
 
   '.blocklyResizeButtonNW,.blocklyResizeButtonSE{',
