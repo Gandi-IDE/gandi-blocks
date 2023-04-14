@@ -476,7 +476,7 @@ Blockly.BlockSvg.prototype.requestMoveInFrame = function() {
     var frame = this.workspace.requestAddBlockToFrame(this);
     if (frame) {
       // If the frame of the block associated was changed, update the block group position.
-      if (frame !== this.frame_) {
+      if (frame !== this.frame_ || !frame.getSvgRoot().contains(this.getSvgRoot())) {
         this.frame_ = frame;
         this.moveBlockToContainer('frame');
       }

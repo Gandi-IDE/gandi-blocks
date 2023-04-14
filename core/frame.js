@@ -128,7 +128,7 @@ Blockly.Frame = function(workspace, opt_options) {
 
   if (this.options.blocks) {
     setTimeout(() => {
-      this.appendBlockToBlocksCanvas();
+      this.appendBlocksToBlocksCanvas();
     });
   }
 
@@ -189,10 +189,11 @@ Blockly.Frame.prototype.borderColor_ = 'var(--theme-brand-color, #2D8CFF)';
 /**
  * Append blocks belonging to the node to the blocklyFrameBlockCanvas node below.
  */
-Blockly.Frame.prototype.appendBlockToBlocksCanvas = function() {
+Blockly.Frame.prototype.appendBlocksToBlocksCanvas = function() {
   this.options.blocks.forEach((blockId) => {
     var block = this.workspace.getBlockById(blockId);
     if (block) {
+      block.frame_ = this;
       block.requestMoveInFrame();
     }
   });
@@ -762,11 +763,11 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
   this.frameGroup_.style.cursor = '';
   this.resizeButtonMouseMove_(dir,e);
   this.checkRect_();
-  this.updateOwnedBlocks();
   this.onStopResizeRect_();
   this.setResizing(false);
   this.workspace.setResizesEnabled(false);
   this.fireFrameRectChange();
+  this.updateOwnedBlocks();
   if (takeOverSubEvents) {
     this.workspace.setCreatingFrame(false);
     Blockly.Events.setGroup(false);
