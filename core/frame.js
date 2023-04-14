@@ -30,9 +30,18 @@ goog.require('Blockly.Workspace');
 goog.require('goog.dom');
 
 /**
+ * The Frame rect state
+ * @typedef {object} FrameRectState
+ * @property {number} x - the X coordinate of the workspace's origin.
+ * @property {number} y - the Y coordinate of the workspace's origin.
+ * @property {number} width - the width of the frame's rect.
+ * @property {number} height - the height of the frame's rect.
+ */
+
+/**
  * Class for a frame.
  * @param {!Blockly.Workspace} workspace The block's workspace.
- * @param {!object} opt_options Dictionary of options.
+ * @param {!NumberLike} opt_options Dictionary of options.
  * @property {string} id - Use this ID if provided, otherwise
  *     create a new ID.  If the ID conflicts with an in-use ID, a new one will
  *     be generated.
@@ -106,7 +115,7 @@ Blockly.Frame = function(workspace, opt_options) {
    */
   this.blockDB_ = {};
 
-  this.tempBlocksXY_ = {};
+  this.oldBlocksCoordinate_ = {};
 
   this.resizeButtons = {
     tl: null,
@@ -119,7 +128,7 @@ Blockly.Frame = function(workspace, opt_options) {
 
   if (this.options.blocks) {
     setTimeout(() => {
-      this.initIncludeBlocks();
+      this.appendBlockToBlocksCanvas();
     });
   }
 
@@ -150,21 +159,21 @@ Blockly.Frame.prototype.minWidth_ = 20;
 Blockly.Frame.prototype.minHeight_ = 20;
 
 /**
- * the width of the resize button.
+ * The width of the resize button.
  * @type {string}
  * @private
  */
 Blockly.Frame.prototype.resizeButtonWidth_ = 10;
 
 /**
- * the height of the resize button.
+ * The height of the resize button.
  * @type {string}
  * @private
  */
 Blockly.Frame.prototype.resizeButtonHeight_ = 10;
 
 /**
- * the height of the title textarea.
+ * The height of the title textarea.
  * @type {string}
  * @private
  */
@@ -177,6 +186,17 @@ Blockly.Frame.prototype.titleTextTextareaHeight_ = 20;
  */
 Blockly.Frame.prototype.borderColor_ = 'var(--theme-brand-color, #2D8CFF)';
 
+/**
+ * Append blocks belonging to the node to the blocklyFrameBlockCanvas node below.
+ */
+Blockly.Frame.prototype.appendBlockToBlocksCanvas = function() {
+  this.options.blocks.forEach((blockId) => {
+    var block = this.workspace.getBlockById(blockId);
+    if (block) {
+      block.requestMoveInFrame();
+    }
+  });
+};
 
 /**
  * Move this frame to the front of the workspace.
@@ -192,6 +212,7 @@ Blockly.Frame.prototype.bringToFront = function() {
 
 /**
  * Check whether the identifiers need to be adjusted after resize。
+ * @private
  */
 Blockly.Frame.prototype.checkRect_ = function() {
   if(this.rect_.right < this.rect_.left) {
@@ -222,7 +243,6 @@ Blockly.Frame.prototype.createDom_ = function() {
   if (this.frameGroup_.dataset) {
     this.frameGroup_.dataset.id = this.id;
   }
-  this.translateFrameGroup();
   var tx = this.resizeButtonWidth_ / 2;
   var ty = this.titleTextTextareaHeight_ + this.resizeButtonHeight_ / 2;
   /** @type {SVGElement} */
@@ -231,7 +251,8 @@ Blockly.Frame.prototype.createDom_ = function() {
         'class': 'blocklyFrameBlockCanvas',
         'transform': 'translate(' + tx + ',' + ty + ')',
       }, this.frameGroup_);
-  this.translateFrameGroup();
+  var xy = this.computeFrameRelativeXY(true);
+  this.translate(xy.x, xy.y);
 
   /** @type {SVGElement} */
   this.svgRect_ = Blockly.utils.createSvgElement('rect',
@@ -340,7 +361,6 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
   return this.resizeGroup_;
 };
 
-
 /**
  * Clean up the frame by ordering all the blocks in a column.
  */
@@ -365,7 +385,7 @@ Blockly.Frame.prototype.cleanUp = function() {
       + Blockly.BlockSvg.MIN_BLOCK_Y;
   }
 
-  this.resetFrameRect({
+  this.render({
     x: this.rect_.left - this.resizeButtonWidth_ / 2,
     y: this.rect_.top - (this.titleTextTextareaHeight_ + this.resizeButtonHeight_ / 2),
     height: height,
@@ -376,46 +396,54 @@ Blockly.Frame.prototype.cleanUp = function() {
   this.workspace.setResizesEnabled(true);
 };
 
+/**
+ * Return the coordinates of the top-left corner of this frame relative to the
+ * workspace's origin (0,0).
+ * @return {!goog.math.Coordinate} Object with .x and .y properties in
+ *     workspace coordinates.
+ */
+Blockly.Frame.prototype.computeFrameRelativeXY = function() {
+  var rx = this.rect_.left < this.rect_.right ? this.rect_.left : this.rect_.right;
+  var ry = this.rect_.top < this.rect_.bottom ? this.rect_.top : this.rect_.bottom;
+  var x = rx - this.resizeButtonWidth_ / 2;
+  var y = ry - this.resizeButtonHeight_ / 2 - this.titleTextTextareaHeight_;
+  return new goog.math.Coordinate(x, y);
+};
+
+/**
+ * Fire an event when the frame changes rectangle dimensions or changes blocks.
+ * @param {?string} element One of 'rect', 'blocks', 'disabled', etc.
+ * @param {?boolean} oldValue oldValue Previous value of element.
+ * @param {?boolean} newValue New value of element.
+ * @private
+ */
 Blockly.Frame.prototype.fireFrameChange = function(element, oldValue, newValue) {
   Blockly.Events.fire(new Blockly.Events.FrameChange(this, element, oldValue, newValue));
 };
 
+/**
+ * Fire an event when the frame changes rectangle dimensions or positions.
+ */
 Blockly.Frame.prototype.fireFrameRectChange = function() {
   this.fireFrameChange('rect', this.oldBoundingFrameRect_, this.getBoundingFrameRect());
   // When the position of a Frame changes, it needs to update the position information of the blocks it contains.
-  this.fireBlocksMove();
-};
-
-Blockly.Frame.prototype.fireFrameBlocksChange = function() {
-  this.fireFrameChange('blocks', this.oldBlockIdList_, this.getBlockIds());
+  for (const key in this.blockDB_) {
+    if (Object.hasOwnProperty.call(this.blockDB_, key)) {
+      var block = this.blockDB_[key];
+      var event = new Blockly.Events.BlockMove(block);
+      event.oldCoordinate = this.oldBlocksCoordinate_[block.id];
+      event.recordNew();
+      Blockly.Events.fire(event);
+    }
+  }
+  this.oldBlocksCoordinate_ = {};
 };
 
 /**
- * Fire a move event at the end of a frame drag.
- * @param {!Blockly.BlockSvg} block The root block that is being moved.
- * @private
+ * Fire an event when the frame changes blocks.
  */
-Blockly.Frame.prototype.fireBlockMoveEvent_ = function(block) {
-  var event = new Blockly.Events.BlockMove(block);
-  event.oldCoordinate = this.tempBlocksXY_[block.id];
-  event.recordNew();
-  Blockly.Events.fire(event);
-};
-
-Blockly.Frame.prototype.onBlocksStartMove = function() {
-  // Recode the old coordinates of the blocks
-  Object.values(this.blockDB_).forEach((block) => {
-    const startXY = block.getRelativeToSurfaceXY();
-    this.tempBlocksXY_[block.id] = startXY;
-  });
-};
-
-Blockly.Frame.prototype.fireBlocksMove = function() {
-  Object.values(this.blockDB_).forEach((block) => {
-    this.fireBlockMoveEvent_(block);
-  });
-
-  this.tempBlocksXY_ = {};
+Blockly.Frame.prototype.fireFrameBlocksChange = function() {
+  this.fireFrameChange('blocks', this.oldBlockIdList_, this.getBlockIds());
 };
 
 /**
@@ -426,7 +454,7 @@ Blockly.Frame.prototype.fireBlocksMove = function() {
  *    Object with top left and bottom right coordinates of the bounding box.
  */
 Blockly.Frame.prototype.getBoundingRectangle = function() {
-  var frame = this.getFrameGroupRelativeXY(true);
+  var frame = this.getFrameGroupRelativeXY();
   var width = this.getWidth();
   var height = this.getHeight();
   var topLeft;
@@ -490,12 +518,17 @@ Blockly.Frame.prototype.getWidth = function() {
 
 /**
  * Get the height of the frame.
- * @return {number} The width of the flyout.
+ * @return {number} The height of the flyout.
  */
 Blockly.Frame.prototype.getHeight = function() {
   return Math.abs(this.rect_.bottom - this.rect_.top);
 };
 
+/**
+ * Returns a bounding box describing the dimensions of this frame
+ * and any frames stacked below it.
+ * @returns {!FrameRectState} Object with width, height, x and y properties.
+ */
 Blockly.Frame.prototype.getBoundingFrameRect = function() {
   return {
     x: this.rect_.left - this.resizeButtonWidth_ / 2,
@@ -505,17 +538,12 @@ Blockly.Frame.prototype.getBoundingFrameRect = function() {
   };
 };
 
+/**
+ * Returns the frame contained block id list.
+ * @returns {Array<string>} The block id list;
+ */
 Blockly.Frame.prototype.getBlockIds = function() {
   return Object.keys(this.blockDB_);
-};
-
-Blockly.Frame.prototype.initIncludeBlocks = function() {
-  this.options.blocks.forEach((blockId) => {
-    var block = this.workspace.getBlockById(blockId);
-    if (block) {
-      block.requestMoveInFrame();
-    }
-  });
 };
 
 /**
@@ -546,7 +574,8 @@ Blockly.Frame.prototype.moveDuringDrag = function(newLoc) {
   this.rect_.top = newLoc.y + this.resizeButtonHeight_ / 2 + this.titleTextTextareaHeight_;
   this.rect_.right = this.rect_.left + this.rect_.width + this.resizeButtonWidth_ / 2;
   this.rect_.bottom = this.rect_.top + this.rect_.height + this.resizeButtonWidth_ / 2;
-  this.translateFrameGroup();
+  var xy = this.computeFrameRelativeXY();
+  this.translate(xy.x, xy.y);
 };
 
 /**
@@ -574,6 +603,10 @@ Blockly.Frame.prototype.moveBy = function(dx, dy) {
   this.workspace.resizeContents();
 };
 
+/**
+ * Add a block to the object of blockDB_.
+ * @param {Blockly.Block} block Block to add.
+ */
 Blockly.Frame.prototype.addBlock = function(block) {
   if (!this.blockDB_[block.id]) {
     this.oldBlockIdList_ = this.getBlockIds();
@@ -581,7 +614,11 @@ Blockly.Frame.prototype.addBlock = function(block) {
     this.fireFrameBlocksChange();
   }
 };
-  
+
+/**
+ * Remove a block from the  object of blockDB_.
+ * @param {!Blockly.Block} block Block to remove.
+ */
 Blockly.Frame.prototype.removeBlock = function(block) {
   if (this.blockDB_[block.id]) {
     this.oldBlockIdList_ = this.getBlockIds();
@@ -590,25 +627,34 @@ Blockly.Frame.prototype.removeBlock = function(block) {
   }
 };
 
+/**
+ * Triggered when starting to drag the Frame.
+ */
 Blockly.Frame.prototype.onStartDrag = function() {
   this.setDragging(true);
-  this.onBlocksStartMove();
+  this.recordBlocksRelativeToSurfaceXY();
 };
 
+/**
+ * Triggered when ending to drag the Frame.
+ */
 Blockly.Frame.prototype.onStopDrag = function() {
   this.fireFrameRectChange();
   this.setDragging(false);
 };
 
 /**
- * Handle resize the frame's rect.
- * @param {!Event} e Mouse down event or touch start event.
+ * Triggered when starting to adjust the size of the Frame.
  * @private
  */
 Blockly.Frame.prototype.onStartResizeRect_ = function() {
   this.foreignObject_.style['pointer-events'] = 'none';
 };
 
+/**
+ * Triggered when ending to adjust the size of the Frame.
+ * @private
+ */
 Blockly.Frame.prototype.onStopResizeRect_ = function() {
   this.foreignObject_.style['pointer-events'] = '';
 };
@@ -630,6 +676,16 @@ Blockly.Frame.prototype.onRectMouseDown_ = function(e) {
 };
 
 /**
+ * Record the current coordinates of the blocks that relative to workspace.
+ */
+Blockly.Frame.prototype.recordBlocksRelativeToSurfaceXY = function() {
+  Object.values(this.blockDB_).forEach((block) => {
+    const startXY = block.getRelativeToSurfaceXY();
+    this.oldBlocksCoordinate_[block.id] = startXY;
+  });
+};
+
+/**
  * Create the resize group.
  * @param {String} dir The direction of the button.
  * @param {!Event} e Mouse down event or touch start event.
@@ -640,19 +696,21 @@ Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e, takeOverSubEve
   this.mostRecentEvent_ = e;
   this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
   this.frameGroup_.style.cursor = 'pointer';
+  this.workspace.setResizesEnabled(false);
   this.setResizing(true);
   this.onStartResizeRect_();
-  this.onBlocksStartMove();
+  this.recordBlocksRelativeToSurfaceXY();
 
   if(takeOverSubEvents) {
     var wsRelativeXY = Blockly.utils.getRelativeXY(this.workspace.svgBlockCanvas_);
     this.rect_.left = this.rect_.right = (e.offsetX - wsRelativeXY.x) / this.workspace.scale;
     this.rect_.top = this.rect_.bottom = (e.offsetY - wsRelativeXY.y) / this.workspace.scale;
   } else {
+    var workspaceSvg = this.workspace.svgGroup_;
     this.resizeButtonMouseMoveBindData_ =
-      Blockly.bindEventWithChecks_(document, 'mousemove', null,  this.resizeButtonMouseMove_.bind(this, dir));
+      Blockly.bindEventWithChecks_(workspaceSvg, 'mousemove', null,  this.resizeButtonMouseMove_.bind(this, dir));
     this.resizeButtonMouseUpBindData_ =
-      Blockly.bindEventWithChecks_(document, 'mouseup', null,  this.resizeButtonMouseUp_.bind(this, dir));
+      Blockly.bindEventWithChecks_(workspaceSvg, 'mouseup', null,  this.resizeButtonMouseUp_.bind(this, dir));
   }
   
   e.preventDefault();
@@ -672,7 +730,22 @@ Blockly.Frame.prototype.resizeButtonMouseMove_ = function(dir, e) {
   var xDir = dir === 'tr' || dir === 'br' ? 'ltr' : 'rtl';
   var yDir = dir === 'tl' || dir === 'tr' ? 'btt' : 'ttb';
   this.updateBoundingClientRect(diffX, diffY, xDir, yDir);
-  this.translateFrameGroup();
+  var newCoord = this.computeFrameRelativeXY();
+
+  var blocks = Object.values(this.blockDB_);
+  // If there are selected blocks in the frame, it needs to keep their relative position in the workspace unchanged.
+  if(blocks.length) {
+    var oldCoord = Blockly.utils.getRelativeXY(this.getSvgRoot());
+    var dx = oldCoord.x - newCoord.x;
+    var dy = oldCoord.y - newCoord.y;
+    if(dx || dy) {
+      blocks.forEach((block) => {
+        block.moveBy(dx, dy);
+      });
+    }
+  }
+  
+  this.translate(newCoord.x, newCoord.y);
   this.updateFrameRectSize();
   this.updateTitleBoxSize();
   this.updateResizeButtonsPosition();
@@ -692,6 +765,7 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
   this.updateOwnedBlocks();
   this.onStopResizeRect_();
   this.setResizing(false);
+  this.workspace.setResizesEnabled(false);
   this.fireFrameRectChange();
   if (takeOverSubEvents) {
     this.workspace.setCreatingFrame(false);
@@ -703,11 +777,11 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
 };
 
 /**
- * Create the resize group.
- * @param {!Object} rect Mouse down event or touch start event.
+ * Render the frame.
+ * @param {!FrameRectState} rect The frame rect state.
  * @private
  */
-Blockly.Frame.prototype.resetFrameRect = function(rect) {
+Blockly.Frame.prototype.render = function(rect) {
   this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
   this.rect_.left = rect.x + this.resizeButtonWidth_ / 2;
   this.rect_.top = rect.y + (this.titleTextTextareaHeight_ + this.resizeButtonHeight_ / 2);
@@ -722,31 +796,16 @@ Blockly.Frame.prototype.resetFrameRect = function(rect) {
   this.fireFrameRectChange();
 };
 
-Blockly.Frame.prototype.resetFrameBlocks = function(blockIds) {
-  this.oldBlockIds_ = this.getBlockIds();
-  blockIds.forEach(blockId => {
-    const block = this.workspace.getBlockById(blockId);
-    if(block) {
-      block.requestMoveInFrame();
-    }
-  });
-  if(JSON.stringify(this.oldBlockIds_) !== JSON.stringify(blockIds)) {
-    this.fireFrameBlocksChange();
-  }
-};
-
 /**
  * If a block is within the range of the frame, it can be collected.
  * @param {Blockly.BlockSvg} block Mouse down event or touch start event.
  * @return {boolean} true if the block was successfully added.
  */
 Blockly.Frame.prototype.requestMoveInBlock = function(block) {
-  const {x,y} = block.getRelativeToSurfaceXY(true);
-  const {left, right, top, bottom, width, height} = this.rect_;
+  const {x,y} = block.getRelativeToSurfaceXY();
+  const {left, right, top, bottom} = this.rect_;
   let removeAble = false;
-  if (block.frame_ === this) {
-    removeAble = x < width && y < height;
-  } else if (block.frame_ && block.frame_ !== this) {
+  if (block.frame_ && block.frame_ !== this) {
     removeAble = false;
   } else if (x > left && x < right && y > top && y < bottom) {
     removeAble = true;
@@ -842,18 +901,6 @@ Blockly.Frame.prototype.showContextMenu_ = function(e) {
 };
 
 /**
- * Transforms a frame group.
- * @private
- */
-Blockly.Frame.prototype.translateFrameGroup = function() {
-  var rx = this.rect_.left < this.rect_.right ? this.rect_.left : this.rect_.right;
-  var ry = this.rect_.top < this.rect_.bottom ? this.rect_.top : this.rect_.bottom;
-  var tx = rx - this.resizeButtonWidth_ / 2;
-  var ty = ry - this.resizeButtonHeight_ / 2 - this.titleTextTextareaHeight_;
-  this.translate(tx, ty);
-};
-
-/**
  * Transforms a frame by setting the translation on the transform attribute
  * of the frame's SVG.
  * @param {number} x The x coordinate of the translation in workspace units.
@@ -869,11 +916,18 @@ Blockly.Frame.prototype.updateFrameRectSize = function() {
   this.svgRect_.setAttribute("height", Math.abs(this.rect_.height));
 };
 
+/**
+ * Updates the frame's title
+ * @param {string} newTitle The new title of the frame
+ */
 Blockly.Frame.prototype.updateTitle = function(newTitle) {
   Blockly.Events.fire(new Blockly.Events.FrameRetitle(this, newTitle));
   this.title = newTitle;
 };
 
+/**
+ * Update the title box size
+ */
 Blockly.Frame.prototype.updateTitleBoxSize = function() {
   if(this.foreignObject_) {
     this.foreignObject_.setAttribute("height", 20);
@@ -885,24 +939,20 @@ Blockly.Frame.prototype.updateTitleBoxSize = function() {
  * Update the owned blocks
  */
 Blockly.Frame.prototype.updateOwnedBlocks = function() {
-  var oldBlocks = Object.assign({}, this.blockDB_);
   const allTopBlocks = this.workspace.getTopBlocks();
   for (let index = 0; index < allTopBlocks.length; index++) {
-    allTopBlocks[index].requestMoveInFrame();
-  }
-  Object.values(oldBlocks).forEach((block) => {
-    if(!this.blockDB_[block.id]) {
-      block.requestMoveOutFrame();
+    if(!allTopBlocks[index].requestMoveInFrame()) {
+      allTopBlocks[index].requestMoveOutFrame();
     }
-  });
+  }
 };
 
 /**
  * Update the most recent frame group size and position
- * @param {Number} diffX The new size change in the x direction
- * @param {Number} diffY The new size change in the y direction
- * @param {String} xDir On the X-axis, from left to right or right to left
- * @param {String} yDir On the Y-axis, from top to bottom or from bottom to top
+ * @param {number} diffX The new size change in the x direction
+ * @param {number} diffY The new size change in the y direction
+ * @param {string} xDir On the X-axis, from left to right or right to left
+ * @param {string} yDir On the Y-axis, from top to bottom or from bottom to top
  */
 Blockly.Frame.prototype.updateBoundingClientRect = function(diffX, diffY, xDir, yDir) {
   // Left to right

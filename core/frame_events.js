@@ -345,18 +345,18 @@ Blockly.Events.FrameChange.prototype.run = function(forward) {
     console.warn('Can\'t change non-existent frame: ' + this.frameId);
     return;
   }
-  var properties = forward ? this.newProperties : this.oldProperties;
-
-  if (properties) {
-    frame.resetFrameRect(properties);
-  }
   var value = forward ? this.newValue : this.oldValue;
   switch (this.element) {
     case 'blocks':
-      frame.resetFrameBlocks(value);
+      value.forEach(blockId => {
+        const block = this.workspace.getBlockById(blockId);
+        if(block) {
+          block.requestMoveInFrame();
+        }
+      });
       break;
     case 'rect':
-      frame.resetFrameRect(value);
+      frame.render(value);
       break;
     default:
       console.warn('Unknown change type: ' + this.element);

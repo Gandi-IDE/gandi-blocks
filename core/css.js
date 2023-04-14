@@ -1128,7 +1128,7 @@ Blockly.Css.CONTENT = [
     'visibility: hidden;',
   '}',
 
-  '.blocklyFrame:hover .frameResizeButtons {',
+  '.blocklyFrame:hover .frameResizeButtons, .frameResizing .frameResizeButtons {',
     'visibility: visible;',
   '}',
 

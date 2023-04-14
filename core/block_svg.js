@@ -439,21 +439,56 @@ Blockly.BlockSvg.prototype.moveBy = function(dx, dy) {
 };
 
 /**
+ * Moves the block to its associated container（workspace or frame）.
+ @param {string} container The name of the container.
+ */
+Blockly.BlockSvg.prototype.moveBlockToContainer = function(container) {
+  // If container is empty or not associate any frame, return immediately.
+  if (!container || !this.frame_) {
+    return;
+  }
+
+  var root = this.getSvgRoot();
+  var xy = Blockly.utils.getRelativeXY(root);
+  goog.dom.removeNode(root);
+  var blockGroupXY = this.frame_.getBlockGroupRelativeXY();
+
+  switch (container) {
+    case 'frame':
+      this.translate(xy.x - blockGroupXY.x, xy.y - blockGroupXY.y);
+      this.frame_.blocksGroup_.appendChild(root);
+      break;
+    case 'workspace':
+      this.translate(xy.x + blockGroupXY.x, xy.y + blockGroupXY.y);
+      this.workspace.getCanvas().appendChild(root);
+      break;
+    default:
+      break;
+  }
+};
+
+/**
  * Move out a block from a frame.
+ * @return {!Boolean} Whither the block is successfully moved into frame.
  */
 Blockly.BlockSvg.prototype.requestMoveInFrame = function() {
   if (this.getRemovableToFrame()) {
     var frame = this.workspace.requestAddBlockToFrame(this);
-    if (frame && this.frame_ !== frame) {
-      var root = this.getSvgRoot();
-      goog.dom.removeNode(root);
-      var xy = Blockly.utils.getRelativeXY(root);
-      var blockGroupXY = frame.getBlockGroupRelativeXY();
-      this.translate(xy.x - blockGroupXY.x, xy.y - blockGroupXY.y);
-      frame.blocksGroup_.appendChild(root);
+    if (frame) {
+      // If the frame of the block associated was changed, update the block group position.
+      if (frame !== this.frame_) {
+        this.frame_ = frame;
+        this.moveBlockToContainer('frame');
+      }
+    } else if (this.frame_) {
+      this.requestMoveOutFrame();
+      this.frame_ = null;
+    } else {
+      this.frame_ = null;
     }
-    this.frame_ = frame || null;
+    return Boolean(frame);
   }
+  return false;
 };
 
 /**
@@ -463,13 +498,7 @@ Blockly.BlockSvg.prototype.requestMoveOutFrame = function() {
   if (this.frame_) {
     this.frame_.removeBlock(this);
     if (!this.parentBlock_) {
-      var root = this.getSvgRoot();
-      goog.dom.removeNode(root);
-  
-      var xy = Blockly.utils.getRelativeXY(root);
-      var blockGroupXY = this.frame_.getBlockGroupRelativeXY();
-      this.translate(xy.x + blockGroupXY.x, xy.y + blockGroupXY.y);
-      this.workspace.getCanvas().appendChild(root);
+      this.moveBlockToContainer('workspace');
     }
     this.frame_ = null;
   }
@@ -527,6 +556,10 @@ Blockly.BlockSvg.prototype.moveOffDragSurface_ = function(newXY) {
   // Translate to current position, turning off 3d.
   this.translate(newXY.x, newXY.y);
   this.workspace.blockDragSurface_.clearAndHide(this.workspace.getCanvas());
+  // If the block in frame, move it to the frame;
+  if(this.frame_) {
+    this.moveBlockToContainer('frame');
+  }
 };
 
 /**
