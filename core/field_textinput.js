@@ -279,6 +279,12 @@ Blockly.FieldTextInput.prototype.setRestrictor = function(restrictor) {
  */
 Blockly.FieldTextInput.prototype.createMenus = function(menuOptions) {
   this.showMenuOptions_ = menuOptions;
+  const contentDiv = Blockly.DropDownDiv.DIV_;
+  if (menuOptions.length === 0) {
+    contentDiv.style.display = 'none';
+  } else {
+    contentDiv.style.display = 'block';
+  }
   for (var i = 0; i < menuOptions.length; i++) {
     var {svg, desc} = menuOptions[i]; // Human-readable text or image.
     // An image, not text.
