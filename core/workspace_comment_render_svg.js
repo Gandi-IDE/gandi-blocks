@@ -507,7 +507,6 @@ Blockly.WorkspaceCommentSvg.prototype.resizeMouseUp_ = function(/*e*/) {
   Blockly.Events.fire(new Blockly.Events.CommentChange(
       this, {width: oldHW.width , height: oldHW.height},
       {width: this.width_, height: this.height_}));
-
   this.workspace.setResizesEnabled(true);
 };
 

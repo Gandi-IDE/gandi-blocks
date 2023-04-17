@@ -261,7 +261,6 @@ Blockly.InsertionMarkerManager.prototype.update = function(dxy, deleteArea) {
  */
 Blockly.InsertionMarkerManager.prototype.createMarkerBlock_ = function(sourceBlock) {
   var imType = sourceBlock.type;
-
   Blockly.Events.disable();
   try {
     var result = this.workspace_.newBlock(imType);
@@ -477,7 +476,6 @@ Blockly.InsertionMarkerManager.prototype.maybeShowPreview_ = function(candidate)
   }
   var closest = candidate.closest;
   var local = candidate.local;
-
   // Nothing to connect to.
   if (!closest) {
     return;
@@ -485,7 +483,7 @@ Blockly.InsertionMarkerManager.prototype.maybeShowPreview_ = function(candidate)
 
   // Something went wrong and we're trying to connect to an invalid connection.
   if (closest == this.closestConnection_ ||
-      closest.sourceBlock_.isInsertionMarker()) {
+      closest.sourceBlock_.isInsertionMarker() || (local.sourceBlock_.boxed && closest.sourceBlock_.boxed)) {
     return;
   }
   // Add an insertion marker or replacement marker.

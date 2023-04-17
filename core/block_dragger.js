@@ -239,19 +239,51 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
   this.dragBlock(e, currentDragDeltaXY);
   let delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
   if (this.draggingBlock_ && this.draggingBlock_.temporaryBatchBlocks) {
+
+    // Dealing with the hidden issue of dragging block style separately
+    let setDragBlockCommentStyleBlock = this.draggingBlock_;
+    do {
+      if (setDragBlockCommentStyleBlock.comment) {
+        setDragBlockCommentStyleBlock.comment.bubble_.bubbleGroup_.setAttribute(
+            "style",
+            "display: block"
+        );
+      }
+      setDragBlockCommentStyleBlock =
+        ((setDragBlockCommentStyleBlock.nextConnection || {}).targetConnection || {})
+            .sourceBlock_;
+    } while (setDragBlockCommentStyleBlock);
+
     const batchHeadBlocks = this.draggingBlock_.temporaryBatchBlocks
         .filter((it) => it.id !== this.draggingBlock_.id);
     batchHeadBlocks.forEach(moveBl => {
       moveBl.getSvgRoot().style.display = 'block';
+      let setCommentStyleBlock = moveBl;
+      do {
+        if (setCommentStyleBlock.comment) {
+          setCommentStyleBlock.comment.bubble_.bubbleGroup_.setAttribute(
+              "style",
+              "display: block"
+          );
+        }
+        setCommentStyleBlock =
+          ((setCommentStyleBlock.nextConnection || {}).targetConnection || {})
+              .sourceBlock_;
+      } while (
+        setCommentStyleBlock
+      );
       const old = moveBl.getRelativeToSurfaceXY();
       let newLoc = goog.math.Coordinate.sum(moveBl.getRelativeToSurfaceXY(), delta);
-      moveBl.moveConnections_(delta.x, delta.y);
       moveBl.moveDuringDrag(newLoc, true);
       let event = new Blockly.Events.BlockMove(moveBl);
       event.oldCoordinate = old;
       event.recordNew();
+      moveBl.moveConnections_(delta.x, delta.y);
       Blockly.Events.fire(event);
+      // MoveConnections_ should be executed after the fire event is triggered.
+      // Because he calculated it based on the actual block location
     });
+
   }
 
 
@@ -259,7 +291,6 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
   var isOutside = this.wasOutside_;
   this.fireEndDragEvent_(isOutside);
   this.draggingBlock_.setMouseThroughStyle(false);
-
   Blockly.BlockAnimations.disconnectUiStop();
 
   // var delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);

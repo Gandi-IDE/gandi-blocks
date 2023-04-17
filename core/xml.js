@@ -176,9 +176,10 @@ Blockly.Xml.allFieldsToDom_ = function(block, element) {
  * @param {!Blockly.Block} block The root block to encode.
  * @param {boolean=} opt_noId True if the encoder should skip the block ID.
  * @param {string} endBlockId End of the block
+ * @param {boolean=} withoutComment Exclude comment area
  * @return {!Element} Tree of XML elements.
  */
-Blockly.Xml.blockToDom = function(block, opt_noId, endBlockId) {
+Blockly.Xml.blockToDom = function(block, opt_noId, endBlockId, withoutComment) {
   var element = goog.dom.createDom(block.isShadow() ? 'shadow' : 'block');
   // powered by xigua start
   if (block.hidden) {
@@ -199,7 +200,9 @@ Blockly.Xml.blockToDom = function(block, opt_noId, endBlockId) {
 
   Blockly.Xml.allFieldsToDom_(block, element);
 
-  Blockly.Xml.scratchCommentToDom_(block, element);
+  if (!withoutComment) {
+    Blockly.Xml.scratchCommentToDom_(block, element);
+  }
 
   if (block.data) {
     var dataElement = goog.dom.createDom('data', null, block.data);
