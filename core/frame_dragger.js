@@ -63,6 +63,18 @@ Blockly.FrameDragger = function(frame, workspace) {
    * @private
    */
   this.startXY_ = this.draggingFrame_.getFrameGroupRelativeXY();
+
+
+  /**
+   * A list of all of the block's icons (comment, warning, and mutator) that are
+   * on this block and its descendants.  Moving an icon moves the bubble that
+   * extends from it if that bubble is open.
+   * @type {Array.<Array.<!Object>>}
+   * @private
+   */
+  this.blocksDragIconData_ = Object.values(this.draggingFrame_.blockDB_).map(function(block) {
+    return Blockly.FrameDragger.initBlockIconData_(block);
+  });
 };
 
 /**
@@ -97,6 +109,33 @@ Blockly.FrameDragger.prototype.startFrameDrag = function() {
 };
 
 /**
+ * Make a list of all of the icons (comment, warning, and mutator) that are
+ * on this block and its descendants.  Moving an icon moves the bubble that
+ * extends from it if that bubble is open.
+ * @param {!Blockly.BlockSvg} block The root block that is being dragged.
+ * @return {!Array.<!Object>} The list of all icons and their locations.
+ * @private
+ */
+Blockly.FrameDragger.initBlockIconData_ = function(block) {
+  // Build a list of icons that need to be moved and where they started.
+  var dragIconData = [];
+  var descendants = block.getDescendants(false);
+  for (var i = 0, descendant; descendant = descendants[i]; i++) {
+    var icons = descendant.getIcons();
+    for (var j = 0; j < icons.length; j++) {
+      var data = {
+        // goog.math.Coordinate with x and y properties (workspace coordinates).
+        location: icons[j].getIconLocation(),
+        // Blockly.Icon
+        icon: icons[j]
+      };
+      dragIconData.push(data);
+    }
+  }
+  return dragIconData;
+};
+
+/**
  * Execute a step of frame dragging, based on the given event.  Update the
  * display accordingly.
  * @param {!Event} e The most recent move event.
@@ -109,6 +148,7 @@ Blockly.FrameDragger.prototype.dragFrame = function(e, currentDragDeltaXY) {
   var delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
   var newLoc = goog.math.Coordinate.sum(this.startXY_, delta);
   this.draggingFrame_.moveDuringDrag(newLoc);
+  this.dragBlocksIcons_(delta);
   var isOutside = Blockly.utils.isDom(e.target) ? !this.rootDiv.contains(e.target) : false;
   if (isOutside !== this.wasOutside_) {
     this.wasOutside_ = isOutside;
@@ -161,4 +201,21 @@ Blockly.FrameDragger.prototype.pixelsToWorkspaceUnits_ = function(pixelCoord) {
     result = result.scale(1 / mainScale);
   }
   return result;
+};
+
+/**
+ * Move all of the icons connected to this drag.
+ * @param {!goog.math.Coordinate} dxy How far to move the icons from their
+ *     original positions, in workspace units.
+ * @private
+ */
+Blockly.FrameDragger.prototype.dragBlocksIcons_ = function(dxy) {
+  for (var i = 0; i < this.blocksDragIconData_.length; i++) {
+    var dragIconData = this.blocksDragIconData_[i];
+    // Moving icons moves their associated bubbles.
+    for (var j = 0; j < dragIconData.length; j++) {
+      var data = dragIconData[j];
+      data.icon.setIconLocation(goog.math.Coordinate.sum(data.location, dxy));
+    }
+  }
 };
