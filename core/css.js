@@ -1129,7 +1129,7 @@ Blockly.Css.CONTENT = [
     'float: left;',
   '}',
 
-  '.resizingFrame {',
+  '.waitingCreateFrame {',
     'cursor: crosshair;',
   '}',
 

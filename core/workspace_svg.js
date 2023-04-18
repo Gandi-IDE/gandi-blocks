@@ -312,7 +312,7 @@ Blockly.WorkspaceSvg.prototype.inverseScreenCTMDirty_ = true;
  * @type {Boolean}
  * @private
  */
-Blockly.WorkspaceSvg.prototype.readyCreateFrame = false;
+Blockly.WorkspaceSvg.prototype.waitingCreateFrame = false;
 
 /**
  * Getter for the inverted screen CTM.
@@ -2187,10 +2187,9 @@ Blockly.WorkspaceSvg.setTopLevelWorkspaceMetrics_ = function(xyRatio) {
  * @param {boolean} enabled Whether readonly should be enabled.
  */
 Blockly.WorkspaceSvg.prototype.setReadonlyEnabled = function(enabled) {
-  var reenabled = (!this.readOnlyEnabled_ && enabled);
-  this.readOnlyEnabled_ = enabled;
+  this.readonlyEnabled = enabled;
   var rootNode = document.getElementsByClassName('injectionDiv')[0];
-  if(reenabled) {
+  if(enabled) {
     rootNode.classList.add('blocklyReadonly');
   } else {
     rootNode.classList.remove('blocklyReadonly');
@@ -2207,6 +2206,19 @@ Blockly.Workspace.prototype.setResizingFrame = function(visible) {
     this.svgGroup_.classList.add('resizingFrame');
   } else {
     this.svgGroup_.classList.remove('resizingFrame');
+  }
+};
+
+/**
+ * Update whether the workspace was waiting to create a frame.
+ * @param {boolean} visible Whether waiting should be enabled.
+ */
+Blockly.Workspace.prototype.setWaitingCreateFrameEnabled = function(visible) {
+  this.waitingCreateFrame = visible;
+  if(visible) {
+    this.svgGroup_.classList.add('waitingCreateFrame');
+  } else {
+    this.svgGroup_.classList.remove('waitingCreateFrame');
   }
 };
 

@@ -686,7 +686,7 @@ Blockly.Frame.prototype.onStopResizeRect_ = function() {
  * @private
  */
 Blockly.Frame.prototype.onRectMouseDown_ = function(e) {
-  if (this.workspace.readyCreateFrame) {
+  if (this.workspace.waitingCreateFrame) {
     e.stopPropagation();
   } else {
     var gesture = this.workspace && this.workspace.getGesture(e);
