@@ -184,7 +184,7 @@ Blockly.Frame.prototype.titleTextTextareaMinHeight_ = 20;
  * @type {string}
  * @private
  */
-Blockly.Frame.prototype.titleTextTextareaHeight_ = 20;
+Blockly.Frame.prototype.titleTextareaHeight_ = 20;
 
 /**
  * The frame border color.
@@ -252,7 +252,7 @@ Blockly.Frame.prototype.createDom_ = function() {
     this.frameGroup_.dataset.id = this.id;
   }
   var tx = this.resizeButtonWidth_ / 2;
-  var ty = this.titleTextTextareaHeight_ + this.resizeButtonHeight_ / 2;
+  var ty = this.titleTextareaHeight_ + this.resizeButtonHeight_ / 2;
   /** @type {SVGElement} */
   this.blocksGroup_ = Blockly.utils.createSvgElement('g',
       {
@@ -260,7 +260,7 @@ Blockly.Frame.prototype.createDom_ = function() {
         'transform': 'translate(' + tx + ',' + ty + ')',
       }, this.frameGroup_);
   var xy = this.computeFrameRelativeXY();
-  this.translate(xy.x, xy.y - this.titleTextTextareaHeight_);
+  this.translate(xy.x, xy.y - this.titleTextareaHeight_);
 
   /** @type {SVGElement} */
   this.svgRect_ = Blockly.utils.createSvgElement('rect',
@@ -329,7 +329,7 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
  */
 Blockly.Frame.prototype.createResizeGroup_ = function() {
   var tx = 0;
-  var ty = this.titleTextTextareaHeight_;
+  var ty = this.titleTextareaHeight_;
   /** @type {SVGElement} */
   this.resizeGroup_ = Blockly.utils.createSvgElement('g', {
     'class': 'frameResizeButtons',
@@ -408,7 +408,7 @@ Blockly.Frame.prototype.cleanUp = function() {
 
   this.render({
     x: this.rect_.left - this.resizeButtonWidth_ / 2,
-    y: this.rect_.top - (this.titleTextTextareaHeight_ + this.resizeButtonHeight_ / 2),
+    y: this.rect_.top - (this.titleTextareaHeight_ + this.resizeButtonHeight_ / 2),
     height: height,
     width: width
   });
@@ -477,7 +477,7 @@ Blockly.Frame.prototype.fireFrameBlocksChange = function() {
 Blockly.Frame.prototype.getBoundingRectangle = function() {
   var frame = this.getFrameGroupRelativeXY();
   var width = this.getWidth() + this.resizeButtonWidth_;
-  var height = this.getHeight() + this.resizeButtonHeight_ + this.titleTextTextareaHeight_;
+  var height = this.getHeight() + this.resizeButtonHeight_ + this.titleTextareaHeight_;
   var topLeft;
   var bottomRight;
   if (this.RTL) {
@@ -707,16 +707,16 @@ Blockly.Frame.prototype.onTitleTextareaHeightChange = function(height) {
     newHeight = this.textarea_.scrollHeight;
     this.textarea_.style.height = newHeight + 'px';
   }
-  if(newHeight !== this.titleTextTextareaHeight_) {
+  if(newHeight !== this.titleTextareaHeight_) {
     var hw = this.resizeButtonWidth_ / 2;
     var hh = this.resizeButtonHeight_ / 2;
     this.workspace.setResizesEnabled(false);
     var xy = this.computeFrameRelativeXY();
-    this.titleTextTextareaHeight_ = newHeight;
+    this.titleTextareaHeight_ = newHeight;
     this.foreignObject_.setAttribute('height', newHeight);
     this.blocksGroup_.setAttribute('transform', 'translate(' + hw + ',' + (newHeight + hh) + ')');
     this.resizeGroup_.setAttribute('transform', 'translate(0,' + newHeight + ')');
-    this.translate(xy.x, xy.y - this.titleTextTextareaHeight_);
+    this.translate(xy.x, xy.y - this.titleTextareaHeight_);
     this.workspace.setResizesEnabled(true);
   }
 };
@@ -753,7 +753,7 @@ Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e, takeOverSubEve
     this.rect_.left = this.rect_.right = (e.offsetX - wsRelativeXY.x) / this.workspace.scale;
     this.rect_.top = this.rect_.bottom = (e.offsetY - wsRelativeXY.y) / this.workspace.scale;
     var xy = this.computeFrameRelativeXY();
-    this.translate(xy.x, xy.y - this.titleTextTextareaHeight_);
+    this.translate(xy.x, xy.y - this.titleTextareaHeight_);
   } else {
     var workspaceSvg = this.workspace.svgGroup_;
     this.resizeButtonMouseMoveBindData_ =
@@ -780,7 +780,7 @@ Blockly.Frame.prototype.resizeButtonMouseMove_ = function(dir, e) {
   var yDir = dir === 'tl' || dir === 'tr' ? 'btt' : 'ttb';
   this.updateBoundingClientRect(diffX, diffY, xDir, yDir);
   var newCoord = this.computeFrameRelativeXY();
-  newCoord.y -= this.titleTextTextareaHeight_;
+  newCoord.y -= this.titleTextareaHeight_;
 
   var blocks = Object.values(this.blockDB_);
   // If there are selected blocks in the frame, it needs to keep their relative position in the workspace unchanged.
@@ -836,7 +836,7 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
 Blockly.Frame.prototype.render = function(rect) {
   this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
   this.rect_.left = rect.x + this.resizeButtonWidth_ / 2;
-  this.rect_.top = rect.y + (this.titleTextTextareaHeight_ + this.resizeButtonHeight_ / 2);
+  this.rect_.top = rect.y + (this.titleTextareaHeight_ + this.resizeButtonHeight_ / 2);
   this.rect_.bottom = this.rect_.top + rect.height;
   this.rect_.right = this.rect_.left + rect.width;
   this.rect_.width = rect.width;
@@ -855,7 +855,9 @@ Blockly.Frame.prototype.render = function(rect) {
  */
 Blockly.Frame.prototype.requestMoveInBlock = function(block) {
   const {x,y} = block.getRelativeToSurfaceXY();
-  const {left, right, top, bottom} = this.rect_;
+  var {left, right, top, bottom} = this.rect_;
+  top += this.titleTextareaHeight_;
+  bottom += this.titleTextareaHeight_;
   let removeAble = false;
   if (block.frame_ && block.frame_ !== this) {
     removeAble = false;
@@ -982,7 +984,7 @@ Blockly.Frame.prototype.updateTitle = function(newTitle) {
  */
 Blockly.Frame.prototype.updateTitleBoxSize = function() {
   if(this.foreignObject_) {
-    this.foreignObject_.setAttribute("height", this.titleTextTextareaHeight_);
+    this.foreignObject_.setAttribute("height", this.titleTextareaHeight_);
     this.foreignObject_.setAttribute("width", this.getWidth());
   }
 };
