@@ -135,6 +135,10 @@ Blockly.Css.CONTENT = [
     'display: block;',
   '}',
 
+  '.blocklyReadonly .blocklyBlockCanvas, .blocklyReadonly .blocklyBubbleCanvas {',
+    'pointer-events: none;',
+  '}',
+
   /* Necessary to position the drag surface */
   '.blocklyRelativeWrapper {',
     'position: relative;',

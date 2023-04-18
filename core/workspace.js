@@ -434,14 +434,6 @@ Blockly.Workspace.prototype.clear = function() {
   this.isClearing = false;
 };
 
-Blockly.Workspace.prototype.setResizingFrame = function(visible) {
-  if(visible) {
-    this.svgGroup_.classList.add('resizingFrame');
-  } else {
-    this.svgGroup_.classList.remove('resizingFrame');
-  }
-};
-
 /* Begin functions that are just pass-throughs to the variable map. */
 /**
  * Rename a variable by updating its name in the variable map. Identify the

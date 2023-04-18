@@ -2183,6 +2183,34 @@ Blockly.WorkspaceSvg.setTopLevelWorkspaceMetrics_ = function(xyRatio) {
 };
 
 /**
+ * Update whether this workspace has readonly enabled.
+ * @param {boolean} enabled Whether readonly should be enabled.
+ */
+Blockly.WorkspaceSvg.prototype.setReadonlyEnabled = function(enabled) {
+  var reenabled = (!this.readOnlyEnabled_ && enabled);
+  this.readOnlyEnabled_ = enabled;
+  var rootNode = document.getElementsByClassName('injectionDiv')[0];
+  if(reenabled) {
+    rootNode.classList.add('blocklyReadonly');
+  } else {
+    rootNode.classList.remove('blocklyReadonly');
+  }
+};
+
+/**
+ * Update whether resizing a frame in the workspace.
+ * If true, other frames should not respond to mouse events.
+ * @param {boolean} visible Whether resizing a frame.
+ */
+Blockly.Workspace.prototype.setResizingFrame = function(visible) {
+  if(visible) {
+    this.svgGroup_.classList.add('resizingFrame');
+  } else {
+    this.svgGroup_.classList.remove('resizingFrame');
+  }
+};
+
+/**
  * Update whether this workspace has resizes enabled.
  * If enabled, workspace will resize when appropriate.
  * If disabled, workspace will not resize until re-enabled.
