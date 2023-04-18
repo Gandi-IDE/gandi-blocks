@@ -592,7 +592,7 @@ Blockly.Frame.prototype.isDeletable = function() {
  */
 Blockly.Frame.prototype.moveDuringDrag = function(newLoc) {
   this.rect_.left = newLoc.x + this.resizeButtonWidth_ / 2;
-  this.rect_.top = newLoc.y + this.resizeButtonHeight_ / 2 + this.titleTextTextareaHeight_;
+  this.rect_.top = newLoc.y + this.resizeButtonHeight_ / 2;
   this.rect_.right = this.rect_.left + this.rect_.width + this.resizeButtonWidth_ / 2;
   this.rect_.bottom = this.rect_.top + this.rect_.height + this.resizeButtonWidth_ / 2;
   var xy = this.computeFrameRelativeXY();
