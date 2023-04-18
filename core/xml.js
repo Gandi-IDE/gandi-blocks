@@ -540,7 +540,10 @@ Blockly.Xml.domToWorkspace = function(xml, workspace) {
   }
   // Re-enable workspace resizing.
   if (workspace.setResizesEnabled) {
-    workspace.setResizesEnabled(true);
+    // Wait until the blocks in the Frame have been assembled before triggering
+    setTimeout(() => {
+      workspace.setResizesEnabled(true);
+    });
   }
   return newBlockIds;
 };
