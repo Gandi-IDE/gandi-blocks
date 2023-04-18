@@ -435,7 +435,6 @@ Blockly.Workspace.prototype.clear = function() {
 };
 
 Blockly.Workspace.prototype.setResizingFrame = function(visible) {
-  this.resizingFrame = visible;
   if(visible) {
     this.svgGroup_.classList.add('resizingFrame');
   } else {

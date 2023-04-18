@@ -348,7 +348,10 @@ Blockly.ContextMenu.wsCreateFrameOption = function(ws) {
   return {
     text: option,
     enabled: true,
-    callback: ws.setResizingFrame.bind(ws, true)
+    callback: function() {
+      ws.readyCreateFrame = true;
+      ws.setResizingFrame.call(ws, true);
+    }
   };
 };
 

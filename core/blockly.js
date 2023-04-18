@@ -201,8 +201,10 @@ Blockly.onKeyDown_ = function(e) {
     Blockly.hideChaff();
     Blockly.DropDownDiv.hide();
     // Pressing esc cancel frame creation
+    Blockly.mainWorkspace.readyCreateFrame = false;
     Blockly.mainWorkspace.setResizingFrame(false);
   } else if (e.keyCode == 65) {
+    Blockly.mainWorkspace.readyCreateFrame = true;
     Blockly.mainWorkspace.setResizingFrame(true);
   }  else if (e.keyCode == 8 || e.keyCode == 46) {
     // Delete or backspace.
