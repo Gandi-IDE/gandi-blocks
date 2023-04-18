@@ -312,7 +312,7 @@ Blockly.WorkspaceSvg.prototype.inverseScreenCTMDirty_ = true;
  * @type {Boolean}
  * @private
  */
-Blockly.WorkspaceSvg.prototype.creatingFrame = false;
+Blockly.WorkspaceSvg.prototype.resizingFrame = false;
 
 /**
  * Getter for the inverted screen CTM.

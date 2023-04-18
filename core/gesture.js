@@ -319,7 +319,7 @@ Blockly.Gesture.prototype.updateFromEvent_ = function(e) {
   var currentXY = new goog.math.Coordinate(e.clientX, e.clientY);
   var changed = this.updateDragDelta_(currentXY);
   // Exceeded the drag radius for the first time.
-  if (changed && !this.startWorkspace_.creatingFrame) {
+  if (changed && !this.startWorkspace_.resizingFrame) {
     this.updateIsDragging_(e);
     Blockly.longStop_();
   }
@@ -590,7 +590,7 @@ Blockly.Gesture.prototype.doStart = function(e) {
 
   this.mouseDownXY_ = new goog.math.Coordinate(e.clientX, e.clientY);
 
-  if(this.startWorkspace_.creatingFrame) {
+  if(this.startWorkspace_.resizingFrame) {
     this.tempFrame_ = this.startWorkspace_.createFrame();
     this.tempFrame_.resizeButtonMouseDown_('br', e, true);
   }
@@ -623,7 +623,7 @@ Blockly.Gesture.prototype.bindMouseEvents = function(e) {
 Blockly.Gesture.prototype.handleMove = function(e) {
   var stopPropagation = true;
   this.updateFromEvent_(e);
-  if (this.startWorkspace_.creatingFrame) {
+  if (this.startWorkspace_.resizingFrame) {
     if(this.startWorkspace_.svgGroup_.contains(e.target)) {
       this.tempFrame_.resizeButtonMouseMove_('br', e);
     }
@@ -655,7 +655,7 @@ Blockly.Gesture.prototype.handleMove = function(e) {
 Blockly.Gesture.prototype.handleUp = function(e) {
   this.updateFromEvent_(e);
   Blockly.longStop_();
-  if (this.startWorkspace_.creatingFrame) {
+  if (this.startWorkspace_.resizingFrame) {
     this.tempFrame_.resizeButtonMouseUp_('br', e, true);
     this.tempFrame_ = null;
   }

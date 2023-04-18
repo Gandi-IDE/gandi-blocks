@@ -312,8 +312,17 @@ Blockly.ContextMenu.blockCommentOption = function(block) {
  * @package
  */
 Blockly.ContextMenu.wsUndoOption = function(ws) {
+  var option = document.createElement('div');
+  option.className = 'keyboard-shortcuts-item';
+  var text = document.createElement('span');
+  text.innerText = Blockly.Msg.UNDO;
+  var shortcutKey = document.createElement('span');
+  shortcutKey.className = 'keyboard-shortcuts';
+  shortcutKey.innerText = goog.userAgent.MAC ? '⌘ Z' : 'Ctrl Z';
+  option.appendChild(text);
+  option.appendChild(shortcutKey);
   return {
-    text: Blockly.Msg.UNDO,
+    text: option,
     enabled: ws.hasUndoStack(),
     callback: ws.undo.bind(ws, false)
   };
@@ -327,10 +336,19 @@ Blockly.ContextMenu.wsUndoOption = function(ws) {
  * @package
  */
 Blockly.ContextMenu.wsCreateFrameOption = function(ws) {
+  var option = document.createElement('div');
+  option.className = 'keyboard-shortcuts-item';
+  var text = document.createElement('span');
+  text.innerText = Blockly.Msg.CREATE_FRAME;
+  var shortcutKey = document.createElement('span');
+  shortcutKey.className = 'keyboard-shortcuts';
+  shortcutKey.innerText = 'A';
+  option.appendChild(text);
+  option.appendChild(shortcutKey);
   return {
-    text: Blockly.Msg.CREATE_FRAME,
+    text: option,
     enabled: true,
-    callback: ws.setCreatingFrame.bind(ws, true)
+    callback: ws.setResizingFrame.bind(ws, true)
   };
 };
 
@@ -357,13 +375,14 @@ Blockly.ContextMenu.frameDeleteOption = function(frame) {
  * Make a context menu option for cleaning up blocks on the frame, by
  * aligning them vertically.
  * @param {!Blockly.BlockSvg} frame The frame where the right-click originated.
+ * @param {!boolean} enabled True if the option is enabled, false otherwise.
  * @return {!Object} A menu option, containing text, enabled, and a callback.
  * @package
  */
-Blockly.ContextMenu.frameCleanupOption = function(frame) {
+Blockly.ContextMenu.frameCleanupOption = function(frame, enabled) {
   var deleteOption = {
     text: Blockly.Msg.CLEAN_UP,
-    enabled: true,
+    enabled: enabled,
     callback: function() {
       Blockly.Events.setGroup(true);
       frame.cleanUp();
@@ -399,8 +418,17 @@ Blockly.ContextMenu.frameDuplicateOption = function(frame, event) {
  * @package
  */
 Blockly.ContextMenu.wsRedoOption = function(ws) {
+  var option = document.createElement('div');
+  option.className = 'keyboard-shortcuts-item';
+  var text = document.createElement('span');
+  text.innerText = Blockly.Msg.REDO;
+  var shortcutKey = document.createElement('span');
+  shortcutKey.className = 'keyboard-shortcuts';
+  shortcutKey.innerText = goog.userAgent.MAC ? '⇧ ⌘ Z' : 'Shift Ctrl Z';
+  option.appendChild(text);
+  option.appendChild(shortcutKey);
   return {
-    text: Blockly.Msg.REDO,
+    text: option,
     enabled: ws.hasRedoStack(),
     callback: ws.undo.bind(ws, true)
   };

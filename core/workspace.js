@@ -434,12 +434,12 @@ Blockly.Workspace.prototype.clear = function() {
   this.isClearing = false;
 };
 
-Blockly.Workspace.prototype.setCreatingFrame = function(visible) {
-  this.creatingFrame = visible;
+Blockly.Workspace.prototype.setResizingFrame = function(visible) {
+  this.resizingFrame = visible;
   if(visible) {
-    this.svgGroup_.classList.add('creatingFrame');
+    this.svgGroup_.classList.add('resizingFrame');
   } else {
-    this.svgGroup_.classList.remove('creatingFrame');
+    this.svgGroup_.classList.remove('resizingFrame');
   }
 };
 

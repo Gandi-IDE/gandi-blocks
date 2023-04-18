@@ -201,8 +201,10 @@ Blockly.onKeyDown_ = function(e) {
     Blockly.hideChaff();
     Blockly.DropDownDiv.hide();
     // Pressing esc cancel frame creation
-    Blockly.mainWorkspace.setCreatingFrame(false);
-  } else if (e.keyCode == 8 || e.keyCode == 46) {
+    Blockly.mainWorkspace.setResizingFrame(false);
+  } else if (e.keyCode == 65) {
+    Blockly.mainWorkspace.setResizingFrame(true);
+  }  else if (e.keyCode == 8 || e.keyCode == 46) {
     // Delete or backspace.
     // Stop the browser from going back to the previous page.
     // Do this first to prevent an error in the delete code from resulting in
@@ -220,7 +222,7 @@ Blockly.onKeyDown_ = function(e) {
     if (Blockly.selected && Blockly.selected.isDeletable()) {
       deleteBlock = true;
     }
-  } else if (e.altKey || e.ctrlKey || e.metaKey) {
+  }else if (e.altKey || e.ctrlKey || e.metaKey) {
     // Don't allow delete while the batchSelector is running.
     if (Blockly.batchSelectedBlocks && Blockly.batchSelectedBlocks.length > 0) {
       return;

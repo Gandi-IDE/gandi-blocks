@@ -943,6 +943,15 @@ Blockly.Css.CONTENT = [
     'background: url(<<<PATH>>>/sprites.png) no-repeat -48px -16px !important;',
   '}',
 
+  '.keyboard-shortcuts-item {',
+    'display: flex;',
+    'justify-content: space-between;',
+  '}',
+
+  '.keyboard-shortcuts {',
+    'color: var(--theme-color-g500, #6B7280);',
+  '}',
+
   /* Category tree in Toolbox. */
   '.blocklyToolboxDiv {',
     'color: $colour_toolboxText;',
@@ -1116,17 +1125,26 @@ Blockly.Css.CONTENT = [
     'float: left;',
   '}',
 
-  '.creatingFrame {',
+  '.resizingFrame {',
     'cursor: crosshair;',
   '}',
 
-  '.creatingFrame .blocklyFrame {',
+  '.resizingFrame .blocklyFrame {',
     'cursor: not-allowed;',
+  '}',
+
+  '.blocklyFrameBlockCanvas:hover {',
+    'cursor: grab;',
+  '}',
+
+  '.blocklyDragging .blocklyFrameBlockCanvas {',
+    'cursor: grabbing;',
   '}',
 
   '.blocklyFrame .frameResizeButtons {',
     'visibility: hidden;',
   '}',
+
 
   '.blocklyFrame:hover .frameResizeButtons, .frameResizing .frameResizeButtons {',
     'visibility: visible;',
