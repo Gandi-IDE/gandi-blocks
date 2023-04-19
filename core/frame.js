@@ -97,6 +97,9 @@ Blockly.Frame = function(workspace, opt_options) {
    */
   this.mostRecentEvent_ = null;
 
+  /** @type {boolean} */
+  this.rendered = false;
+
   
   this.rect_ = {
     width: this.options.width,
@@ -133,8 +136,12 @@ Blockly.Frame = function(workspace, opt_options) {
   }
 
   workspace.addTopFrame(this);
-  Blockly.Events.setGroup(true);
-  Blockly.Events.fire(new Blockly.Events.FrameCreate(this));
+
+  if (opt_options && opt_options.id) {
+    this.rendered = true;
+    Blockly.Events.setGroup(true);
+    Blockly.Events.fire(new Blockly.Events.FrameCreate(this));
+  }
 };
 
 /**
@@ -637,7 +644,9 @@ Blockly.Frame.prototype.addBlock = function(block) {
   if (!this.blockDB_[block.id]) {
     this.oldBlockIdList_ = this.getBlockIds();
     this.blockDB_[block.id] = block;
-    this.fireFrameBlocksChange();
+    if (this.rendered) {
+      this.fireFrameBlocksChange();
+    }
   }
 };
 
@@ -649,7 +658,9 @@ Blockly.Frame.prototype.removeBlock = function(block) {
   if (this.blockDB_[block.id]) {
     this.oldBlockIdList_ = this.getBlockIds();
     delete this.blockDB_[block.id];
-    this.fireFrameBlocksChange();
+    if (this.rendered) {
+      this.fireFrameBlocksChange();
+    }
   }
 };
 
@@ -822,12 +833,14 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
   this.onTitleTextareaHeightChange();
   this.setResizing(false);
   this.workspace.setResizesEnabled(true);
-  this.fireFrameRectChange();
-  this.updateOwnedBlocks();
   if (takeOverSubEvents) {
     this.workspace.setResizingFrame(false);
-    Blockly.Events.setGroup(false);
+    this.updateOwnedBlocks();
+    this.rendered = true;
+    Blockly.Events.fire(new Blockly.Events.FrameCreate(this));
   } else {
+    this.fireFrameRectChange();
+    this.updateOwnedBlocks();
     Blockly.unbindEvent_(this.resizeButtonMouseMoveBindData_);
     Blockly.unbindEvent_(this.resizeButtonMouseUpBindData_);
   }
@@ -1044,8 +1057,9 @@ Blockly.Frame.prototype.updateResizeButtonsPosition = function() {
 
 /**
  * Dispose of this frame.
+ * @param {?boolean} retainBlocks Whether to keep blocks or not.
  */
-Blockly.Frame.prototype.dispose = function() {
+Blockly.Frame.prototype.dispose = function(retainBlocks) {
   if (!this.workspace) {
     // The frame has already been deleted.
     return;
@@ -1055,16 +1069,17 @@ Blockly.Frame.prototype.dispose = function() {
   var oldBlocks = Object.assign({}, this.blockDB_);
   this.blockDB_ = {};
 
-  // Remove all blocks;
-  this.fireFrameBlocksChange();
-
   for (const key in oldBlocks) {
     const block = oldBlocks[key];
     var ws = block.workspace;
-    setTimeout(function() {
-      ws.fireDeletionListeners(block);
-    });
-    block.dispose(true, true);
+    if (retainBlocks) {
+      block.requestMoveOutFrame();
+    } else {
+      setTimeout(function() {
+        ws.fireDeletionListeners(block);
+      });
+      block.dispose(true, true);
+    }
   }
 
   Blockly.Events.fire(new Blockly.Events.FrameDelete(this));

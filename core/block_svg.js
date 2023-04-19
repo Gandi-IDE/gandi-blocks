@@ -453,16 +453,18 @@ Blockly.BlockSvg.prototype.moveBlockToContainer = function(container) {
 
   var root = this.getSvgRoot();
   var xy = Blockly.utils.getRelativeXY(root);
-  goog.dom.removeNode(root);
   var blockGroupXY = this.frame_.getBlockGroupRelativeXY();
 
   switch (container) {
     case 'frame':
+      goog.dom.removeNode(root);
       this.translate(xy.x - blockGroupXY.x, xy.y - blockGroupXY.y);
       this.frame_.blocksGroup_.appendChild(root);
       break;
     case 'workspace':
-      this.translate(xy.x + blockGroupXY.x, xy.y + blockGroupXY.y);
+      var bxy = this.getRelativeToSurfaceXY();
+      goog.dom.removeNode(root);
+      this.translate(bxy.x, bxy.y);
       this.workspace.getCanvas().appendChild(root);
       break;
     default:

@@ -139,7 +139,7 @@ Blockly.Events.FrameCreate.prototype.run = function(forward) {
       height: this.height
     });
   } else {
-    workspace.deleteFrameById(this.frameId);
+    workspace.deleteFrameById(this.frameId, true);
   }
 };
 

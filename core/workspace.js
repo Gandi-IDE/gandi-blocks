@@ -594,9 +594,10 @@ Blockly.Workspace.prototype.createFrame = function(opt_options) {
  * Delete a frame and all of its uses from this workspace by the passed
  * in ID. May prompt the user for confirmation.
  * @param {string} id ID of frame to delete.
+ * @param {?boolean} retainBlocks Whether to keep blocks or not.
  */
-Blockly.Workspace.prototype.deleteFrameById = function(id) {
-  this.frameDB_[id].dispose();
+Blockly.Workspace.prototype.deleteFrameById = function(id, retainBlocks) {
+  this.frameDB_[id].dispose(retainBlocks);
   delete this.frameDB_[id];
 };
 
