@@ -349,7 +349,7 @@ Blockly.Events.FrameChange.prototype.run = function(forward) {
   switch (this.element) {
     case 'blocks':
       value.blocks.forEach(blockId => {
-        const block = this.workspace.getBlockById(blockId);
+        const block = workspace.getBlockById(blockId);
         if(block) {
           block.requestMoveInFrame();
         }
