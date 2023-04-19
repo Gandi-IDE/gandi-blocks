@@ -227,6 +227,8 @@ Blockly.Workspace.prototype.removeTopFrame = function(frame) {
   if (!goog.array.remove(this.topFrames_, frame)) {
     throw 'Frame not present in workspace\'s list of top-most frames.';
   }
+  
+  delete this.frameDB_[frame.id];
 };
 
 Blockly.Workspace.prototype.resetFrameAndTopBlocksMap = function() {
