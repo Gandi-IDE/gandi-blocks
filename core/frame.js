@@ -405,7 +405,7 @@ Blockly.Frame.prototype.cleanUp = function() {
       continue;
     }
     var xy = block.getRelativeToSurfaceXY(true);
-    block.moveBy(-xy.x + 10, height - xy.y);
+    block.moveBy(-xy.x + 10, height - xy.y, true);
     block.snapToGrid();
     var blockHeightWidth = block.getHeightWidth();
     width = Math.max(width, blockHeightWidth.width + 20);
@@ -629,7 +629,7 @@ Blockly.Frame.prototype.moveBy = function(dx, dy) {
   this.translate(xy.x + dx, xy.y + dy);
 
   Object.values(this.blockDB_).forEach((block) => {
-    block.moveBy(dx, dy, true);
+    block.moveBy(dx, dy);
   });
   
   this.fireFrameRectChange();
@@ -806,7 +806,9 @@ Blockly.Frame.prototype.resizeButtonMouseMove_ = function(dir, e) {
     var dy = oldCoord.y - newCoord.y;
     if(dx || dy) {
       blocks.forEach((block) => {
-        block.moveBy(dx, dy);
+        var xy = block.getRelativeToSurfaceXY(true);
+        block.translate(xy.x + dx, xy.y + dy);
+        block.moveConnections_(dx, dy);
       });
     }
   }
@@ -832,7 +834,6 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
   this.onStopResizeRect_();
   this.onTitleTextareaHeightChange();
   this.setResizing(false);
-  this.workspace.setResizesEnabled(true);
   if (takeOverSubEvents) {
     this.workspace.setResizingFrame(false);
     this.updateOwnedBlocks();
@@ -844,6 +845,7 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
     Blockly.unbindEvent_(this.resizeButtonMouseMoveBindData_);
     Blockly.unbindEvent_(this.resizeButtonMouseUpBindData_);
   }
+  this.workspace.setResizesEnabled(true);
 };
 
 /**
@@ -1020,7 +1022,7 @@ Blockly.Frame.prototype.updateOwnedBlocks = function() {
       block.requestMoveOutFrame();
     }
   });
-  
+
   const allTopBlocks = this.workspace.getTopBlocks();
   for (let index = 0; index < allTopBlocks.length; index++) {
     if(!allTopBlocks[index].requestMoveInFrame()) {

@@ -170,7 +170,7 @@ Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
   var delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
   var blocks = Object.values(this.draggingFrame_.blockDB_);
   for (let index = 0; index < blocks.length; index++) {
-    blocks[index].moveConnections_(delta.x, delta.y);
+    blocks[index].moveBy(delta.x, delta.y);
   }
   this.draggingFrame_.onStopDrag();
   this.workspace_.setResizesEnabled(true);

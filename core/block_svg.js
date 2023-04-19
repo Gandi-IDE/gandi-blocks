@@ -421,15 +421,15 @@ Blockly.BlockSvg.prototype.getRemovableToFrame = function(ignoreParentBlock) {
  * Move a block by a relative offset.
  * @param {number} dx Horizontal offset in workspace units.
  * @param {number} dy Vertical offset in workspace units.
- * @param {boolean} keepStill Whether to leave the block position unchanged.
+ * @param {boolean} relativeFrame Whether the block should be displaced relative to the frame.
  */
-Blockly.BlockSvg.prototype.moveBy = function(dx, dy, keepStill) {
+Blockly.BlockSvg.prototype.moveBy = function(dx, dy, relativeFrame) {
   goog.asserts.assert(!this.parentBlock_, 'Block has parent.');
   var eventsEnabled = Blockly.Events.isEnabled();
   if (eventsEnabled) {
     var event = new Blockly.Events.BlockMove(this);
   }
-  if (!keepStill) {
+  if (!this.frame_ || relativeFrame) {
     var xy = this.getRelativeToSurfaceXY(true);
     this.translate(xy.x + dx, xy.y + dy);
   }
