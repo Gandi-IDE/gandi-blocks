@@ -877,7 +877,9 @@ Blockly.Frame.prototype.requestMoveInBlock = function(block) {
   top += this.titleTextareaHeight_;
   bottom += this.titleTextareaHeight_;
   let removeAble = false;
-  if (block.frame_ && block.frame_ !== this) {
+  if (block.parentBlock_) {
+    removeAble = false;
+  } else if (block.frame_ && block.frame_ !== this) {
     removeAble = false;
   } else if (x > left && x < right && y > top && y < bottom) {
     removeAble = true;
@@ -1011,6 +1013,14 @@ Blockly.Frame.prototype.updateTitleBoxSize = function() {
  * Update the owned blocks
  */
 Blockly.Frame.prototype.updateOwnedBlocks = function() {
+  // Removes all not top blocks
+  const oldBlocks = Object.values(this.blockDB_);
+  oldBlocks.forEach(function(block) {
+    if (block.parentBlock_) {
+      block.requestMoveOutFrame();
+    }
+  });
+  
   const allTopBlocks = this.workspace.getTopBlocks();
   for (let index = 0; index < allTopBlocks.length; index++) {
     if(!allTopBlocks[index].requestMoveInFrame()) {
