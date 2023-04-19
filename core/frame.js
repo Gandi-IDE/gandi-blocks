@@ -446,25 +446,31 @@ Blockly.Frame.prototype.fireFrameChange = function(element, oldValue, newValue) 
  * Fire an event when the frame changes rectangle dimensions or positions.
  */
 Blockly.Frame.prototype.fireFrameRectChange = function() {
-  this.fireFrameChange('rect', this.oldBoundingFrameRect_, this.getBoundingFrameRect());
-  // When the position of a Frame changes, it needs to update the position information of the blocks it contains.
-  for (const key in this.blockDB_) {
-    if (Object.hasOwnProperty.call(this.blockDB_, key)) {
-      var block = this.blockDB_[key];
-      var event = new Blockly.Events.BlockMove(block);
-      event.oldCoordinate = this.oldBlocksCoordinate_[block.id];
-      event.recordNew();
-      Blockly.Events.fire(event);
+  var eventsEnabled = Blockly.Events.isEnabled();
+  if (eventsEnabled) {
+    this.fireFrameChange('rect', this.oldBoundingFrameRect_, this.getBoundingFrameRect());
+    // When the position of a Frame changes, it needs to update the position information of the blocks it contains.
+    for (const key in this.blockDB_) {
+      if (Object.hasOwnProperty.call(this.blockDB_, key)) {
+        var block = this.blockDB_[key];
+        var event = new Blockly.Events.BlockMove(block);
+        event.oldCoordinate = this.oldBlocksCoordinate_[block.id];
+        event.recordNew();
+        Blockly.Events.fire(event);
+      }
     }
+    this.oldBlocksCoordinate_ = {};
   }
-  this.oldBlocksCoordinate_ = {};
 };
 
 /**
  * Fire an event when the frame changes blocks.
  */
 Blockly.Frame.prototype.fireFrameBlocksChange = function() {
-  this.fireFrameChange('blocks', {blocks: this.oldBlockIdList_} , {blocks: this.getBlockIds()});
+  var eventsEnabled = Blockly.Events.isEnabled();
+  if (eventsEnabled) {
+    this.fireFrameChange('blocks', {blocks: this.oldBlockIdList_} , {blocks: this.getBlockIds()});
+  }
 };
 
 /**
@@ -605,10 +611,7 @@ Blockly.Frame.prototype.moveDuringDrag = function(newLoc) {
  * @param {number} dy Vertical offset in workspace units.
  */
 Blockly.Frame.prototype.moveBy = function(dx, dy) {
-  var eventsEnabled = Blockly.Events.isEnabled();
-  if (eventsEnabled) {
-    this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
-  }
+  this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
   var xy = this.getFrameGroupRelativeXY();
 
   this.rect_.left += dx;
@@ -617,10 +620,12 @@ Blockly.Frame.prototype.moveBy = function(dx, dy) {
   this.rect_.bottom += dy;
 
   this.translate(xy.x + dx, xy.y + dy);
+
+  Object.values(this.blockDB_).forEach((block) => {
+    block.moveBy(dx, dy, true);
+  });
   
-  if (eventsEnabled) {
-    this.fireFrameRectChange();
-  }
+  this.fireFrameRectChange();
   this.workspace.resizeContents();
 };
 
@@ -836,7 +841,7 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
 Blockly.Frame.prototype.render = function(rect) {
   this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
   this.rect_.left = rect.x + this.resizeButtonWidth_ / 2;
-  this.rect_.top = rect.y + (this.titleTextareaHeight_ + this.resizeButtonHeight_ / 2);
+  this.rect_.top = rect.y + this.resizeButtonHeight_ / 2;
   this.rect_.bottom = this.rect_.top + rect.height;
   this.rect_.right = this.rect_.left + rect.width;
   this.rect_.width = rect.width;
