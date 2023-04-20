@@ -321,9 +321,13 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
   Blockly.bindEventWithChecks_(textarea, 'input', this, function() {
     this.onTitleTextareaHeightChange();
   });
-  Blockly.bindEventWithChecks_(textarea, 'change', this, function() {
-    if (this.title != textarea.value) {
-      this.updateTitle(textarea.value);
+  Blockly.bindEventWithChecks_(textarea, 'change', this, function(e) {
+    var newValue = e.target.value;
+    if (!newValue.trim()) {
+      e.target.value = this.title;
+      this.onTitleTextareaHeightChange();
+    } else if (this.title != newValue) {
+      this.updateTitle(newValue);
     }
   });
   this.updateTitleBoxSize();
@@ -876,8 +880,6 @@ Blockly.Frame.prototype.render = function(rect) {
 Blockly.Frame.prototype.requestMoveInBlock = function(block) {
   const {x,y} = block.getRelativeToSurfaceXY();
   var {left, right, top, bottom} = this.rect_;
-  top += this.titleTextareaHeight_;
-  bottom += this.titleTextareaHeight_;
   let removeAble = false;
   if (block.parentBlock_) {
     removeAble = false;
