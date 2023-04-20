@@ -1168,7 +1168,7 @@ Blockly.Css.CONTENT = [
 
   '.blocklyFrameTitleTextarea {',
     'background-color: transparent;',
-    'font-size: 12px;',
+    'font-size: 16px;',
     'line-height: 20px;',
     'width: 100%;',
     'height: 20px;',
