@@ -282,7 +282,7 @@ Blockly.Frame.prototype.createDom_ = function() {
       },
       this.blocksGroup_);
   Blockly.bindEventWithChecks_(
-      this.svgRect_, 'mousedown', null, this.onRectMouseDown_.bind(this));
+      this.frameGroup_, 'mousedown', null, this.onRectMouseDown_.bind(this));
 
   this.createTitleEditor_();
   this.createResizeGroup_();
@@ -294,7 +294,11 @@ Blockly.Frame.prototype.createDom_ = function() {
  */
 Blockly.Frame.prototype.createTitleEditor_ = function() {
   this.foreignObject_ = Blockly.utils.createSvgElement('foreignObject', {
-    'x': this.resizeButtonWidth_ / 2, 'y': 0, height: 0, width: 0
+    class: 'blocklyFrameTitle',
+    'x': this.resizeButtonWidth_ / 2,
+    'y': 0,
+    height: 0,
+    width: 0
   }, this.frameGroup_);
   var body = document.createElementNS(Blockly.HTML_NS, 'body');
   body.setAttribute('xmlns', Blockly.HTML_NS);
@@ -304,6 +308,7 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
   textarea.value = this.title;
   textarea.setAttribute('dir', this.workspace.RTL ? 'RTL' : 'LTR');
   textarea.setAttribute('maxlength', 1000);
+  textarea.style['pointer-events'] = 'none';
   body.appendChild(textarea);
   this.textarea_ = textarea;
   this.foreignObject_.appendChild(body);
@@ -315,6 +320,8 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
       this.frameGroup_.style.visibility = 'visible';
     });
   } else {
+    var xy = this.computeFrameRelativeXY();
+    this.translate(xy.x, xy.y);
     this.frameGroup_.style.visibility = 'visible';
   }
   // Don't zoom with mousewheel.
@@ -332,6 +339,16 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
     } else if (this.title != newValue) {
       this.onTitleChange(newValue);
     }
+  });
+  Blockly.bindEventWithChecks_(textarea, 'blur', this, function(e) {
+    e.target.style['pointer-events'] = 'none';
+  });
+  Blockly.bindEventWithChecks_(body, 'click', this, function() {
+    this.select();
+  });
+  Blockly.bindEventWithChecks_(body, 'dblclick', this, function() {
+    textarea.style['pointer-events'] = 'auto';
+    this.textarea_.focus();
   });
   this.updateTitleBoxSize();
 };
@@ -404,25 +421,26 @@ Blockly.Frame.prototype.cleanUp = function() {
   if (!Blockly.Events.getGroup()) {
     Blockly.Events.setGroup(true);
   }
+  var padding = 20;
   var blocks = Object.values(this.blockDB_);
-  var height = 10;
+  var height = padding;
   var width = 0;
   for (var i = 0, block; block = blocks[i]; i++) {
     if (block.hidden) {
       continue;
     }
     var xy = block.getRelativeToSurfaceXY(true);
-    block.moveBy(-xy.x + 10, height - xy.y, true);
+    block.moveBy(-xy.x + padding, height - xy.y);
     block.snapToGrid();
     var blockHeightWidth = block.getHeightWidth();
-    width = Math.max(width, blockHeightWidth.width + 20);
+    width = Math.max(width, blockHeightWidth.width + 20 + padding);
     height = block.getRelativeToSurfaceXY(true).y + blockHeightWidth.height
-      + Blockly.BlockSvg.MIN_BLOCK_Y;
+      + (blocks[i + 1] ? Blockly.BlockSvg.MIN_BLOCK_Y : padding);
   }
 
   this.render({
-    x: this.rect_.left - this.resizeButtonWidth_ / 2,
-    y: this.rect_.top - (this.titleTextareaHeight_ + this.resizeButtonHeight_ / 2),
+    x: this.rect_.left,
+    y: this.rect_.top,
     height: height,
     width: width
   });
@@ -468,9 +486,14 @@ Blockly.Frame.prototype.fireFrameRectChange = function() {
       if (Object.hasOwnProperty.call(this.blockDB_, key)) {
         var block = this.blockDB_[key];
         var event = new Blockly.Events.BlockMove(block);
-        event.oldCoordinate = this.oldBlocksCoordinate_[block.id];
-        event.recordNew();
-        Blockly.Events.fire(event);
+        var oldCoordinate = this.oldBlocksCoordinate_[block.id];
+        if(oldCoordinate) {
+          event.oldCoordinate = oldCoordinate;
+          event.recordNew();
+          Blockly.Events.fire(event);
+        } else {
+          event = null;
+        }
       }
     }
     this.oldBlocksCoordinate_ = {};
@@ -636,7 +659,7 @@ Blockly.Frame.prototype.moveBy = function(dx, dy) {
   this.translate(xy.x + dx, xy.y + dy);
 
   Object.values(this.blockDB_).forEach((block) => {
-    block.moveBy(dx, dy);
+    block.moveBy(dx, dy, true);
   });
   
   this.fireFrameRectChange();
@@ -704,6 +727,63 @@ Blockly.Frame.prototype.onStopResizeRect_ = function() {
 };
 
 /**
+ * Select this block.  Highlight it visually.
+ */
+Blockly.Frame.prototype.select = function() {
+  if (Blockly.locked) return;
+  if (Blockly.selected == this) {
+    return;
+  }
+  var oldId = null;
+  if (Blockly.selected) {
+    oldId = Blockly.selected.id;
+    // Unselect any previously selected object.
+    Blockly.Events.disable();
+    try {
+      Blockly.selected.unselect();
+    } finally {
+      Blockly.Events.enable();
+    }
+  }
+  
+  var event = new Blockly.Events.Ui(null, 'selected', oldId, this.id);
+  event.workspaceId = this.workspace.id;
+  Blockly.Events.fire(event);
+  Blockly.selected = this;
+  this.addSelect();
+};
+
+/**
+ * Unselect this block.  Remove its highlighting.
+ */
+Blockly.Frame.prototype.unselect = function() {
+  if (Blockly.selected != this) {
+    return;
+  }
+  var event = new Blockly.Events.Ui(null, 'selected', this.id, null);
+  event.workspaceId = this.workspace.id;
+  Blockly.Events.fire(event);
+  Blockly.selected = null;
+  this.removeSelect();
+};
+
+/**
+ * Select this frame.
+ */
+Blockly.Frame.prototype.addSelect = function() {
+  Blockly.utils.addClass(
+      /** @type {!Element} */ (this.frameGroup_), 'frameSelected');
+};
+
+/**
+ * Unselect this frame.
+ */
+Blockly.Frame.prototype.removeSelect = function() {
+  Blockly.utils.removeClass(
+      /** @type {!Element} */ (this.frameGroup_),  'frameSelected');
+};
+
+/**
  * Handle a mouse-down on an frame's rect.
  * @param {!Event} e Mouse down event or touch start event.
  * @private
@@ -711,7 +791,7 @@ Blockly.Frame.prototype.onStopResizeRect_ = function() {
 Blockly.Frame.prototype.onRectMouseDown_ = function(e) {
   if (this.workspace.waitingCreateFrame) {
     e.stopPropagation();
-  } else {
+  } else if (Blockly.selected == this) {
     var gesture = this.workspace && this.workspace.getGesture(e);
     if (gesture) {
       gesture.handleFrameStart(e, this);
@@ -745,7 +825,7 @@ Blockly.Frame.prototype.onTitleTextareaHeightChange = function(height) {
     this.workspace.setResizesEnabled(false);
     this.titleTextareaHeight_ = newHeight;
     var xy = this.computeFrameRelativeXY();
-    this.foreignObject_.setAttribute('height', newHeight);
+    this.updateTitleBoxSize();
     this.blocksGroup_.setAttribute('transform', 'translate(' + hw + ',' + (newHeight + hh) + ')');
     this.resizeGroup_.setAttribute('transform', 'translate(0,' + newHeight + ')');
     this.translate(xy.x, xy.y);
@@ -776,6 +856,7 @@ Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e, takeOverSubEve
   this.frameGroup_.style.cursor = 'pointer';
   this.workspace.setResizesEnabled(false);
   this.workspace.setResizingFrame(true);
+  this.select();
   this.setResizing(true);
   this.onStartResizeRect_();
   this.recordBlocksRelativeToSurfaceXY();
@@ -871,15 +952,16 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
  */
 Blockly.Frame.prototype.render = function(rect) {
   this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
-  this.rect_.left = rect.x + this.resizeButtonWidth_ / 2;
-  this.rect_.top = rect.y + this.resizeButtonHeight_ / 2;
+  this.rect_.left = rect.x;
+  this.rect_.top = rect.y;
   this.rect_.bottom = this.rect_.top + rect.height;
   this.rect_.right = this.rect_.left + rect.width;
   this.rect_.width = rect.width;
   this.rect_.height = rect.height;
-
-  this.translate(rect.x, rect.y);
+  var xy = this.computeFrameRelativeXY();
+  this.translate(xy.x, xy.y);
   this.updateFrameRectSize();
+  this.updateTitleBoxSize();
   this.updateResizeButtonsPosition();
   this.fireFrameRectChange();
 };
@@ -1026,6 +1108,7 @@ Blockly.Frame.prototype.updateTitleBoxSize = function() {
   if(this.foreignObject_) {
     this.foreignObject_.setAttribute("height", this.titleTextareaHeight_);
     this.foreignObject_.setAttribute("width", this.getWidth());
+    this.foreignObject_.style.setProperty('--frame-title-height', this.titleTextareaHeight_ + 'px');
   }
 };
 
@@ -1097,7 +1180,6 @@ Blockly.Frame.prototype.dispose = function(retainBlocks) {
 
   this.oldBlockIdList_ = this.getBlockIds();
   var oldBlocks = Object.assign({}, this.blockDB_);
-  this.blockDB_ = {};
 
   for (const key in oldBlocks) {
     const block = oldBlocks[key];
@@ -1108,7 +1190,7 @@ Blockly.Frame.prototype.dispose = function(retainBlocks) {
       setTimeout(function() {
         ws.fireDeletionListeners(block);
       });
-      block.dispose(true, true);
+      block.dispose(false, true);
     }
   }
 
@@ -1118,6 +1200,7 @@ Blockly.Frame.prototype.dispose = function(retainBlocks) {
   this.frameGroup_ = null;
   this.rect_ = null;
   this.svgRect_ = null;
+  this.blockDB_ = {};
 
   // Remove from the list of top frames and the frame database.
   this.workspace.removeTopFrame(this);

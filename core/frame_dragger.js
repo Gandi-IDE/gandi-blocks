@@ -101,7 +101,6 @@ Blockly.FrameDragger.prototype.startFrameDrag = function() {
   if (!Blockly.Events.getGroup()) {
     Blockly.Events.setGroup(true);
   }
-
   this.draggingFrame_.oldBoundingFrameRect_ = this.draggingFrame_.getBoundingFrameRect();
   this.workspace_.setFrameToFront(this.draggingFrame_);
   this.workspace_.setResizesEnabled(false);
@@ -170,7 +169,7 @@ Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
   var delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
   var blocks = Object.values(this.draggingFrame_.blockDB_);
   for (let index = 0; index < blocks.length; index++) {
-    blocks[index].moveBy(delta.x, delta.y);
+    blocks[index].moveBy(delta.x, delta.y, true);
   }
   this.draggingFrame_.onStopDrag();
   this.workspace_.setResizesEnabled(true);
