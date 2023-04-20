@@ -933,16 +933,23 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
   this.setResizing(false);
   if (takeOverSubEvents) {
     this.workspace.setResizingFrame(false);
-    this.updateOwnedBlocks();
-    this.rendered = true;
-    Blockly.Events.fire(new Blockly.Events.FrameCreate(this));
+    if(this.getHeight() < this.minHeight_ || this.getWidth() < this.minWidth_) {
+      Blockly.Events.disable();
+      this.workspace.deleteFrameById(this.id);
+      Blockly.Events.enable();
+    } else {
+      this.updateOwnedBlocks();
+      this.rendered = true;
+      Blockly.Events.fire(new Blockly.Events.FrameCreate(this));
+      this.workspace.setResizesEnabled(true);
+    }
   } else {
     this.fireFrameRectChange();
     this.updateOwnedBlocks();
     Blockly.unbindEvent_(this.resizeButtonMouseMoveBindData_);
     Blockly.unbindEvent_(this.resizeButtonMouseUpBindData_);
+    this.workspace.setResizesEnabled(true);
   }
-  this.workspace.setResizesEnabled(true);
 };
 
 /**
@@ -1195,6 +1202,10 @@ Blockly.Frame.prototype.dispose = function(retainBlocks) {
   }
 
   Blockly.Events.fire(new Blockly.Events.FrameDelete(this));
+
+  if (Blockly.selected === this) {
+    Blockly.selected = null;
+  }
 
   goog.dom.removeNode(this.frameGroup_);
   this.frameGroup_ = null;
