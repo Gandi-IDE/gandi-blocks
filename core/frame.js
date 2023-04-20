@@ -254,6 +254,8 @@ Blockly.Frame.prototype.createDom_ = function() {
       {
         'class': 'blocklyFrame',
       }, this.workspace.svgBlockCanvas_);
+  // Avoid blinking
+  this.frameGroup_.style.visibility = 'hidden';
   // Expose this block's ID on its top-level SVG group.
   if (this.frameGroup_.dataset) {
     this.frameGroup_.dataset.id = this.id;
@@ -266,8 +268,6 @@ Blockly.Frame.prototype.createDom_ = function() {
         'class': 'blocklyFrameBlockCanvas',
         'transform': 'translate(' + tx + ',' + ty + ')',
       }, this.frameGroup_);
-  var xy = this.computeFrameRelativeXY();
-  this.translate(xy.x, xy.y - this.titleTextareaHeight_);
 
   /** @type {SVGElement} */
   this.svgRect_ = Blockly.utils.createSvgElement('rect',
@@ -307,13 +307,16 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
   body.appendChild(textarea);
   this.textarea_ = textarea;
   this.foreignObject_.appendChild(body);
-  setTimeout(() => {
-    if (this.title !== Blockly.Msg.FRAME) {
+  if (this.title !== Blockly.Msg.FRAME) {
+    setTimeout(() => {
       var newHeight = this.textarea_.scrollHeight;
       this.textarea_.style.height = newHeight + 'px';
       this.onTitleTextareaHeightChange(newHeight);
-    }
-  });
+      this.frameGroup_.style.visibility = 'visible';
+    });
+  } else {
+    this.frameGroup_.style.visibility = 'visible';
+  }
   // Don't zoom with mousewheel.
   Blockly.bindEventWithChecks_(textarea, 'wheel', this, function(e) {
     e.stopPropagation();
@@ -778,11 +781,12 @@ Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e, takeOverSubEve
   this.recordBlocksRelativeToSurfaceXY();
 
   if(takeOverSubEvents) {
-    var wsRelativeXY = Blockly.utils.getRelativeXY(this.workspace.svgBlockCanvas_);
-    this.rect_.left = this.rect_.right = (e.offsetX - wsRelativeXY.x) / this.workspace.scale;
-    this.rect_.top = this.rect_.bottom = (e.offsetY - wsRelativeXY.y) / this.workspace.scale;
+    var scale = this.workspace.scale;
+    var wsXY = Blockly.utils.getRelativeXY(this.workspace.svgBlockCanvas_);
+    this.rect_.left = this.rect_.right = (e.offsetX - wsXY.x) / scale;
+    this.rect_.top = this.rect_.bottom = (e.offsetY - wsXY.y) / scale;
     var xy = this.computeFrameRelativeXY();
-    this.translate(xy.x, xy.y - this.titleTextareaHeight_);
+    this.translate(xy.x, xy.y);
   } else {
     var workspaceSvg = this.workspace.svgGroup_;
     this.resizeButtonMouseMoveBindData_ =
@@ -809,7 +813,6 @@ Blockly.Frame.prototype.resizeButtonMouseMove_ = function(dir, e) {
   var yDir = dir === 'tl' || dir === 'tr' ? 'btt' : 'ttb';
   this.updateBoundingClientRect(diffX, diffY, xDir, yDir);
   var newCoord = this.computeFrameRelativeXY();
-  newCoord.y -= this.titleTextareaHeight_;
 
   var blocks = Object.values(this.blockDB_);
   // If there are selected blocks in the frame, it needs to keep their relative position in the workspace unchanged.
