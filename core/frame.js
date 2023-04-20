@@ -438,7 +438,7 @@ Blockly.Frame.prototype.computeFrameRelativeXY = function() {
   var rx = this.rect_.left < this.rect_.right ? this.rect_.left : this.rect_.right;
   var ry = this.rect_.top < this.rect_.bottom ? this.rect_.top : this.rect_.bottom;
   var x = rx - this.resizeButtonWidth_ / 2;
-  var y = ry - this.resizeButtonHeight_ / 2;
+  var y = ry - this.resizeButtonHeight_ / 2 - this.titleTextareaHeight_;
   return new goog.math.Coordinate(x, y);
 };
 
@@ -609,7 +609,7 @@ Blockly.Frame.prototype.isDeletable = function() {
  */
 Blockly.Frame.prototype.moveDuringDrag = function(newLoc) {
   this.rect_.left = newLoc.x + this.resizeButtonWidth_ / 2;
-  this.rect_.top = newLoc.y + this.resizeButtonHeight_ / 2;
+  this.rect_.top = newLoc.y + this.resizeButtonHeight_ / 2 + this.titleTextareaHeight_;
   this.rect_.right = this.rect_.left + this.rect_.width + this.resizeButtonWidth_ / 2;
   this.rect_.bottom = this.rect_.top + this.rect_.height + this.resizeButtonWidth_ / 2;
   var xy = this.computeFrameRelativeXY();
@@ -740,12 +740,12 @@ Blockly.Frame.prototype.onTitleTextareaHeightChange = function(height) {
     var hw = this.resizeButtonWidth_ / 2;
     var hh = this.resizeButtonHeight_ / 2;
     this.workspace.setResizesEnabled(false);
-    var xy = this.computeFrameRelativeXY();
     this.titleTextareaHeight_ = newHeight;
+    var xy = this.computeFrameRelativeXY();
     this.foreignObject_.setAttribute('height', newHeight);
     this.blocksGroup_.setAttribute('transform', 'translate(' + hw + ',' + (newHeight + hh) + ')');
     this.resizeGroup_.setAttribute('transform', 'translate(0,' + newHeight + ')');
-    this.translate(xy.x, xy.y - this.titleTextareaHeight_);
+    this.translate(xy.x, xy.y);
     this.workspace.setResizesEnabled(true);
   }
 };
