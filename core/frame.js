@@ -327,7 +327,7 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
       e.target.value = this.title;
       this.onTitleTextareaHeightChange();
     } else if (this.title != newValue) {
-      this.updateTitle(newValue);
+      this.onTitleChange(newValue);
     }
   });
   this.updateTitleBoxSize();
@@ -717,6 +717,15 @@ Blockly.Frame.prototype.onRectMouseDown_ = function(e) {
 };
 
 /**
+ * Handle the frame's title change event.
+ * @param {string} newTitle The new title of the frame
+ */
+Blockly.Frame.prototype.onTitleChange = function(newTitle) {
+  Blockly.Events.fire(new Blockly.Events.FrameRetitle(this, newTitle));
+  this.title = newTitle;
+};
+
+/**
  * Handle a mouse-down on an frame's rect.
  * @param {Number} height Mouse down event or touch start event.
  */
@@ -959,6 +968,19 @@ Blockly.Frame.prototype.setMouseThroughStyle = function(letMouseThrough) {
 };
 
 /**
+ * Set the title of the frame.
+ * @param {string} newTitle The new title of the frame.
+ */
+Blockly.Frame.prototype.setTitle = function(newTitle) {
+  if(this.title != newTitle) {
+    this.title = newTitle;
+    this.textarea_.value = this.title;
+    Blockly.Events.fire(new Blockly.Events.FrameRetitle(this, newTitle));
+    this.onTitleTextareaHeightChange();
+  }
+};
+
+/**
  * Show the context menu for this frame.
  * @param {!Event} e Mouse event.
  * @private
@@ -992,15 +1014,6 @@ Blockly.Frame.prototype.translate = function(x, y) {
 Blockly.Frame.prototype.updateFrameRectSize = function() {
   this.svgRect_.setAttribute("width", Math.abs(this.rect_.width));
   this.svgRect_.setAttribute("height", Math.abs(this.rect_.height));
-};
-
-/**
- * Updates the frame's title
- * @param {string} newTitle The new title of the frame
- */
-Blockly.Frame.prototype.updateTitle = function(newTitle) {
-  Blockly.Events.fire(new Blockly.Events.FrameRetitle(this, newTitle));
-  this.title = newTitle;
 };
 
 /**

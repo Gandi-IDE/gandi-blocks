@@ -608,7 +608,7 @@ Blockly.Workspace.prototype.deleteFrameById = function(id, retainBlocks) {
  */
 Blockly.Workspace.prototype.retitleFrameById = function(id, newTitle) {
   var frame = this.getFrameById(id);
-  frame.updateTitle(newTitle);
+  frame.setTitle(newTitle);
 };
 
 /**
