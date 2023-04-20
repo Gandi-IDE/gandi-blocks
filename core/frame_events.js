@@ -348,10 +348,20 @@ Blockly.Events.FrameChange.prototype.run = function(forward) {
   var value = forward ? this.newValue : this.oldValue;
   switch (this.element) {
     case 'blocks':
-      value.blocks.forEach(blockId => {
+      var l1 = forward ? this.newValue.blocks : this.oldValue.blocks;
+      var l2 = forward ? this.oldValue.blocks : this.newValue.blocks;
+      var addedBlocks = l1.filter(function(v){ return l2.indexOf(v) == -1;});
+      addedBlocks.forEach(blockId => {
         const block = workspace.getBlockById(blockId);
-        if(block) {
+        if (block) {
           block.requestMoveInFrame();
+        }
+      });
+      var deletedBlocks = l2.filter(function(v){ return l1.indexOf(v) == -1;});
+      deletedBlocks.forEach(blockId => {
+        const block = workspace.getBlockById(blockId);
+        if (block) {
+          block.requestMoveOutFrame();
         }
       });
       break;
