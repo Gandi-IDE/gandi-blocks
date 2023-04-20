@@ -1137,7 +1137,7 @@ Blockly.Css.CONTENT = [
     'cursor: not-allowed;',
   '}',
 
-  '.blocklyFrameBlockCanvas:hover {',
+  '.frameSelected:hover {',
     'cursor: grab;',
   '}',
 
@@ -1149,17 +1149,33 @@ Blockly.Css.CONTENT = [
     'visibility: hidden;',
   '}',
 
-
-  '.blocklyFrame:hover .frameResizeButtons, .frameResizing .frameResizeButtons {',
+  '.frameSelected .frameResizeButtons {',
     'visibility: visible;',
   '}',
 
-  '.blocklyFrame:hover .blocklyFrameRectangle,.frameResizing .blocklyFrameRectangle {',
+  '.blocklyFrame:hover .blocklyFrameRectangle {',
+    'stroke-width: 2px;',
     'stroke: var(--theme-brand-color, #2D8CFF);',
   '}',
 
-  '.blocklyFrame:hover .blocklyFrameTitleTextarea,.frameResizing .blocklyFrameTitleTextarea {',
+  '.blocklyFrame.frameSelected .blocklyFrameRectangle {',
+    'stroke-width: 1px;',
+    'stroke: var(--theme-brand-color, #2D8CFF);',
+  '}',
+
+  '.blocklyFrame:hover .blocklyFrameTitleTextarea {',
+    'font-weight: 600;',
     'color: var(--theme-brand-color, #2D8CFF);',
+  '}',
+
+  '.blocklyFrame.frameSelected .blocklyFrameTitleTextarea {',
+    'font-weight: 400;',
+    'color: var(--theme-brand-color, #2D8CFF);',
+  '}',
+
+  '.blocklyFrameTitle {',
+    'transform: scale(var(--anti-scale, 1));',
+    'transform-origin: left var(--frame-title-height, 20);',
   '}',
 
   '.blocklyFrameTitleBody {',
@@ -1192,6 +1208,12 @@ Blockly.Css.CONTENT = [
 
   '.blocklyResizeButtonNE,.blocklyResizeButtonSW{',
     'cursor: nesw-resize;',
+  '}',
+
+  '.blocklyResizeButtonNE,.blocklyResizeButtonSE,.blocklyResizeButtonSW,.blocklyResizeButtonNW{',
+    'width: calc(var(--anti-scale, 1) * 10px);',
+    'height: calc(var(--anti-scale, 1) * 10px);',
+    'transform: translate(calc((var(--anti-scale, 1) - 1) * -5px), calc((var(--anti-scale, 1) - 1) * -5px));',
   '}',
 
   '.scratchNotePickerKeyLabel {',

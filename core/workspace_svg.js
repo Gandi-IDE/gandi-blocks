@@ -1911,6 +1911,7 @@ Blockly.WorkspaceSvg.prototype.setScale = function(newScale) {
     newScale = this.options.zoomOptions.minScale;
   }
   this.scale = newScale;
+  this.svgBlockCanvas_.style.setProperty('--anti-scale', Math.max(Math.floor(1 / this.scale), 1));
   if (this.grid_) {
     this.grid_.update(this.scale);
   }
