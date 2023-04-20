@@ -367,7 +367,7 @@ Blockly.ContextMenu.frameDeleteOption = function(frame) {
     enabled: true,
     callback: function() {
       Blockly.Events.setGroup(true);
-      frame.dispose(true, true);
+      frame.dispose();
       Blockly.Events.setGroup(false);
     }
   };
