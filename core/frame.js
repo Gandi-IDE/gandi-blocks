@@ -791,7 +791,7 @@ Blockly.Frame.prototype.removeSelect = function() {
 Blockly.Frame.prototype.onRectMouseDown_ = function(e) {
   if (this.workspace.waitingCreateFrame) {
     e.stopPropagation();
-  } else if (Blockly.selected == this) {
+  } else if (Blockly.selected == this || e.button === 2) {
     var gesture = this.workspace && this.workspace.getGesture(e);
     if (gesture) {
       gesture.handleFrameStart(e, this);
@@ -931,8 +931,8 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
   this.onStopResizeRect_();
   this.onTitleTextareaHeightChange();
   this.setResizing(false);
+  this.workspace.setResizingFrame(false);
   if (takeOverSubEvents) {
-    this.workspace.setResizingFrame(false);
     if(this.getHeight() < this.minHeight_ || this.getWidth() < this.minWidth_) {
       Blockly.Events.disable();
       this.workspace.deleteFrameById(this.id);
