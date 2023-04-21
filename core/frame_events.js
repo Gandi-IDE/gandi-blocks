@@ -354,7 +354,18 @@ Blockly.Events.FrameChange.prototype.run = function(forward) {
       addedBlocks.forEach(blockId => {
         const block = workspace.getBlockById(blockId);
         if (block) {
-          block.requestMoveInFrame();
+          const result = block.requestMoveInFrame();
+          // If it fail to add the block to frame, it means that there is a special scenario present,
+          // such as the Block needing to change from a connected state to a disconnected state. In this case,
+          // the Block cannot be added because it is a non-top level block. It needs to be waited for
+          // the Block to move to the top level block and then tried again.
+          if(!result) {
+            // Here, a hack is used to make the Block try to add frames later on,
+            // the first frame it tries to add is this frame.
+            var temp = workspace.frameDB_[this.frameId];
+            delete workspace.frameDB_[this.frameId];
+            workspace.frameDB_[this.frameId] = temp;
+          }
         }
       });
       var deletedBlocks = l2.filter(function(v){ return l1.indexOf(v) == -1;});

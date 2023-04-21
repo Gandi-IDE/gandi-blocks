@@ -204,6 +204,7 @@ Blockly.Frame.prototype.borderColor_ = 'var(--theme-brand-color, #2D8CFF)';
  * Append blocks belonging to the node to the blocklyFrameBlockCanvas node below.
  */
 Blockly.Frame.prototype.appendBlocksToBlocksCanvas = function() {
+  Blockly.Events.disable();
   this.options.blocks.forEach((blockId) => {
     var block = this.workspace.getBlockById(blockId);
     if (block) {
@@ -211,6 +212,7 @@ Blockly.Frame.prototype.appendBlocksToBlocksCanvas = function() {
       block.requestMoveInFrame();
     }
   });
+  Blockly.Events.enable();
 };
 
 /**
@@ -989,9 +991,7 @@ Blockly.Frame.prototype.requestMoveInBlock = function(block) {
   const {x,y} = block.getRelativeToSurfaceXY();
   var {left, right, top, bottom} = this.rect_;
   let removeAble = false;
-  if (block.parentBlock_) {
-    removeAble = false;
-  } else if (block.frame_ && block.frame_ !== this) {
+  if (block.frame_ && block.frame_ !== this) {
     removeAble = false;
   } else if (x > left && x < right && y > top && y < bottom) {
     removeAble = true;

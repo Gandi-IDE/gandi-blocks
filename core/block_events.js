@@ -525,6 +525,9 @@ Blockly.Events.Move.prototype.run = function(forward) {
     var xy = block.getRelativeToSurfaceXY();
     var rtlAwareX = workspace.RTL ? workspace.getWidth() - coordinate.x : coordinate.x;
     block.moveBy(rtlAwareX - xy.x, coordinate.y - xy.y);
+    if (this.newParentId !== this.oldParentId) {
+      block.requestMoveInFrame();
+    }
   } else {
     var blockConnection = block.outputConnection || block.previousConnection;
     var parentConnection;
