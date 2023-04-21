@@ -1174,6 +1174,7 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.blocklyFrameTitle {',
+    'cursor: pointer;',
     'transform: scale(var(--anti-scale, 1));',
     'transform-origin: left var(--frame-title-height, 20);',
   '}',
