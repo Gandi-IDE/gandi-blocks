@@ -208,8 +208,9 @@ Blockly.Frame.prototype.appendBlocksToBlocksCanvas = function() {
   this.options.blocks.forEach((blockId) => {
     var block = this.workspace.getBlockById(blockId);
     if (block) {
+      this.addBlock(block);
       block.frame_ = this;
-      block.requestMoveInFrame();
+      block.moveBlockToContainer('frame');
     }
   });
   Blockly.Events.enable();
@@ -319,6 +320,10 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
       var newHeight = this.textarea_.scrollHeight;
       this.textarea_.style.height = newHeight + 'px';
       this.onTitleTextareaHeightChange(newHeight);
+      if (newHeight === this.titleTextareaHeight_) {
+        var xy = this.computeFrameRelativeXY();
+        this.translate(xy.x, xy.y);
+      }
       this.frameGroup_.style.visibility = 'visible';
     });
   } else {
