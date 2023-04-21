@@ -118,7 +118,7 @@ Blockly.Frame = function(workspace, opt_options) {
    */
   this.blockDB_ = {};
 
-  this.oldBlocksCoordinate_ = {};
+  this.oldBlocksCoordinate_ = null;
 
   this.resizeButtons = {
     tl: null,
@@ -282,7 +282,7 @@ Blockly.Frame.prototype.createDom_ = function() {
       },
       this.blocksGroup_);
   Blockly.bindEventWithChecks_(
-      this.frameGroup_, 'mousedown', null, this.onRectMouseDown_.bind(this));
+      this.frameGroup_, 'mousedown', null, this.onMouseDown_.bind(this));
 
   this.createTitleEditor_();
   this.createResizeGroup_();
@@ -446,6 +446,7 @@ Blockly.Frame.prototype.cleanUp = function() {
   });
 
   Blockly.Events.setGroup(false);
+  this.bringToFront();
   this.workspace.setResizesEnabled(true);
 };
 
@@ -481,22 +482,25 @@ Blockly.Frame.prototype.fireFrameRectChange = function() {
   var eventsEnabled = Blockly.Events.isEnabled();
   if (eventsEnabled) {
     this.fireFrameChange('rect', this.oldBoundingFrameRect_, this.getBoundingFrameRect());
-    // When the position of a Frame changes, it needs to update the position information of the blocks it contains.
-    for (const key in this.blockDB_) {
-      if (Object.hasOwnProperty.call(this.blockDB_, key)) {
-        var block = this.blockDB_[key];
-        var event = new Blockly.Events.BlockMove(block);
-        var oldCoordinate = this.oldBlocksCoordinate_[block.id];
-        if(oldCoordinate) {
-          event.oldCoordinate = oldCoordinate;
-          event.recordNew();
-          Blockly.Events.fire(event);
-        } else {
-          event = null;
+
+    if (this.oldBlocksCoordinate_) {
+      // When the position of a Frame changes, it needs to update the position information of the blocks it contains.
+      for (const key in this.blockDB_) {
+        if (Object.hasOwnProperty.call(this.blockDB_, key)) {
+          var block = this.blockDB_[key];
+          var event = new Blockly.Events.BlockMove(block);
+          var oldCoordinate = this.oldBlocksCoordinate_[block.id];
+          if (oldCoordinate) {
+            event.oldCoordinate = oldCoordinate;
+            event.recordNew();
+            var dxy = goog.math.Coordinate.difference(event.newCoordinate, event.oldCoordinate);
+            block.moveBy(dxy.x, dxy.y, true);
+            Blockly.Events.fire(event);
+          }
         }
       }
+      this.oldBlocksCoordinate_ = null;
     }
-    this.oldBlocksCoordinate_ = {};
   }
 };
 
@@ -784,17 +788,21 @@ Blockly.Frame.prototype.removeSelect = function() {
 };
 
 /**
- * Handle a mouse-down on an frame's rect.
+ * Handle a mouse-down on the frame group.
  * @param {!Event} e Mouse down event or touch start event.
  * @private
  */
-Blockly.Frame.prototype.onRectMouseDown_ = function(e) {
+Blockly.Frame.prototype.onMouseDown_ = function(e) {
   if (this.workspace.waitingCreateFrame) {
     e.stopPropagation();
   } else if (Blockly.selected == this || e.button === 2) {
-    var gesture = this.workspace && this.workspace.getGesture(e);
-    if (gesture) {
-      gesture.handleFrameStart(e, this);
+    // Avoiding canceling right-click events on blocks in the frame.
+    var hasGesture = this.workspace && this.workspace.hasGesture();
+    if (!hasGesture) {
+      var gesture = this.workspace && this.workspace.getGesture(e);
+      if (gesture) {
+        gesture.handleFrameStart(e, this);
+      }
     }
   }
 };
@@ -837,6 +845,7 @@ Blockly.Frame.prototype.onTitleTextareaHeightChange = function(height) {
  * Record the current coordinates of the blocks that relative to workspace.
  */
 Blockly.Frame.prototype.recordBlocksRelativeToSurfaceXY = function() {
+  this.oldBlocksCoordinate_ = {};
   Object.values(this.blockDB_).forEach((block) => {
     const startXY = block.getRelativeToSurfaceXY();
     this.oldBlocksCoordinate_[block.id] = startXY;
@@ -859,7 +868,6 @@ Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e, takeOverSubEve
   this.select();
   this.setResizing(true);
   this.onStartResizeRect_();
-  this.recordBlocksRelativeToSurfaceXY();
 
   if(takeOverSubEvents) {
     var scale = this.workspace.scale;
@@ -905,7 +913,6 @@ Blockly.Frame.prototype.resizeButtonMouseMove_ = function(dir, e) {
       blocks.forEach((block) => {
         var xy = block.getRelativeToSurfaceXY(true);
         block.translate(xy.x + dx, xy.y + dy);
-        block.moveConnections_(dx, dy);
       });
     }
   }

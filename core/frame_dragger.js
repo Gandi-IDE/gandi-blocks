@@ -165,12 +165,6 @@ Blockly.FrameDragger.prototype.dragFrame = function(e, currentDragDeltaXY) {
 Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
   // Make sure internal state is fresh.
   this.dragFrame(e, currentDragDeltaXY);
-
-  var delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
-  var blocks = Object.values(this.draggingFrame_.blockDB_);
-  for (let index = 0; index < blocks.length; index++) {
-    blocks[index].moveBy(delta.x, delta.y, true);
-  }
   this.draggingFrame_.onStopDrag();
   this.workspace_.setResizesEnabled(true);
   this.workspace_.resetFrameAndTopBlocksMap();

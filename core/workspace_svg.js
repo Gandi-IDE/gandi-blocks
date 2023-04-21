@@ -2371,6 +2371,14 @@ Blockly.WorkspaceSvg.prototype.getGesture = function(e) {
 };
 
 /**
+ * Returning whether a gesture is currently present.
+ * @returns {boolean} True if the gesture is currently active, false otherwise
+ */
+Blockly.WorkspaceSvg.prototype.hasGesture = function() {
+  return this.currentGesture_ !== null;
+};
+
+/**
  * Clear the reference to the current gesture.
  * @package
  */
