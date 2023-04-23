@@ -1472,6 +1472,7 @@ Blockly.WorkspaceSvg.prototype.showContextMenu_ = function(e) {
   var menuOptions = window.__XIGUA_SHORTCUT ? [Blockly.ContextMenu.showBlocks(this)] : [];
   // powered by xigua end
   var topBlocks = this.getTopBlocks(true);
+  var topFrames = this.getTopFrames(false);
   var eventGroup = Blockly.utils.genUid();
   var ws = this;
 
@@ -1485,7 +1486,7 @@ Blockly.WorkspaceSvg.prototype.showContextMenu_ = function(e) {
   // Option to clean up blocks.
   if (this.scrollbar) {
     menuOptions.push(
-        Blockly.ContextMenu.wsCleanupOption(this,topBlocks.length));
+        Blockly.ContextMenu.wsCleanupOption(this, topBlocks.concat(topFrames).length));
   }
 
   if (this.options.collapse) {

@@ -495,7 +495,7 @@ Blockly.Frame.prototype.fireFrameRectChange = function() {
       for (const key in this.blockDB_) {
         if (Object.hasOwnProperty.call(this.blockDB_, key)) {
           var block = this.blockDB_[key];
-          var event = new Blockly.Events.BlockMove(block);
+          var event = new Blockly.Events.BlockMove(block, true);
           var oldCoordinate = this.oldBlocksCoordinate_[block.id];
           if (oldCoordinate) {
             event.oldCoordinate = oldCoordinate;
@@ -666,13 +666,8 @@ Blockly.Frame.prototype.moveBy = function(dx, dy) {
   this.rect_.top += dy;
   this.rect_.right += dx;
   this.rect_.bottom += dy;
-
+  this.recordBlocksRelativeToSurfaceXY();
   this.translate(xy.x + dx, xy.y + dy);
-
-  Object.values(this.blockDB_).forEach((block) => {
-    block.moveBy(dx, dy, true);
-  });
-  
   this.fireFrameRectChange();
   this.workspace.resizeContents();
 };
