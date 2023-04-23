@@ -303,6 +303,12 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
     height: 0,
     width: 0
   }, this.frameGroup_);
+  Blockly.bindEvent_(this.foreignObject_, 'mouseenter', this, function() {
+    this.svgRect_.classList.add('blocklyFrameRectangleHover');
+  });
+  Blockly.bindEvent_(this.foreignObject_, 'mouseleave', this, function() {
+    this.svgRect_.classList.remove('blocklyFrameRectangleHover');
+  });
   var body = document.createElementNS(Blockly.HTML_NS, 'body');
   body.setAttribute('xmlns', Blockly.HTML_NS);
   body.className = 'blocklyMinimalBody blocklyFrameTitleBody';
