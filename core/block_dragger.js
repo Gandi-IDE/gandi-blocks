@@ -167,6 +167,7 @@ Blockly.BlockDragger.prototype.startBlockDrag = function(e, currentDragDeltaXY) 
   }
 
   this.workspace_.setResizesEnabled(false);
+  this.workspace_.setDraggingBlock(true);
   Blockly.BlockAnimations.disconnectUiStop();
 
   var frame = this.draggingBlock_.getTopFrame();
@@ -325,6 +326,7 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
   }
   this.workspace_.resetFrameAndTopBlocksMap();
   this.workspace_.setResizesEnabled(true);
+  this.workspace_.setDraggingBlock(false);
 
   var toolbox = this.workspace_.getToolbox();
   if (toolbox) {

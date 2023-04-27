@@ -207,8 +207,7 @@ Blockly.Frame.prototype.appendBlocksToBlocksCanvas = function() {
   Blockly.Events.disable();
   this.options.blocks.forEach((blockId) => {
     var block = this.workspace.getBlockById(blockId);
-    if (block) {
-      this.addBlock(block);
+    if(block && this.requestMoveInBlock(block)) {
       block.frame_ = this;
       block.moveBlockToContainer('frame');
     }
@@ -304,10 +303,14 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
     width: 0
   }, this.frameGroup_);
   Blockly.bindEvent_(this.foreignObject_, 'mouseenter', this, function() {
-    this.svgRect_.classList.add('blocklyFrameRectangleHover');
+    if (!this.workspace.draggingBlocks_) {
+      this.svgRect_.classList.add('blocklyFrameRectangleHover');
+    }
   });
   Blockly.bindEvent_(this.foreignObject_, 'mouseleave', this, function() {
-    this.svgRect_.classList.remove('blocklyFrameRectangleHover');
+    if (!this.workspace.draggingBlocks_) {
+      this.svgRect_.classList.remove('blocklyFrameRectangleHover');
+    }
   });
   var body = document.createElementNS(Blockly.HTML_NS, 'body');
   body.setAttribute('xmlns', Blockly.HTML_NS);
@@ -434,7 +437,7 @@ Blockly.Frame.prototype.cleanUp = function() {
   if (!Blockly.Events.getGroup()) {
     Blockly.Events.setGroup(true);
   }
-  var padding = 20;
+  var padding = 50;
   var blocks = Object.values(this.blockDB_);
   var height = padding;
   var width = 0;
@@ -446,7 +449,7 @@ Blockly.Frame.prototype.cleanUp = function() {
     block.moveBy(-xy.x + padding, height - xy.y);
     block.snapToGrid();
     var blockHeightWidth = block.getHeightWidth();
-    width = Math.max(width, blockHeightWidth.width + 20 + padding);
+    width = Math.max(width, blockHeightWidth.width + 2 * padding);
     height = block.getRelativeToSurfaceXY(true).y + blockHeightWidth.height
       + (blocks[i + 1] ? Blockly.BlockSvg.MIN_BLOCK_Y : padding);
   }
