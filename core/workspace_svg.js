@@ -459,6 +459,7 @@ Blockly.WorkspaceSvg.prototype.createDom = function(opt_backgroundClass) {
   /** @type {SVGElement} */
   this.svgBlockCanvas_ = Blockly.utils.createSvgElement('g',
       {'class': 'blocklyBlockCanvas'}, this.svgGroup_, this);
+  this.svgBlockCanvas_.style.setProperty('--scale', this.scale);
   /** @type {SVGElement} */
   this.svgBubbleCanvas_ = Blockly.utils.createSvgElement('g',
       {'class': 'blocklyBubbleCanvas'}, this.svgGroup_, this);
@@ -1912,7 +1913,7 @@ Blockly.WorkspaceSvg.prototype.setScale = function(newScale) {
     newScale = this.options.zoomOptions.minScale;
   }
   this.scale = newScale;
-  this.svgBlockCanvas_.style.setProperty('--anti-scale', Math.max(Math.floor(1 / this.scale), 1));
+  this.svgBlockCanvas_.style.setProperty('--scale', this.scale);
   if (this.grid_) {
     this.grid_.update(this.scale);
   }
@@ -2208,6 +2209,19 @@ Blockly.Workspace.prototype.setResizingFrame = function(visible) {
     this.svgGroup_.classList.add('resizingFrame');
   } else {
     this.svgGroup_.classList.remove('resizingFrame');
+  }
+};
+
+/**
+ * Update whether the workspace was dragging blocks.
+ * @param {boolean} visible Whether dragging blocks.
+ */
+Blockly.Workspace.prototype.setDraggingBlock = function(visible) {
+  this.draggingBlocks_ = visible;
+  if(visible) {
+    this.svgGroup_.classList.add('draggingBlocks');
+  } else {
+    this.svgGroup_.classList.remove('draggingBlocks');
   }
 };
 

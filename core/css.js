@@ -1141,7 +1141,7 @@ Blockly.Css.CONTENT = [
     'cursor: grab;',
   '}',
 
-  '.blocklyDragging .blocklyFrameBlockCanvas {',
+  '.blocklyFrame.blocklyDragging, .blocklyFrame.blocklyDragging .blocklyFrameTitle {',
     'cursor: grabbing;',
   '}',
 
@@ -1153,18 +1153,23 @@ Blockly.Css.CONTENT = [
     'visibility: visible;',
   '}',
 
+  '.draggingBlocks .blocklyFrameRectangle:hover {',
+    'stroke-width: 2px;',
+    'stroke: var(--theme-brand-color, #2D8CFF);',
+  '}',
+
   '.blocklyFrame.frameSelected .blocklyFrameRectangle {',
     'stroke-width: 1px;',
     'stroke: var(--theme-brand-color, #2D8CFF);',
   '}',
 
-  '.blocklyFrameTitle:hover .blocklyFrameTitleTextarea {',
+  '.blocklyFrameTitle:hover:not(.draggingBlocks .blocklyFrameTitle) .blocklyFrameTitleTextarea {',
     'font-weight: 600;',
     'color: var(--theme-brand-color, #2D8CFF);',
   '}',
 
   '.blocklyFrame.frameSelected .blocklyFrameTitleTextarea {',
-    'font-weight: 400;',
+    'font-weight: 400 !important;',
     'color: var(--theme-brand-color, #2D8CFF);',
   '}',
 
@@ -1175,8 +1180,8 @@ Blockly.Css.CONTENT = [
 
   '.blocklyFrameTitle {',
     'cursor: pointer;',
-    'transform: scale(var(--anti-scale, 1));',
-    'transform-origin: left var(--frame-title-height, 20);',
+    'transform: scale(calc(1 / var(--scale, 1)));',
+    'transform-origin: 4px var(--frame-title-height, 20);',
   '}',
 
   '.blocklyFrameTitleBody {',
@@ -1185,7 +1190,7 @@ Blockly.Css.CONTENT = [
 
   '.blocklyFrameTitleTextarea {',
     'background-color: transparent;',
-    'font-size: 16px;',
+    'font-size: 12px;',
     'line-height: 20px;',
     'width: 100%;',
     'height: 20px;',
@@ -1200,7 +1205,7 @@ Blockly.Css.CONTENT = [
 
   '.blocklyFrame .blocklyFrameTitleTextarea:focus {',
     'background-color: white;',
-    'color: #000000',
+    'color: #000000 !important;',
   '}',
 
   '.blocklyResizeButtonNW,.blocklyResizeButtonSE{',
@@ -1212,9 +1217,9 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.blocklyResizeButtonNE,.blocklyResizeButtonSE,.blocklyResizeButtonSW,.blocklyResizeButtonNW{',
-    'width: calc(var(--anti-scale, 1) * 10px);',
-    'height: calc(var(--anti-scale, 1) * 10px);',
-    'transform: translate(calc((var(--anti-scale, 1) - 1) * -5px), calc((var(--anti-scale, 1) - 1) * -5px));',
+    'width: calc(10px / var(--scale, 1));',
+    'height: calc(10px / var(--scale, 1));',
+    'transform: translate(calc(5px - 5px / var(--scale, 1)),calc(5px - 5px / var(--scale, 1)));',
   '}',
 
   '.scratchNotePickerKeyLabel {',
@@ -1369,6 +1374,11 @@ Blockly.Css.CONTENT = [
     'color: white;',
     'cursor: pointer;',
     'background-color: var(--theme-brand-color);',
+  '}',
+
+  '.blocklyWidgetDiv .goog-menuitem-highlight .keyboard-shortcuts,',
+  '.blocklyWidgetDiv .goog-menuitem-hover .keyboard-shortcuts{',
+    'color: white;',
   '}',
 
   '.blocklyDropDownDiv .goog-menuitem-highlight,',
