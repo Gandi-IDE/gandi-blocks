@@ -90,7 +90,7 @@ Blockly.Xml.framesToDom = function(framesList) {
   for (var i = 0, frame; frame = framesList[i]; i++) {
     var element = goog.dom.createDom('frame', null, frame.name);
     var rect = frame.rect_;
-    element.textContent = frame.title;
+    element.setAttribute('title', frame.title);
     element.setAttribute('id', frame.id);
     element.setAttribute('blocks', Object.keys(frame.blockDB_).join(' '));
     element.setAttribute('x', rect.left);
@@ -684,7 +684,7 @@ Blockly.Xml.domToBlock = function(xmlBlock, workspace) {
  */
 Blockly.Xml.domToFrames = function(xmlFrames, workspace) {
   for (var i = 0, xmlChild; xmlChild = xmlFrames.children[i]; i++) {
-    var title = xmlChild.textContent;
+    var title = xmlChild.getAttribute('title');
     var id = xmlChild.getAttribute('id');
     var blocks = xmlChild.getAttribute('blocks');
 

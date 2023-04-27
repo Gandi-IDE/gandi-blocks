@@ -58,10 +58,11 @@ Blockly.Frame = function(workspace, opt_options) {
 
   this.options = opt_options || {
     title: '',
+    blocks: [],
     x: 0,
     y: 0,
     width: 0,
-    height: 0
+    height: 0,
   };
 
   /** @type {boolean} */
@@ -118,6 +119,9 @@ Blockly.Frame = function(workspace, opt_options) {
    */
   this.blockDB_ = {};
 
+
+  this.isEmpty_ = null;
+
   this.oldBlocksCoordinate_ = null;
 
   this.resizeButtons = {
@@ -134,6 +138,8 @@ Blockly.Frame = function(workspace, opt_options) {
       this.appendBlocksToBlocksCanvas();
     });
   }
+
+  this.setIsEmpty(!this.options.blocks.length);
 
   workspace.addTopFrame(this);
 
@@ -180,18 +186,11 @@ Blockly.Frame.prototype.resizeButtonWidth_ = 10;
 Blockly.Frame.prototype.resizeButtonHeight_ = 10;
 
 /**
- * The min height of the title textarea.
+ * The height of the title input.
  * @type {string}
  * @private
  */
-Blockly.Frame.prototype.titleTextTextareaMinHeight_ = 20;
-
-/**
- * The height of the title textarea.
- * @type {string}
- * @private
- */
-Blockly.Frame.prototype.titleTextareaHeight_ = 20;
+Blockly.Frame.prototype.titleInputHeight_ = 20;
 
 /**
  * The frame border color.
@@ -263,7 +262,7 @@ Blockly.Frame.prototype.createDom_ = function() {
     this.frameGroup_.dataset.id = this.id;
   }
   var tx = this.resizeButtonWidth_ / 2;
-  var ty = this.titleTextareaHeight_ + this.resizeButtonHeight_ / 2;
+  var ty = this.titleInputHeight_ + this.resizeButtonHeight_ / 2;
   /** @type {SVGElement} */
   this.blocksGroup_ = Blockly.utils.createSvgElement('g',
       {
@@ -315,56 +314,39 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
   var body = document.createElementNS(Blockly.HTML_NS, 'body');
   body.setAttribute('xmlns', Blockly.HTML_NS);
   body.className = 'blocklyMinimalBody blocklyFrameTitleBody';
-  var textarea = document.createElementNS(Blockly.HTML_NS, 'textarea');
-  textarea.className = 'blocklyFrameTitleTextarea';
-  textarea.value = this.title;
-  textarea.setAttribute('dir', this.workspace.RTL ? 'RTL' : 'LTR');
-  textarea.setAttribute('maxlength', 1000);
-  textarea.style['pointer-events'] = 'none';
-  body.appendChild(textarea);
-  this.textarea_ = textarea;
+  var titleInput = document.createElementNS(Blockly.HTML_NS, 'input');
+  titleInput.className = 'blocklyFrameTitleInput';
+  titleInput.value = this.title;
+  titleInput.setAttribute('dir', this.workspace.RTL ? 'RTL' : 'LTR');
+  titleInput.setAttribute('maxlength', 1000);
+  titleInput.style['pointer-events'] = 'none';
+  body.appendChild(titleInput);
+  this.titleInput_ = titleInput;
   this.foreignObject_.appendChild(body);
-  if (this.title !== Blockly.Msg.FRAME) {
-    setTimeout(() => {
-      var newHeight = this.textarea_.scrollHeight;
-      this.textarea_.style.height = newHeight + 'px';
-      this.onTitleTextareaHeightChange(newHeight);
-      if (newHeight === this.titleTextareaHeight_) {
-        var xy = this.computeFrameRelativeXY();
-        this.translate(xy.x, xy.y);
-      }
-      this.frameGroup_.style.visibility = 'visible';
-    });
-  } else {
-    var xy = this.computeFrameRelativeXY();
-    this.translate(xy.x, xy.y);
-    this.frameGroup_.style.visibility = 'visible';
-  }
+  var xy = this.computeFrameRelativeXY();
+  this.translate(xy.x, xy.y);
+  this.frameGroup_.style.visibility = 'visible';
   // Don't zoom with mousewheel.
-  Blockly.bindEventWithChecks_(textarea, 'wheel', this, function(e) {
+  Blockly.bindEventWithChecks_(titleInput, 'wheel', this, function(e) {
     e.stopPropagation();
   });
-  Blockly.bindEventWithChecks_(textarea, 'input', this, function() {
-    this.onTitleTextareaHeightChange();
-  });
-  Blockly.bindEventWithChecks_(textarea, 'change', this, function(e) {
+  Blockly.bindEventWithChecks_(titleInput, 'change', this, function(e) {
     var newValue = e.target.value;
     if (!newValue.trim()) {
       e.target.value = this.title;
-      this.onTitleTextareaHeightChange();
     } else if (this.title != newValue) {
       this.onTitleChange(newValue);
     }
   });
-  Blockly.bindEventWithChecks_(textarea, 'blur', this, function(e) {
+  Blockly.bindEventWithChecks_(titleInput, 'blur', this, function(e) {
     e.target.style['pointer-events'] = 'none';
   });
   Blockly.bindEventWithChecks_(body, 'click', this, function() {
     this.select();
   });
   Blockly.bindEventWithChecks_(body, 'dblclick', this, function() {
-    textarea.style['pointer-events'] = 'auto';
-    this.textarea_.focus();
+    titleInput.style['pointer-events'] = 'auto';
+    this.titleInput_.focus();
   });
   this.updateTitleBoxSize();
 };
@@ -376,7 +358,7 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
  */
 Blockly.Frame.prototype.createResizeGroup_ = function() {
   var tx = 0;
-  var ty = this.titleTextareaHeight_;
+  var ty = this.titleInputHeight_;
   /** @type {SVGElement} */
   this.resizeGroup_ = Blockly.utils.createSvgElement('g', {
     'class': 'frameResizeButtons',
@@ -476,7 +458,7 @@ Blockly.Frame.prototype.computeFrameRelativeXY = function() {
   var rx = this.rect_.left < this.rect_.right ? this.rect_.left : this.rect_.right;
   var ry = this.rect_.top < this.rect_.bottom ? this.rect_.top : this.rect_.bottom;
   var x = rx - this.resizeButtonWidth_ / 2;
-  var y = ry - this.resizeButtonHeight_ / 2 - this.titleTextareaHeight_;
+  var y = ry - this.resizeButtonHeight_ / 2 - this.titleInputHeight_;
   return new goog.math.Coordinate(x, y);
 };
 
@@ -540,7 +522,7 @@ Blockly.Frame.prototype.fireFrameBlocksChange = function() {
 Blockly.Frame.prototype.getBoundingRectangle = function() {
   var frame = this.getFrameGroupRelativeXY();
   var width = this.getWidth() + this.resizeButtonWidth_;
-  var height = this.getHeight() + this.resizeButtonHeight_ + this.titleTextareaHeight_;
+  var height = this.getHeight() + this.resizeButtonHeight_ + this.titleInputHeight_;
   var topLeft;
   var bottomRight;
   if (this.RTL) {
@@ -655,7 +637,7 @@ Blockly.Frame.prototype.isDeletable = function() {
  */
 Blockly.Frame.prototype.moveDuringDrag = function(newLoc) {
   this.rect_.left = newLoc.x + this.resizeButtonWidth_ / 2;
-  this.rect_.top = newLoc.y + this.resizeButtonHeight_ / 2 + this.titleTextareaHeight_;
+  this.rect_.top = newLoc.y + this.resizeButtonHeight_ / 2 + this.titleInputHeight_;
   this.rect_.right = this.rect_.left + this.rect_.width + this.resizeButtonWidth_ / 2;
   this.rect_.bottom = this.rect_.top + this.rect_.height + this.resizeButtonWidth_ / 2;
   var xy = this.computeFrameRelativeXY();
@@ -693,6 +675,7 @@ Blockly.Frame.prototype.addBlock = function(block) {
       this.fireFrameBlocksChange();
     }
   }
+  this.setIsEmpty(!Object.keys(this.blockDB_).length);
 };
 
 /**
@@ -707,6 +690,7 @@ Blockly.Frame.prototype.removeBlock = function(block) {
       this.fireFrameBlocksChange();
     }
   }
+  this.setIsEmpty(!Object.keys(this.blockDB_).length);
 };
 
 /**
@@ -828,31 +812,6 @@ Blockly.Frame.prototype.onTitleChange = function(newTitle) {
 };
 
 /**
- * Handle a mouse-down on an frame's rect.
- * @param {Number} height Mouse down event or touch start event.
- */
-Blockly.Frame.prototype.onTitleTextareaHeightChange = function(height) {
-  let newHeight = height || this.textarea_.scrollHeight;
-  if(typeof height === 'undefined') {
-    this.textarea_.style.height = this.titleTextTextareaMinHeight_ + 'px';
-    newHeight = this.textarea_.scrollHeight;
-    this.textarea_.style.height = newHeight + 'px';
-  }
-  if(newHeight !== this.titleTextareaHeight_) {
-    var hw = this.resizeButtonWidth_ / 2;
-    var hh = this.resizeButtonHeight_ / 2;
-    this.workspace.setResizesEnabled(false);
-    this.titleTextareaHeight_ = newHeight;
-    var xy = this.computeFrameRelativeXY();
-    this.updateTitleBoxSize();
-    this.blocksGroup_.setAttribute('transform', 'translate(' + hw + ',' + (newHeight + hh) + ')');
-    this.resizeGroup_.setAttribute('transform', 'translate(0,' + newHeight + ')');
-    this.translate(xy.x, xy.y);
-    this.workspace.setResizesEnabled(true);
-  }
-};
-
-/**
  * Record the current coordinates of the blocks that relative to workspace.
  */
 Blockly.Frame.prototype.recordBlocksRelativeToSurfaceXY = function() {
@@ -947,7 +906,6 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
   }
   this.checkRect_();
   this.onStopResizeRect_();
-  this.onTitleTextareaHeightChange();
   this.setResizing(false);
   this.workspace.setResizingFrame(false);
   if (takeOverSubEvents) {
@@ -1032,6 +990,23 @@ Blockly.Frame.prototype.setDragging = function(adding) {
 };
 
 /**
+ * Sets whether the frame is empty
+ * @param {boolean} isEmpty True if frame is empty.
+ * @package
+ */
+Blockly.Frame.prototype.setIsEmpty = function(isEmpty) {
+  if (this.isEmpty_ === isEmpty) return;
+  this.isEmpty_ = isEmpty;
+  if (isEmpty) {
+    Blockly.utils.addClass(
+        /** @type {!Element} */ (this.frameGroup_), 'emptyFrame');
+  } else {
+    Blockly.utils.removeClass(
+        /** @type {!Element} */ (this.frameGroup_), 'emptyFrame');
+  }
+};
+
+/**
  * Recursively adds or removes the resizing class to this node.
  * @param {boolean} adding True if adding, false if removing.
  * @package
@@ -1082,9 +1057,8 @@ Blockly.Frame.prototype.setMouseThroughStyle = function(letMouseThrough) {
 Blockly.Frame.prototype.setTitle = function(newTitle) {
   if(this.title != newTitle) {
     this.title = newTitle;
-    this.textarea_.value = this.title;
+    this.titleInput_.value = this.title;
     Blockly.Events.fire(new Blockly.Events.FrameRetitle(this, newTitle));
-    this.onTitleTextareaHeightChange();
   }
 };
 
@@ -1129,9 +1103,12 @@ Blockly.Frame.prototype.updateFrameRectSize = function() {
  */
 Blockly.Frame.prototype.updateTitleBoxSize = function() {
   if(this.foreignObject_) {
-    this.foreignObject_.setAttribute("height", this.titleTextareaHeight_);
-    this.foreignObject_.setAttribute("width", this.getWidth());
-    this.foreignObject_.style.setProperty('--frame-title-height', this.titleTextareaHeight_ + 'px');
+    var height = this.titleInputHeight_;
+    var width = this.getWidth();
+    this.foreignObject_.setAttribute("height", height);
+    this.foreignObject_.setAttribute("width", width);
+    this.foreignObject_.style.setProperty('--frame-title-width', width + 'px');
+    this.foreignObject_.style.setProperty('--frame-title-height', height + 'px');
   }
 };
 

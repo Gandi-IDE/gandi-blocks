@@ -1154,27 +1154,18 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.draggingBlocks .blocklyFrameRectangle:hover {',
-    'stroke-width: 2px;',
     'stroke: var(--theme-brand-color, #2D8CFF);',
   '}',
 
-  '.blocklyFrame.frameSelected .blocklyFrameRectangle {',
-    'stroke-width: 1px;',
-    'stroke: var(--theme-brand-color, #2D8CFF);',
-  '}',
-
-  '.blocklyFrameTitle:hover:not(.draggingBlocks .blocklyFrameTitle) .blocklyFrameTitleTextarea {',
-    'font-weight: 600;',
+  '.blocklyFrameTitle:hover:not(.draggingBlocks .blocklyFrameTitle) .blocklyFrameTitleInput {',
     'color: var(--theme-brand-color, #2D8CFF);',
   '}',
 
-  '.blocklyFrame.frameSelected .blocklyFrameTitleTextarea {',
-    'font-weight: 400 !important;',
+  '.blocklyFrame.emptyFrame:hover .blocklyFrameTitleInput, .blocklyFrame.frameSelected .blocklyFrameTitleInput {',
     'color: var(--theme-brand-color, #2D8CFF);',
   '}',
 
-  '.blocklyFrameRectangleHover {',
-    'stroke-width: 2px;',
+  '.blocklyFrameRectangleHover, .blocklyFrame.frameSelected .blocklyFrameRectangle, .emptyFrame:hover .blocklyFrameRectangle {',
     'stroke: var(--theme-brand-color, #2D8CFF);',
   '}',
 
@@ -1182,13 +1173,15 @@ Blockly.Css.CONTENT = [
     'cursor: pointer;',
     'transform: scale(calc(1 / var(--scale, 1)));',
     'transform-origin: 4px var(--frame-title-height, 20);',
+    'width: calc(var(--frame-title-width) * var(--scale, 1));',
   '}',
 
   '.blocklyFrameTitleBody {',
     'background: transparent !important;',
   '}',
 
-  '.blocklyFrameTitleTextarea {',
+  '.blocklyFrameTitleInput {',
+    'display: block;',
     'background-color: transparent;',
     'font-size: 12px;',
     'line-height: 20px;',
@@ -1199,11 +1192,12 @@ Blockly.Css.CONTENT = [
     'outline: 0;',
     'margin: 0;',
     'padding: 0px 2px;',
-    'resize: none;',
     'overflow: hidden;',
+    'text-overflow: ellipsis;',
+    'white-space: nowrap;',
   '}',
 
-  '.blocklyFrame .blocklyFrameTitleTextarea:focus {',
+  '.blocklyFrame .blocklyFrameTitleInput:focus {',
     'background-color: white;',
     'color: #000000 !important;',
   '}',
