@@ -900,7 +900,6 @@ Blockly.BlockSvg.prototype.setDragging = function(adding) {
   }
 };
 
-
 /**
  * Add or remove the UI indicating if this block is movable or not.
  */

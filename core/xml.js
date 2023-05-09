@@ -92,6 +92,8 @@ Blockly.Xml.framesToDom = function(framesList) {
     var rect = frame.rect_;
     element.setAttribute('title', frame.title);
     element.setAttribute('id', frame.id);
+    element.setAttribute('color', frame.color);
+    element.setAttribute('locked', frame.locked);
     element.setAttribute('blocks', Object.keys(frame.blockDB_).join(' '));
     element.setAttribute('x', rect.left);
     element.setAttribute('y', rect.top);
@@ -685,6 +687,8 @@ Blockly.Xml.domToBlock = function(xmlBlock, workspace) {
 Blockly.Xml.domToFrames = function(xmlFrames, workspace) {
   for (var i = 0, xmlChild; xmlChild = xmlFrames.children[i]; i++) {
     var title = xmlChild.getAttribute('title');
+    var color = xmlChild.getAttribute('color');
+    var locked = xmlChild.getAttribute('locked') === 'true';
     var id = xmlChild.getAttribute('id');
     var blocks = xmlChild.getAttribute('blocks');
 
@@ -694,6 +698,8 @@ Blockly.Xml.domToFrames = function(xmlFrames, workspace) {
     var height = xmlChild.getAttribute('height');
     workspace.createFrame({
       title: title,
+      color: color,
+      locked: locked,
       id: id,
       blocks: blocks ? blocks.split(' ') : [],
       x: Number(x),

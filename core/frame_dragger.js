@@ -64,6 +64,12 @@ Blockly.FrameDragger = function(frame, workspace) {
    */
   this.startXY_ = this.draggingFrame_.getFrameGroupRelativeXY();
 
+  /**
+   * Whether the frame would be deleted if dropped immediately.
+   * @type {boolean}
+   * @private
+   */
+  this.wouldDeleteFrame_ = false;
 
   /**
    * A list of all of the block's icons (comment, warning, and mutator) that are
@@ -94,7 +100,7 @@ Blockly.FrameDragger.prototype.dispose = function() {
  *     moved from the position at mouse down, in pixel units.
  * @package
  */
-Blockly.FrameDragger.prototype.startFrameDrag = function() {
+Blockly.FrameDragger.prototype.startFrameDrag = function(e) {
   this.rootDiv = document.getElementsByClassName('injectionDiv')[0];
   if(Blockly.locked) return;
 
@@ -104,6 +110,13 @@ Blockly.FrameDragger.prototype.startFrameDrag = function() {
   this.draggingFrame_.oldBoundingFrameRect_ = this.draggingFrame_.getBoundingFrameRect();
   this.workspace_.setFrameToFront(this.draggingFrame_);
   this.workspace_.setResizesEnabled(false);
+  var toolbox = this.workspace_.getToolbox();
+  this.draggingFrame_.moveToDragSurface_(e);
+
+  if (toolbox && !this.workspace_.isDeleteArea(e)) {
+    toolbox.addStyle('dragStartInWorkspace');
+  }
+
   this.draggingFrame_.onStartDrag();
 };
 
@@ -144,11 +157,12 @@ Blockly.FrameDragger.initBlockIconData_ = function(block) {
  * @return {boolean} True if the event should be propagated, false if not.
  */
 Blockly.FrameDragger.prototype.dragFrame = function(e, currentDragDeltaXY) {
-  var delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
-  var newLoc = goog.math.Coordinate.sum(this.startXY_, delta);
+  const delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
+  const newLoc = goog.math.Coordinate.sum(this.startXY_, delta);
   this.draggingFrame_.moveDuringDrag(newLoc);
-  this.dragBlocksIcons_(delta);
-  var isOutside = Blockly.utils.isDom(e.target) ? !this.rootDiv.contains(e.target) : false;
+  this.wouldDeleteFrame_ = this.workspace_.isDeleteArea(e);
+
+  const isOutside = Blockly.utils.isDom(e.target) ? !this.rootDiv.contains(e.target) : false;
   if (isOutside !== this.wasOutside_) {
     this.wasOutside_ = isOutside;
   }
@@ -163,12 +177,39 @@ Blockly.FrameDragger.prototype.dragFrame = function(e, currentDragDeltaXY) {
  * @package
  */
 Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
-  // Make sure internal state is fresh.
-  this.dragFrame(e, currentDragDeltaXY);
-  this.draggingFrame_.onStopDrag();
+  const delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
+  const newLoc = goog.math.Coordinate.sum(this.startXY_, delta);
+  this.draggingFrame_.moveOffDragSurface_(newLoc, this.wouldDeleteFrame_);
+
+  const deleted = this.maybeDeleteFrame_();
+  if (!deleted) {
+    // Make sure internal state is fresh.
+    this.dragBlocksIcons_(delta);
+    this.dragFrame(e, currentDragDeltaXY);
+    this.draggingFrame_.onStopDrag();
+  }
+
   this.workspace_.setResizesEnabled(true);
   this.workspace_.resetFrameAndTopBlocksMap();
   Blockly.Events.setGroup(false);
+
+  var toolbox = this.workspace_.getToolbox();
+  if (toolbox) {
+    toolbox.removeStyle('dragStartInWorkspace');
+  }
+};
+
+/**
+ * Shut the trash can and, if necessary, delete the dragging frame.
+ * Should be called at the end of a frame drag.
+ * @return {boolean} whether the frame was deleted.
+ * @private
+ */
+Blockly.FrameDragger.prototype.maybeDeleteFrame_ = function() {
+  if (this.wouldDeleteFrame_) {
+    this.draggingFrame_.dispose();
+  }
+  return this.wouldDeleteFrame_;
 };
 
 /**

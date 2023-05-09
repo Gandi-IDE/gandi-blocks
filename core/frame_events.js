@@ -79,6 +79,8 @@ Blockly.Events.FrameCreate = function(frame) {
   }
   Blockly.Events.FrameCreate.superClass_.constructor.call(this, frame);
   this.title = frame.title;
+  this.color = frame.color;
+  this.locked = frame.locked;
   this.blocks = Object.keys(frame.blockDB_);
   this.x = frame.rect_.left;
   this.y = frame.rect_.top;
@@ -100,6 +102,8 @@ Blockly.Events.FrameCreate.prototype.type = Blockly.Events.FRAME_CREATE;
 Blockly.Events.FrameCreate.prototype.toJson = function() {
   var json = Blockly.Events.FrameCreate.superClass_.toJson.call(this);
   json['title'] = this.title;
+  json['color'] = this.color;
+  json['locked'] = this.locked;
   json['blocks'] = this.blocks;
   json['x'] = this.x;
   json['y'] = this.y;
@@ -115,6 +119,8 @@ Blockly.Events.FrameCreate.prototype.toJson = function() {
 Blockly.Events.FrameCreate.prototype.fromJson = function(json) {
   Blockly.Events.FrameCreate.superClass_.fromJson.call(this, json);
   this.title = json['title'];
+  this.color = json['color'];
+  this.locked = json['locked'];
   this.blocks = json['blocks'];
   this.x = json['x'];
   this.y = json['y'];
@@ -132,6 +138,8 @@ Blockly.Events.FrameCreate.prototype.run = function(forward) {
     workspace.createFrame({
       id: this.frameId,
       title: this.title,
+      color: this.color,
+      locked: this.locked,
       blocks: this.blocks,
       x: this.x,
       y: this.y,
@@ -156,6 +164,8 @@ Blockly.Events.FrameDelete = function(frame) {
   }
   Blockly.Events.FrameDelete.superClass_.constructor.call(this, frame);
   this.title = frame.title;
+  this.color = frame.color;
+  this.locked = frame.locked;
   this.blocks = Object.keys(frame.blockDB_);
   this.x = frame.rect_.left;
   this.y = frame.rect_.top;
@@ -177,6 +187,8 @@ Blockly.Events.FrameDelete.prototype.type = Blockly.Events.FRAME_DELETE;
 Blockly.Events.FrameDelete.prototype.toJson = function() {
   var json = Blockly.Events.FrameDelete.superClass_.toJson.call(this);
   json['title'] = this.title;
+  json['color'] = this.color;
+  json['locked'] = this.locked;
   json['blocks'] = this.blocks;
   json['x'] = this.x;
   json['y'] = this.y;
@@ -192,6 +204,8 @@ Blockly.Events.FrameDelete.prototype.toJson = function() {
 Blockly.Events.FrameDelete.prototype.fromJson = function(json) {
   Blockly.Events.FrameDelete.superClass_.fromJson.call(this, json);
   this.title = json['title'];
+  this.color = json['color'];
+  this.locked = json['locked'];
   this.blocks = json['blocks'];
   this.x = json['x'];
   this.y = json['y'];
@@ -211,6 +225,8 @@ Blockly.Events.FrameDelete.prototype.run = function(forward) {
     workspace.createFrame({
       id: this.frameId,
       title: this.title,
+      color: this.color,
+      locked: this.locked,
       blocks: this.blocks,
       x: this.x,
       y: this.y,
@@ -282,7 +298,7 @@ Blockly.Events.FrameRetitle.prototype.run = function(forward) {
  * Class for a frame change event.
  * @param {Blockly.Frame} frame
  *     The frame that is being changed. Null for a blank event.
- * @param {string} element One of 'rect', 'blocks', 'disabled', etc.
+ * @param {string} element One of 'rect', 'blocks', 'color', etc.
  * @param {*} oldValue Previous value of element.
  * @param {*} newValue New value of element.
  * @extends {Blockly.Events.FrameBase}
@@ -378,6 +394,12 @@ Blockly.Events.FrameChange.prototype.run = function(forward) {
       break;
     case 'rect':
       frame.render(value);
+      break;
+    case 'color':
+      frame.setColor(value);
+      break;
+    case 'locked':
+      frame.triggerChangeLock();
       break;
     default:
       console.warn('Unknown change type: ' + this.element);

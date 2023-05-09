@@ -291,14 +291,12 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
 
   }
 
-
   this.dragIconData_ = [];
   var isOutside = this.wasOutside_;
   this.fireEndDragEvent_(isOutside);
   this.draggingBlock_.setMouseThroughStyle(false);
   Blockly.BlockAnimations.disconnectUiStop();
 
-  // var delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
   var newLoc = goog.math.Coordinate.sum(this.startXY_, delta);
   this.draggingBlock_.moveOffDragSurface_(newLoc);
 

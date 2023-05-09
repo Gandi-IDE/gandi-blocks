@@ -135,6 +135,8 @@ Blockly.WorkspaceSvg.prototype.resizeHandlerWrapper_ = null;
  */
 Blockly.WorkspaceSvg.prototype.rendered = true;
 
+Blockly.WorkspaceSvg.prototype.resizingFrame = false;
+
 /**
  * Whether the workspace is visible.  False if the workspace has been hidden
  * by calling `setVisible(false)`.
@@ -1289,6 +1291,8 @@ Blockly.WorkspaceSvg.prototype.isInsideBlocksArea = function(e) {
  * @private
  */
 Blockly.WorkspaceSvg.prototype.onMouseDown_ = function(e) {
+  if (this.resizingFrame) return;
+
   var gesture = this.getGesture(e);
   if (gesture) {
     gesture.handleWsStart(e, this);
@@ -1466,7 +1470,7 @@ Blockly.WorkspaceSvg.prototype.cleanUp = function() {
  * @private
  */
 Blockly.WorkspaceSvg.prototype.showContextMenu_ = function(e) {
-  if (this.options.readOnly || this.isFlyout) {
+  if (this.options.readOnly || this.isFlyout || this.resizingFrame) {
     return;
   }
   // powered by xigua start
@@ -1718,6 +1722,7 @@ Blockly.WorkspaceSvg.prototype.zoom = function(x, y, amount) {
   // Hide the WidgetDiv without animation (zoom makes field out of place with div)
   Blockly.WidgetDiv.hide(true);
   Blockly.DropDownDiv.hideWithoutAnimation();
+  Blockly.ColorSelector.hide();
 };
 
 /**
@@ -2205,6 +2210,8 @@ Blockly.WorkspaceSvg.prototype.setReadonlyEnabled = function(enabled) {
  * @param {boolean} visible Whether resizing a frame.
  */
 Blockly.Workspace.prototype.setResizingFrame = function(visible) {
+  this.resizingFrame = visible;
+
   if(visible) {
     this.svgGroup_.classList.add('resizingFrame');
   } else {

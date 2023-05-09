@@ -90,6 +90,15 @@ Blockly.Frame = function(workspace, opt_options) {
    */
   this.title = this.options.title || Blockly.Msg.FRAME;
 
+  /**
+   * The frame's color
+   */
+  this.color = this.options.color || '45, 140, 255';
+
+  /**
+   * Whether the frame is locked
+   */
+  this.locked = this.options.locked || false;
 
   /**
    * The event that most recently updated this gesture.
@@ -136,6 +145,9 @@ Blockly.Frame = function(workspace, opt_options) {
   if (this.options.blocks) {
     setTimeout(() => {
       this.appendBlocksToBlocksCanvas();
+      if (opt_options.blocks.length !== 0) {
+        Blockly.Events.fire(new Blockly.Events.FrameCreate(this));
+      }
     });
   }
 
@@ -146,7 +158,9 @@ Blockly.Frame = function(workspace, opt_options) {
   if (opt_options && opt_options.id) {
     this.rendered = true;
     Blockly.Events.setGroup(true);
-    Blockly.Events.fire(new Blockly.Events.FrameCreate(this));
+    if(opt_options.blocks.length === 0) {
+      Blockly.Events.fire(new Blockly.Events.FrameCreate(this));
+    }
   }
 };
 
@@ -206,7 +220,8 @@ Blockly.Frame.prototype.appendBlocksToBlocksCanvas = function() {
   Blockly.Events.disable();
   this.options.blocks.forEach((blockId) => {
     var block = this.workspace.getBlockById(blockId);
-    if(block && this.requestMoveInBlock(block)) {
+    if (block) {
+      this.addBlock(block);
       block.frame_ = this;
       block.moveBlockToContainer('frame');
     }
@@ -246,6 +261,15 @@ Blockly.Frame.prototype.checkRect_ = function() {
 };
 
 /**
+ * Clear the frame of transform="..." attributes.
+ * Used when the frame is switching from 3d to 2d transform or vice versa.
+ * @private
+ */
+Blockly.Frame.prototype.clearTransformAttributes_ = function() {
+  Blockly.utils.removeAttribute(this.getSvgRoot(), 'transform');
+};
+
+/**
  * Create the frame's DOM.
  * @private
  */
@@ -253,7 +277,7 @@ Blockly.Frame.prototype.createDom_ = function() {
   /** @type {SVGElement} */
   this.frameGroup_ = Blockly.utils.createSvgElement('g',
       {
-        'class': 'blocklyFrame',
+        'class': `blocklyFrame${this.locked ? ' blocklyFrameLocked' : ''}`,
       }, this.workspace.svgBlockCanvas_);
   // Avoid blinking
   this.frameGroup_.style.visibility = 'hidden';
@@ -275,7 +299,7 @@ Blockly.Frame.prototype.createDom_ = function() {
       {
         'class': 'blocklyFrameRectangle',
         'stroke': 'transparent',
-        'fill': 'var(--theme-color-400, rgba(0,0,0,0.3))',
+        'fill': `rgba(${this.color},0.12)`,
         'x': 0 ,
         'y': 0,
         'height': this.rect_.height,
@@ -285,24 +309,15 @@ Blockly.Frame.prototype.createDom_ = function() {
   Blockly.bindEventWithChecks_(
       this.frameGroup_, 'mousedown', null, this.onMouseDown_.bind(this));
 
-  this.createTitleEditor_();
-  this.createResizeGroup_();
-};
-
-/**
- * Create the editor for the frame's title.
- * @private
- */
-Blockly.Frame.prototype.createTitleEditor_ = function() {
   this.foreignObject_ = Blockly.utils.createSvgElement('foreignObject', {
-    class: 'blocklyFrameTitle',
+    class: 'blocklyFrameForeignObject',
     'x': this.resizeButtonWidth_ / 2,
     'y': 0,
     height: 0,
     width: 0
   }, this.frameGroup_);
   Blockly.bindEvent_(this.foreignObject_, 'mouseenter', this, function() {
-    if (!this.workspace.draggingBlocks_) {
+    if (!this.workspace.draggingBlocks_ && !this.locked) {
       this.svgRect_.classList.add('blocklyFrameRectangleHover');
     }
   });
@@ -311,18 +326,85 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
       this.svgRect_.classList.remove('blocklyFrameRectangleHover');
     }
   });
-  var body = document.createElementNS(Blockly.HTML_NS, 'body');
-  body.setAttribute('xmlns', Blockly.HTML_NS);
-  body.className = 'blocklyMinimalBody blocklyFrameTitleBody';
+  this.foreignObjectBody_ = document.createElementNS(Blockly.HTML_NS, 'body');
+  this.foreignObjectBody_.setAttribute('xmlns', Blockly.HTML_NS);
+  this.foreignObjectBody_.className = 'blocklyMinimalBody blocklyFrameForeignObjectBody';
+  Blockly.bindEvent_(this.foreignObjectBody_, 'mousedown', this, function() {
+    // If the frame is locked, it cannot be selected.
+    if(this.locked) return;
+
+    if (goog.userAgent.IPAD) {
+      this.titleInput_.style['pointer-events'] = 'auto';
+      this.titleInput_.focus();
+    }
+    this.select();
+  });
+  Blockly.bindEventWithChecks_(this.foreignObjectBody_, 'dblclick', this, function() {
+    // If the frame is locked, you cannot modify the title.
+    if (this.locked) return;
+
+    this.titleInput_.style['pointer-events'] = 'auto';
+    this.titleInput_.focus();
+  });
+  this.foreignObject_.appendChild(this.foreignObjectBody_);
+  this.createColorButton_();
+  this.createTitleEditor_();
+  this.createLockButton_();
+  this.createMenuButton_();
+  this.createResizeGroup_();
+};
+
+Blockly.Frame.prototype.createColorButton_ = function() {
+  this.colorButton_ = document.createElementNS(Blockly.HTML_NS, 'div');
+  this.colorButton_.className = 'blocklyFrameActionButton blocklyFrameColorButton';
+  this.colorButton_.style.setProperty('--color', `rgb(${this.color || '#2D8CFF'})`);
+  Blockly.bindEventWithChecks_(this.colorButton_, 'mousedown', this, function(e) {
+    // If the frame is locked, you cannot modify the color.
+    if (this.locked) return;
+    Blockly.ColorSelector.show(e, this.color, this.setColor.bind(this));
+  });
+  this.foreignObjectBody_.appendChild(this.colorButton_);
+};
+
+Blockly.Frame.prototype.createLockButton_ = function() {
+  this.lockButton_ = document.createElementNS(Blockly.HTML_NS, 'div');
+  this.lockButton_.className = 'blocklyFrameActionButton blocklyFrameLockButton';
+  Blockly.bindEventWithChecks_(this.lockButton_, 'mousedown', this, this.triggerChangeLock);
+  this.foreignObjectBody_.appendChild(this.lockButton_);
+};
+
+/**
+ * Create the editor for the frame's title.
+ * @private
+ */
+Blockly.Frame.prototype.createMenuButton_ = function() {
+  this.menuButton_ = document.createElementNS(Blockly.HTML_NS, 'div');
+  this.menuButton_.className = 'blocklyFrameActionButton blocklyFrameMenuButton';
+  Blockly.bindEventWithChecks_(this.menuButton_, 'mousedown', this, function(e) {
+    if (this.locked) return;
+
+    this.showContextMenu_(e);
+    e.stopPropagation();
+  });
+  this.foreignObjectBody_.appendChild(this.menuButton_);
+};
+
+/**
+ * Create the editor for the frame's title.
+ * @private
+ */
+Blockly.Frame.prototype.createTitleEditor_ = function() {
   var titleInput = document.createElementNS(Blockly.HTML_NS, 'input');
   titleInput.className = 'blocklyFrameTitleInput';
   titleInput.value = this.title;
   titleInput.setAttribute('dir', this.workspace.RTL ? 'RTL' : 'LTR');
   titleInput.setAttribute('maxlength', 1000);
-  titleInput.style['pointer-events'] = 'none';
-  body.appendChild(titleInput);
+  if (!goog.userAgent.IPAD) {
+    titleInput.style['pointer-events'] = 'none';
+  }
+  this.foreignObjectBody_.appendChild(titleInput);
   this.titleInput_ = titleInput;
-  this.foreignObject_.appendChild(body);
+
   var xy = this.computeFrameRelativeXY();
   this.translate(xy.x, xy.y);
   this.frameGroup_.style.visibility = 'visible';
@@ -339,14 +421,9 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
     }
   });
   Blockly.bindEventWithChecks_(titleInput, 'blur', this, function(e) {
-    e.target.style['pointer-events'] = 'none';
-  });
-  Blockly.bindEventWithChecks_(body, 'click', this, function() {
-    this.select();
-  });
-  Blockly.bindEventWithChecks_(body, 'dblclick', this, function() {
-    titleInput.style['pointer-events'] = 'auto';
-    this.titleInput_.focus();
+    if (!goog.userAgent.IPAD) {
+      e.target.style['pointer-events'] = 'none';
+    }
   });
   this.updateTitleBoxSize();
 };
@@ -480,25 +557,28 @@ Blockly.Frame.prototype.fireFrameRectChange = function() {
   var eventsEnabled = Blockly.Events.isEnabled();
   if (eventsEnabled) {
     this.fireFrameChange('rect', this.oldBoundingFrameRect_, this.getBoundingFrameRect());
+    this.fireFrameBlocksCoordinatesChange(true);
+  }
+};
 
-    if (this.oldBlocksCoordinate_) {
-      // When the position of a Frame changes, it needs to update the position information of the blocks it contains.
-      for (const key in this.blockDB_) {
-        if (Object.hasOwnProperty.call(this.blockDB_, key)) {
-          var block = this.blockDB_[key];
-          var event = new Blockly.Events.BlockMove(block, true);
-          var oldCoordinate = this.oldBlocksCoordinate_[block.id];
-          if (oldCoordinate) {
-            event.oldCoordinate = oldCoordinate;
-            event.recordNew();
-            var dxy = goog.math.Coordinate.difference(event.newCoordinate, event.oldCoordinate);
-            block.moveBy(dxy.x, dxy.y, true);
-            Blockly.Events.fire(event);
-          }
+Blockly.Frame.prototype.fireFrameBlocksCoordinatesChange = function(isFollowFrame) {
+  if (this.oldBlocksCoordinate_) {
+    // When the position of a Frame changes, it needs to update the position information of the blocks it contains.
+    for (const key in this.blockDB_) {
+      if (Object.hasOwnProperty.call(this.blockDB_, key)) {
+        var block = this.blockDB_[key];
+        var event = new Blockly.Events.BlockMove(block, isFollowFrame);
+        var oldCoordinate = this.oldBlocksCoordinate_[block.id];
+        if (oldCoordinate) {
+          event.oldCoordinate = oldCoordinate;
+          event.recordNew();
+          var dxy = goog.math.Coordinate.difference(event.newCoordinate, event.oldCoordinate);
+          block.moveBy(dxy.x, dxy.y, true);
+          Blockly.Events.fire(event);
         }
       }
-      this.oldBlocksCoordinate_ = null;
     }
+    this.oldBlocksCoordinate_ = null;
   }
 };
 
@@ -629,6 +709,43 @@ Blockly.Frame.prototype.isDeletable = function() {
 };
 
 /**
+ * Move this block to its workspace's drag surface, accounting for positioning.
+ * Generally should be called at the same time as setDragging_(true).
+ * Does nothing if useDragSurface_ is false.
+ * @param {!Event} e The most recent move event.
+ * @private
+ */
+Blockly.Frame.prototype.moveToDragSurface_ = function(e) {
+  var xy = this.getFrameGroupRelativeXY();
+  this.clearTransformAttributes_();
+  this.workspace.blockDragSurface_.translateSurface(xy.x, xy.y);
+  // Execute the move on the top-level SVG component
+  this.workspace.blockDragSurface_.setBlocksAndShow(this.getSvgRoot(), false, e);
+};
+
+/**
+ * Move this block back to the workspace block canvas.
+ * Generally should be called at the same time as setDragging_(false).
+ * Does nothing if useDragSurface_ is false.
+ * @param {!goog.math.Coordinate} newXY The position the block should take on
+ *     on the workspace canvas, in workspace coordinates.
+ * @param {boolean} wouldDeleteFrame the frame will be deleted.
+ * @private
+ */
+Blockly.Frame.prototype.moveOffDragSurface_ = function(newXY, wouldDeleteFrame) {
+  if (wouldDeleteFrame) {
+    this.fireFrameBlocksCoordinatesChange(false);
+  } else {
+    this.rect_.left = newXY.x + this.resizeButtonWidth_ / 2;
+    this.rect_.top = newXY.y + this.resizeButtonHeight_ / 2 + this.titleInputHeight_;
+    this.rect_.right = this.rect_.left + this.rect_.width + this.resizeButtonWidth_ / 2;
+    this.rect_.bottom = this.rect_.top + this.rect_.height + this.resizeButtonWidth_ / 2;
+  }
+  this.translate(newXY.x, newXY.y);
+  this.workspace.blockDragSurface_.clearAndHide(this.workspace.getCanvas());
+};
+
+/**
  * Move this frame during a drag, taking into account whether we are using a
  * drag surface to translate frame.
  * @param {!goog.math.Coordinate} newLoc The location to translate to, in
@@ -636,12 +753,7 @@ Blockly.Frame.prototype.isDeletable = function() {
  * @package
  */
 Blockly.Frame.prototype.moveDuringDrag = function(newLoc) {
-  this.rect_.left = newLoc.x + this.resizeButtonWidth_ / 2;
-  this.rect_.top = newLoc.y + this.resizeButtonHeight_ / 2 + this.titleInputHeight_;
-  this.rect_.right = this.rect_.left + this.rect_.width + this.resizeButtonWidth_ / 2;
-  this.rect_.bottom = this.rect_.top + this.rect_.height + this.resizeButtonWidth_ / 2;
-  var xy = this.computeFrameRelativeXY();
-  this.translate(xy.x, xy.y);
+  this.workspace.blockDragSurface_.translateSurface(newLoc.x, newLoc.y);
 };
 
 /**
@@ -788,6 +900,9 @@ Blockly.Frame.prototype.removeSelect = function() {
  * @private
  */
 Blockly.Frame.prototype.onMouseDown_ = function(e) {
+  // If the frame is locked, it cannot be selected.
+  if(this.locked) return;
+
   if (this.workspace.waitingCreateFrame) {
     e.stopPropagation();
   } else if (Blockly.selected == this || e.button === 2) {
@@ -842,8 +957,11 @@ Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e, takeOverSubEve
   if(takeOverSubEvents) {
     var scale = this.workspace.scale;
     var wsXY = Blockly.utils.getRelativeXY(this.workspace.svgBlockCanvas_);
-    this.rect_.left = this.rect_.right = (e.offsetX - wsXY.x) / scale;
-    this.rect_.top = this.rect_.bottom = (e.offsetY - wsXY.y) / scale;
+    const rect = e.target.getBoundingClientRect();
+    const offsetX = Math.round(e.clientX - rect.left);
+    const offsetY = Math.round(e.clientY - rect.top);
+    this.rect_.left = this.rect_.right = (offsetX - wsXY.x) / scale;
+    this.rect_.top = this.rect_.bottom = (offsetY - wsXY.y) / scale;
     var xy = this.computeFrameRelativeXY();
     this.translate(xy.x, xy.y);
   } else {
@@ -865,8 +983,8 @@ Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e, takeOverSubEve
  * @private
  */
 Blockly.Frame.prototype.resizeButtonMouseMove_ = function(dir, e) {
-  var diffX = (e.offsetX - this.mostRecentEvent_.offsetX) / this.workspace.scale;
-  var diffY = (e.offsetY - this.mostRecentEvent_.offsetY) / this.workspace.scale;
+  var diffX = (e.clientX - this.mostRecentEvent_.clientX) / this.workspace.scale;
+  var diffY = (e.clientY - this.mostRecentEvent_.clientY) / this.workspace.scale;
   this.mostRecentEvent_ = e;
   var xDir = dir === 'tr' || dir === 'br' ? 'ltr' : 'rtl';
   var yDir = dir === 'tl' || dir === 'tr' ? 'btt' : 'ttb';
@@ -1059,6 +1177,32 @@ Blockly.Frame.prototype.setTitle = function(newTitle) {
     this.title = newTitle;
     this.titleInput_.value = this.title;
     Blockly.Events.fire(new Blockly.Events.FrameRetitle(this, newTitle));
+  }
+};
+
+/**
+ * Set the color of the frame.
+ * @param {string} color The new color of the frame.
+ */
+Blockly.Frame.prototype.setColor = function(color) {
+  if (this.color !== color) {
+    this.fireFrameChange('color', this.color, color);
+    this.color = color;
+    this.svgRect_.setAttribute('fill', `rgba(${color},0.12)`);
+    this.colorButton_.style.setProperty('--color', `rgb(${color})`);
+  }
+};
+
+/**
+ * Toggle lock state.
+ */
+Blockly.Frame.prototype.triggerChangeLock = function() {
+  this.fireFrameChange('locked', this.locked, !this.locked);
+  this.locked = !this.locked;
+  if (this.locked) {
+    this.frameGroup_.classList.add('blocklyFrameLocked');
+  } else {
+    this.frameGroup_.classList.remove('blocklyFrameLocked');
   }
 };
 

@@ -252,6 +252,7 @@ Blockly.BlockDragSurfaceSvg.prototype.translateAndScaleGroup = function(x, y, sc
   // fuzzy while they are being dragged on the drag surface.
   var fixedX = x.toFixed(0);
   var fixedY = y.toFixed(0);
+  this.dragGroup_.style.setProperty('--scale', this.scale_);
   this.dragGroup_.setAttribute('transform',
       'translate(' + fixedX + ',' + fixedY + ') scale(' + scale + ')');
 };

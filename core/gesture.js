@@ -322,6 +322,8 @@ Blockly.Gesture.prototype.updateFromEvent_ = function(e) {
   if (changed && !this.startWorkspace_.waitingCreateFrame) {
     this.updateIsDragging_(e);
     Blockly.longStop_();
+  } else if (this.startWorkspace_.waitingCreateFrame) {
+    Blockly.longStop_();
   }
   this.mostRecentEvent_ = e;
 };

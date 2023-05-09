@@ -340,6 +340,7 @@ Blockly.createMainWorkspace_ = function(svg, options, blockDragSurface, workspac
   }
   // The SVG is now fully assembled.
   Blockly.svgResize(mainWorkspace);
+  Blockly.ColorSelector.createDom();
   Blockly.WidgetDiv.createDom();
   Blockly.DropDownDiv.createDom();
   Blockly.Tooltip.createDom();

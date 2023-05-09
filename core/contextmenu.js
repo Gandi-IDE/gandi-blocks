@@ -350,9 +350,25 @@ Blockly.ContextMenu.wsCreateFrameOption = function(ws) {
     enabled: true,
     callback: function() {
       ws.setWaitingCreateFrameEnabled(true);
-      ws.setResizingFrame.call(ws, true);
     }
   };
+};
+
+/**
+ * Make a context menu option for duplicating the current frame.
+ * @param {!Blockly.Frame} frame The frame where the right-click originated.
+ * @param {!Event} event Event that caused the context menu to open.
+ * @return {!Object} A menu option, containing text, enabled, and a callback.
+ * @package
+ */
+Blockly.ContextMenu.frameDuplicateOption = function(frame) {
+  var deleteOption = {
+    text: Blockly.Msg.DUPLICATE,
+    enabled: true,
+    callback: function() {
+    }
+  };
+  return deleteOption;
 };
 
 /**
@@ -393,23 +409,6 @@ Blockly.ContextMenu.frameCleanupOption = function(frame, enabled) {
     }
   };
   return deleteOption;
-};
-
-/**
- * Make a context menu option for duplicating the current frame.
- * @param {!Blockly.BlockSvg} frame The frame where the right-click originated.
- * @param {!Event} event Event that caused the context menu to open.
- * @return {!Object} A menu option, containing text, enabled, and a callback.
- * @package
- */
-Blockly.ContextMenu.frameDuplicateOption = function(frame, event) {
-  var duplicateOption = {
-    text: Blockly.Msg.DUPLICATE,
-    enabled: true,
-    callback:
-        Blockly.scratchBlocksUtils.duplicateAndDragCallback(frame, event)
-  };
-  return duplicateOption;
 };
 
 /**
