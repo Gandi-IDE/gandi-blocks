@@ -543,7 +543,7 @@ Blockly.BlockSvg.prototype.moveToDragSurface_ = function(e) {
   }
   this.workspace.blockDragSurface_.translateSurface(xy.x, xy.y);
   // Execute the move on the top-level SVG component
-  this.workspace.blockDragSurface_.setBlocksAndShow(this.getSvgRoot(), this.isBatchBlock, e);
+  this.workspace.blockDragSurface_.setBlocksAndShow(this.getSvgRoot(), this.isBatchElement, e);
 };
 
 /**

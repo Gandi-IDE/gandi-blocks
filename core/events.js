@@ -103,10 +103,22 @@ Blockly.Events.MOVE = 'move';
 Blockly.Events.DRAG_OUTSIDE = 'dragOutside';
 
 /**
+ * Name of event that drags a frame outside of or into the blocks workspace
+ * @const
+ */
+Blockly.Events.FRAME_DRAG_OUTSIDE = 'frame_drag_outside';
+
+/**
  * Name of event that ends a block drag
  * @const
  */
 Blockly.Events.END_DRAG = 'endDrag';
+
+/**
+ * Name of event that ends a frame drag
+ * @const
+ */
+Blockly.Events.FRAME_END_DRAG = 'frame_end_drag';
 
 /**
  * Name of event that moves a block.
@@ -466,3 +478,14 @@ Blockly.Events.disableOrphans = function(event) {
     Blockly.Events.enable();
   }
 };
+
+if (!goog.global['Blockly']) {
+  goog.global['Blockly'] = {};
+}
+if (!goog.global['Blockly']['Events']) {
+  goog.global['Blockly']['Events'] = {};
+}
+goog.global['Blockly']['Events']['disable'] = Blockly.Events.disable;
+goog.global['Blockly']['Events']['enable'] = Blockly.Events.enable;
+goog.global['Blockly']['Events']['setGroup'] = Blockly.Events.setGroup;
+goog.global['Blockly']['Events']['getGroup'] = Blockly.Events.getGroup;

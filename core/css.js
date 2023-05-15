@@ -1253,6 +1253,18 @@ Blockly.Css.CONTENT = [
     'stroke: var(--theme-brand-color, #2D8CFF);',
   '}',
 
+  '.blocklyFrameHighlight .blocklyFrameRectangle {',
+    'stroke: rgba(45, 140, 255, 0.4) !important;',
+  '}',
+
+  '.blocklyFrameHighlight .blocklyDraggable {',
+    'pointer-events: none;',
+  '}',
+
+  '.blocklyFrameHighlight .blocklyFrameTitleInput {',
+    'color: rgba(45, 140, 255, 0.2) !important;',
+  '}',
+
   '.blocklyFrameActionButton {',
     'cursor: pointer;',
     'flex-shrink: 0;',
@@ -1461,6 +1473,14 @@ Blockly.Css.CONTENT = [
     'padding-right: 28px;',
   '}',
 
+  '.goog-menu-separator {',
+    'border-top: 1px solid var(--theme-color-200, #3E495B)',
+  '}',
+
+  '.goog-menuitem-disabled .keyboard-shortcuts-item > span:first-child {',
+    'color: var(--theme-color-g500) !important;',
+  '}',
+  
   /* If a menu doesn't have checkable items or items with icons, remove padding. */
   '.blocklyWidgetDiv .goog-menu-nocheckbox .goog-menuitem,',
   '.blocklyWidgetDiv .goog-menu-noicon .goog-menuitem, ',

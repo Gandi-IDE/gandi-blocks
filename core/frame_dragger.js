@@ -23,6 +23,8 @@
 goog.provide('Blockly.FrameDragger');
 
 goog.require('goog.math.Coordinate');
+goog.require('Blockly.Events.DragFrameOutside');
+goog.require('Blockly.Events.EndFrameDrag');
 
 
 
@@ -164,6 +166,7 @@ Blockly.FrameDragger.prototype.dragFrame = function(e, currentDragDeltaXY) {
 
   const isOutside = Blockly.utils.isDom(e.target) ? !this.rootDiv.contains(e.target) : false;
   if (isOutside !== this.wasOutside_) {
+    this.fireDragOutsideEvent_(isOutside);
     this.wasOutside_ = isOutside;
   }
   return isOutside;
@@ -179,7 +182,17 @@ Blockly.FrameDragger.prototype.dragFrame = function(e, currentDragDeltaXY) {
 Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
   const delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
   const newLoc = goog.math.Coordinate.sum(this.startXY_, delta);
+
+  if (this.draggingFrame_ && this.draggingFrame_.temporaryBatchElements) {
+    const batchHeadBlocks = this.draggingFrame_.temporaryBatchElements[0];
+    const batchedFrames = this.draggingFrame_.temporaryBatchElements[1]
+        .filter((it) => it.id !== this.draggingFrame_.id);
+    Blockly.utils.moveBatchedElements(delta, [batchHeadBlocks, batchedFrames]);
+  }
   this.draggingFrame_.moveOffDragSurface_(newLoc, this.wouldDeleteFrame_);
+
+  var isOutside = this.wasOutside_;
+  this.fireEndDragEvent_(isOutside);
 
   const deleted = this.maybeDeleteFrame_();
   if (!deleted) {
@@ -192,6 +205,16 @@ Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
   this.workspace_.setResizesEnabled(true);
   this.workspace_.resetFrameAndTopBlocksMap();
   Blockly.Events.setGroup(false);
+
+  var ws = this.workspace_;
+
+  if (isOutside) {
+    // Reset a drag to the outside of scratch-blocks
+    setTimeout(function() {
+      ws.undo();
+    });
+    return;
+  }
 
   var toolbox = this.workspace_.getToolbox();
   if (toolbox) {
@@ -208,8 +231,46 @@ Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
 Blockly.FrameDragger.prototype.maybeDeleteFrame_ = function() {
   if (this.wouldDeleteFrame_) {
     this.draggingFrame_.dispose();
+    // delete all batch elements
+    if (this.draggingFrame_.temporaryBatchElements) {
+      const batchHeadBlocks = this.draggingFrame_.temporaryBatchElements[0];
+      batchHeadBlocks.forEach(block => {
+        block.dispose(false, true);
+      });
+      this.draggingFrame_.temporaryBatchElements[1].forEach((frame) => {
+        if (frame.id !== this.draggingFrame_.id) {
+          frame.dispose();
+        }
+      });
+    }
   }
   return this.wouldDeleteFrame_;
+};
+
+/**
+ * Fire an event when the dragged frame move outside.
+ * @param {?boolean} isOutside True if the drag is going outside the visible area.
+ * @private
+ */
+Blockly.FrameDragger.prototype.fireDragOutsideEvent_ = function(isOutside) {
+  var event = new Blockly.Events.DragFrameOutside(this.draggingFrame_);
+  event.isOutside = isOutside;
+  Blockly.Events.fire(event);
+};
+
+/**
+ * Fire an end drag event at the end of a frame drag.
+ * @param {?boolean} isOutside True if the drag is going outside the visible area.
+ * @private
+ */
+Blockly.FrameDragger.prototype.fireEndDragEvent_ = function(isOutside) {
+  if (Blockly.locked) return;
+  var frame = Object.assign(this.draggingFrame_, {});
+  if (isOutside) {
+    frame.rect_ = Object.assign(frame.rect_, frame.oldBoundingFrameRect_);
+  }
+  var event = new Blockly.Events.EndFrameDrag(frame, isOutside);
+  Blockly.Events.fire(event);
 };
 
 /**

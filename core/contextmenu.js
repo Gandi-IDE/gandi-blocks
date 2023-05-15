@@ -54,7 +54,14 @@ Blockly.ContextMenu.currentBlock = null;
  * @type {Array.<!Array>}
  * @private
  */
-Blockly.ContextMenu.eventWrapper_ = null;
+Blockly.ContextMenu.eventWrapper_ = [];
+
+/**
+ * A list of options that are added dynamically when the menu is displayed.
+ * @type {Array.<!Object>}
+ * @private
+ */
+Blockly.ContextMenu.appendedMenuItems_ = [];
 
 /**
  * Construct the menu based on the list of options and show the menu.
@@ -64,6 +71,7 @@ Blockly.ContextMenu.eventWrapper_ = null;
  */
 Blockly.ContextMenu.show = function(e, options, rtl) {
   Blockly.WidgetDiv.show(Blockly.ContextMenu, rtl, null);
+  Blockly.ContextMenu.appendDynamicMenuItem(e, options);
   if (!options.length) {
     Blockly.ContextMenu.hide();
     return;
@@ -100,6 +108,9 @@ Blockly.ContextMenu.populate_ = function(options, rtl) {
     menuItem.setRightToLeft(rtl);
     menu.addChild(menuItem, true);
     menuItem.setEnabled(option.enabled);
+    if (option.separator) {
+      menuItem.addClassName('goog-menu-separator');
+    }
     if (option.enabled) {
       goog.events.listen(
           menuItem, goog.ui.Component.EventType.ACTION, option.callback);
@@ -224,9 +235,10 @@ Blockly.ContextMenu.blockDeleteOption = function(block) {
     descendantCount -= nextBlock.getDescendants(false, true).length;
   }
   var deleteOption = {
-    text: descendantCount == 1 ? Blockly.Msg.DELETE_BLOCK :
-        Blockly.Msg.DELETE_X_BLOCKS.replace('%1', String(descendantCount)),
+    text: Blockly.utils.createMenuOptionNode(descendantCount == 1 ? Blockly.Msg.DELETE_BLOCK :
+      Blockly.Msg.DELETE_X_BLOCKS.replace('%1', String(descendantCount)), '⌫', 'var(--theme-error-color)'),
     enabled: true,
+    separator: true,
     callback: function() {
       var ws = block.workspace;
       setTimeout(function() {
@@ -267,7 +279,7 @@ Blockly.ContextMenu.blockHelpOption = function(block) {
  */
 Blockly.ContextMenu.blockDuplicateOption = function(block, event) {
   var duplicateOption = {
-    text: Blockly.Msg.DUPLICATE,
+    text: Blockly.utils.createMenuOptionNode(Blockly.Msg.DUPLICATE, goog.userAgent.WINDOWS ? 'Ctrl C' : '⌘ C'),
     enabled: true,
     callback:
         Blockly.scratchBlocksUtils.duplicateAndDragCallback(block, event, undefined, true)
@@ -312,17 +324,8 @@ Blockly.ContextMenu.blockCommentOption = function(block) {
  * @package
  */
 Blockly.ContextMenu.wsUndoOption = function(ws) {
-  var option = document.createElement('div');
-  option.className = 'keyboard-shortcuts-item';
-  var text = document.createElement('span');
-  text.innerText = Blockly.Msg.UNDO;
-  var shortcutKey = document.createElement('span');
-  shortcutKey.className = 'keyboard-shortcuts';
-  shortcutKey.innerText = goog.userAgent.MAC ? '⌘ Z' : 'Ctrl Z';
-  option.appendChild(text);
-  option.appendChild(shortcutKey);
   return {
-    text: option,
+    text: Blockly.utils.createMenuOptionNode(Blockly.Msg.UNDO, goog.userAgent.WINDOWS ? 'Ctrl Z' : '⌘ Z'),
     enabled: ws.hasUndoStack(),
     callback: ws.undo.bind(ws, false)
   };
@@ -336,17 +339,8 @@ Blockly.ContextMenu.wsUndoOption = function(ws) {
  * @package
  */
 Blockly.ContextMenu.wsCreateFrameOption = function(ws) {
-  var option = document.createElement('div');
-  option.className = 'keyboard-shortcuts-item';
-  var text = document.createElement('span');
-  text.innerText = Blockly.Msg.CREATE_FRAME;
-  var shortcutKey = document.createElement('span');
-  shortcutKey.className = 'keyboard-shortcuts';
-  shortcutKey.innerText = 'A';
-  option.appendChild(text);
-  option.appendChild(shortcutKey);
   return {
-    text: option,
+    text: Blockly.utils.createMenuOptionNode(Blockly.Msg.CREATE_FRAME, 'A'),
     enabled: true,
     callback: function() {
       ws.setWaitingCreateFrameEnabled(true);
@@ -361,12 +355,11 @@ Blockly.ContextMenu.wsCreateFrameOption = function(ws) {
  * @return {!Object} A menu option, containing text, enabled, and a callback.
  * @package
  */
-Blockly.ContextMenu.frameDuplicateOption = function(frame) {
+Blockly.ContextMenu.frameDuplicateOption = function(frame, event) {
   var deleteOption = {
-    text: Blockly.Msg.DUPLICATE,
+    text: Blockly.utils.createMenuOptionNode(Blockly.Msg.DUPLICATE, goog.userAgent.WINDOWS ? 'Ctrl C' : '⌘ C'),
     enabled: true,
-    callback: function() {
-    }
+    callback: Blockly.scratchBlocksUtils.duplicateAndDragFrameCallback(frame, event)
   };
   return deleteOption;
 };
@@ -379,8 +372,9 @@ Blockly.ContextMenu.frameDuplicateOption = function(frame) {
  */
 Blockly.ContextMenu.frameDeleteOption = function(frame) {
   var deleteOption = {
-    text: Blockly.Msg.DELETE_FRAME,
+    text: Blockly.utils.createMenuOptionNode(Blockly.Msg.DELETE_FRAME, '⌫', 'var(--theme-error-color)'),
     enabled: true,
+    separator: true,
     callback: function() {
       Blockly.Events.setGroup(true);
       frame.dispose();
@@ -420,17 +414,8 @@ Blockly.ContextMenu.frameCleanupOption = function(frame, enabled) {
  * @package
  */
 Blockly.ContextMenu.wsRedoOption = function(ws) {
-  var option = document.createElement('div');
-  option.className = 'keyboard-shortcuts-item';
-  var text = document.createElement('span');
-  text.innerText = Blockly.Msg.REDO;
-  var shortcutKey = document.createElement('span');
-  shortcutKey.className = 'keyboard-shortcuts';
-  shortcutKey.innerText = goog.userAgent.MAC ? '⇧ ⌘ Z' : 'Shift Ctrl Z';
-  option.appendChild(text);
-  option.appendChild(shortcutKey);
   return {
-    text: option,
+    text: Blockly.utils.createMenuOptionNode(Blockly.Msg.REDO, goog.userAgent.WINDOWS ? 'Shift Ctrl Z' : '⇧ ⌘ Z'),
     enabled: ws.hasRedoStack(),
     callback: ws.undo.bind(ws, true)
   };
@@ -449,7 +434,7 @@ Blockly.ContextMenu.wsCleanupOption = function(ws, numTopBlocks) {
   return {
     text: Blockly.Msg.CLEAN_UP,
     enabled: numTopBlocks > 1,
-    callback: ws.cleanUp.bind(ws, true)
+    callback: ws.cleanUp.bind(ws)
   };
 };
 
@@ -620,7 +605,74 @@ Blockly.ContextMenu.workspaceCommentOption = function(ws, e) {
   return wsCommentOption;
 };
 
-// powered by xigua start
+/**
+ * Add a dynamic insertion menu item.
+ * @param {!Function} callback The callback function called before menu is displayed if conditions are met.
+ * @param {!Object} config The configuration options for the insertion condition.
+ * @return {!Number} The index value of item in list.
+ */
+Blockly.ContextMenu.addDynamicMenuItem = function(callback, config) {
+  return Blockly.ContextMenu.appendedMenuItems_.push({callback, config}) - 1;
+};
+
+/**
+ * Delete a dynamic insertion menu item.
+ * @param {!Number} index The index of the dynamic menu item to delete.
+ */
+Blockly.ContextMenu.deleteDynamicMenuItem = function(index) {
+  Blockly.ContextMenu.appendedMenuItems_.splice(index, 1);
+};
+
+/**
+ * Delete all dynamic insertion menu item.
+ */
+Blockly.ContextMenu.clearDynamicMenuItems = function() {
+  Blockly.ContextMenu.appendedMenuItems_ = [];
+};
+
+/**
+ * Add a dynamic insertion menu item.
+ * @param {!Event} e Mouse event.
+ * @param {!Array.<!Object>} options Array of menu options.
+ */
+Blockly.ContextMenu.appendDynamicMenuItem = function(e, options) {
+  let targetFlyout, targetBlock, targetFrame, targetComment, target = null;
+
+  const gesture = Blockly.mainWorkspace.currentGesture_;
+  if (gesture) {
+    targetBlock = gesture.targetBlock_;
+    targetFrame = gesture.targetFrame_;
+    targetComment = gesture.startBubble_;
+    target = targetBlock || targetComment || targetFrame;
+  }
+
+  Blockly.ContextMenu.appendedMenuItems_.forEach(item => {
+    const {callback, config: { targetNames = [] }} = item;
+    const injectable = targetNames.reduce((tag, item) => {
+      switch (item) {
+        case 'workspace':
+          return tag || (!targetBlock && !targetFrame && !targetFlyout && !targetComment);
+        case 'blocks':
+          return tag || (!targetFlyout && targetBlock);
+        case 'custom-frame':
+          return tag || (!targetFlyout && targetFrame) ;
+        case 'comment':
+          return tag || targetComment;
+        default:
+          break;
+      }
+    }, false);
+
+    if (injectable) {
+      try {
+        options = callback(options, target, e);
+      } catch (e) {
+        console.error('Dynamic menu item insertion failed: ', e);
+      }
+    }
+  });
+};
+
 Blockly.ContextMenu.hideBlocks = function(block) {
   return {
     text: '隐藏该段代码',
@@ -651,6 +703,17 @@ Blockly.ContextMenu.showBlocks = function(ws) {
     }
   };
 };
-// powered by xigua end
 
 // End helper functions for creating context menu options.
+
+if (!goog.global['Blockly']) {
+  goog.global['Blockly'] = {};
+}
+if (!goog.global['Blockly']['ContextMenu']) {
+  goog.global['Blockly']['ContextMenu'] = {};
+}
+goog.global['Blockly']['ContextMenu']['show'] = Blockly.ContextMenu.show;
+goog.global['Blockly']['ContextMenu']['hide'] = Blockly.ContextMenu.hide;
+goog.global['Blockly']['ContextMenu']['addDynamicMenuItem'] = Blockly.ContextMenu.addDynamicMenuItem;
+goog.global['Blockly']['ContextMenu']['deleteDynamicMenuItem'] = Blockly.ContextMenu.deleteDynamicMenuItem;
+goog.global['Blockly']['ContextMenu']['clearDynamicMenuItems'] = Blockly.ContextMenu.clearDynamicMenuItems;

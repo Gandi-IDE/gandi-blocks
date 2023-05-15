@@ -96,7 +96,7 @@ Blockly.Events.EndBlockDrag = function(block, isOutside) {
     this.xml = Blockly.Xml.blockToDom(block, true /* opt_noId */);
   }
   this.recordUndo = false;
-  this.batchHeadBlocksXml = (block.temporaryBatchBlocks || []).filter(bl => bl.id !== block.id)
+  this.batchHeadBlocksXml = (block.temporaryBatchElements || [[], []])[0].filter(bl => bl.id !== block.id)
       .map(bl => Blockly.Xml.blockToDom(bl, true /* opt_noId */));
 };
 goog.inherits(Blockly.Events.EndBlockDrag, Blockly.Events.BlockBase);

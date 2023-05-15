@@ -243,8 +243,7 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
   // Make sure internal state is fresh.
   this.dragBlock(e, currentDragDeltaXY);
   let delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
-  if (this.draggingBlock_ && this.draggingBlock_.temporaryBatchBlocks) {
-
+  if (this.draggingBlock_ && this.draggingBlock_.temporaryBatchElements) {
     // Dealing with the hidden issue of dragging block style separately
     let setDragBlockCommentStyleBlock = this.draggingBlock_;
     do {
@@ -259,36 +258,10 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
             .sourceBlock_;
     } while (setDragBlockCommentStyleBlock);
 
-    const batchHeadBlocks = this.draggingBlock_.temporaryBatchBlocks
+    const batchHeadBlocks = this.draggingBlock_.temporaryBatchElements[0]
         .filter((it) => it.id !== this.draggingBlock_.id);
-    batchHeadBlocks.forEach(moveBl => {
-      moveBl.getSvgRoot().style.display = 'block';
-      let setCommentStyleBlock = moveBl;
-      do {
-        if (setCommentStyleBlock.comment) {
-          setCommentStyleBlock.comment.bubble_.bubbleGroup_.setAttribute(
-              "style",
-              "display: block"
-          );
-        }
-        setCommentStyleBlock =
-          ((setCommentStyleBlock.nextConnection || {}).targetConnection || {})
-              .sourceBlock_;
-      } while (
-        setCommentStyleBlock
-      );
-      const old = moveBl.getRelativeToSurfaceXY();
-      let newLoc = goog.math.Coordinate.sum(moveBl.getRelativeToSurfaceXY(), delta);
-      moveBl.moveDuringDrag(newLoc, true);
-      let event = new Blockly.Events.BlockMove(moveBl);
-      event.oldCoordinate = old;
-      event.recordNew();
-      moveBl.moveConnections_(delta.x, delta.y);
-      Blockly.Events.fire(event);
-      // MoveConnections_ should be executed after the fire event is triggered.
-      // Because he calculated it based on the actual block location
-    });
-
+    const batchedFrames = this.draggingBlock_.temporaryBatchElements[1];
+    Blockly.utils.moveBatchedElements(delta, [batchHeadBlocks, batchedFrames]);
   }
 
   this.dragIconData_ = [];
@@ -337,8 +310,8 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
   var ws = this.workspace_;
 
 
-  // clear draggingBlock_ temporaryBatchBlocks
-  this.draggingBlock_.temporaryBatchBlocks = null;
+  // clear draggingBlock_ temporaryBatchElements
+  this.draggingBlock_.temporaryBatchElements = null;
 
   if (isOutside) {
     // Reset a drag to the outside of scratch-blocks
@@ -468,12 +441,17 @@ Blockly.BlockDragger.prototype.maybeDeleteBlock_ = function() {
     // Fire a move event, so we know where to go back to for an undo.
     this.fireMoveEvent_();
     this.draggingBlock_.dispose(false, true);
-    // delete all batch blocks
-    const batchHeadBlocks = (this.draggingBlock_.temporaryBatchBlocks || [])
-        .filter((it) => it.id !== this.draggingBlock_.id);
-    batchHeadBlocks.forEach(bl => {
-      bl.dispose(false, true);
-    });
+    // delete all batch elements
+    if(this.draggingBlock_.temporaryBatchElements) {
+      const batchHeadBlocks = this.draggingBlock_.temporaryBatchElements[0]
+          .filter((it) => it.id !== this.draggingBlock_.id);
+      batchHeadBlocks.forEach(bl => {
+        bl.dispose(false, true);
+      });
+      this.draggingBlock_.temporaryBatchElements[1].forEach((frame) => {
+        frame.dispose();
+      });
+    }
   } else if (trashcan) {
     // Make sure the trash can is closed.
     trashcan.close();

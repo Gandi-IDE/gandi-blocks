@@ -191,14 +191,14 @@ Blockly.BlockDragSurfaceSvg.prototype.createDropShadowDom_ = function(defs) {
  * Set the SVG blocks on the drag surface's group and show the surface.
  * Only one block group should be on the drag surface at a time.
  * @param {!Element} blocks Block or group of blocks to place on the drag
- * @param {boolean} isBatchBlock is drag batch block.
+ * @param {boolean} isBatchElement is drag batch block.
  * @param {!Event} e The most recent move event.
  * surface.
  */
-Blockly.BlockDragSurfaceSvg.prototype.setBlocksAndShow = function(blocks, isBatchBlock, e) {
+Blockly.BlockDragSurfaceSvg.prototype.setBlocksAndShow = function(blocks, isBatchElement, e) {
   goog.asserts.assert(
       this.dragGroup_.childNodes.length == 0, 'Already dragging a block.');
-  if (isBatchBlock) {
+  if (isBatchElement) {
     // Simulate batch selection movement
     blocks.style.display = 'none';
     const batchMoveBlock = Blockly.utils.createSvgElement('image',

@@ -34,6 +34,7 @@
 goog.provide('Blockly.utils');
 
 goog.require('Blockly.Touch');
+goog.require('Blockly.FrameDragger');
 goog.require('goog.dom');
 goog.require('goog.events.BrowserFeature');
 goog.require('goog.math.Coordinate');
@@ -323,6 +324,18 @@ Blockly.utils.createSvgElement = function(name, attrs, parent /*, opt_workspace 
     parent.appendChild(e);
   }
   return e;
+};
+
+Blockly.utils.createMenuOptionNode = function(text, shortcutKey, textColor) {
+  const element = goog.dom.createDom('div', {class: 'keyboard-shortcuts-item'});
+  const textNode = goog.dom.createDom('span', {}, text);
+  if (textColor) {
+    textNode.style.color = textColor;
+  }
+  const shortcutKeyNode = goog.dom.createDom('span', {class: 'keyboard-shortcuts'}, shortcutKey);
+  element.appendChild(textNode);
+  element.appendChild(shortcutKeyNode);
+  return element;
 };
 
 /**
@@ -1080,7 +1093,6 @@ Blockly.utils.CODE_HASH = {
   "[operator_or,operator_and,operator_not]": "[sensing_touchingobject,sensing_touchingcolor,sensing_coloristouchingcolor,sensing_keypressed,sensing_mousedown,operator_gt,operator_lt,operator_equals,operator_and,operator_or,operator_not]"
 };
 
-
 /**
  * Render block.
  * @param {object} svgGroup Block's svgGroup.
@@ -1249,3 +1261,57 @@ Blockly.utils.getDropDownBlocks = function(workspace) {
   return allBlocks;
 };
 
+Blockly.utils.moveBatchedElements = function(delta, batchedElements) {
+  batchedElements[0].forEach(moveBl => {
+    moveBl.getSvgRoot().style.display = 'block';
+    let setCommentStyleBlock = moveBl;
+    do {
+      if (setCommentStyleBlock.comment) {
+        setCommentStyleBlock.comment.bubble_.bubbleGroup_.setAttribute(
+            "style",
+            "display: block"
+        );
+      }
+      setCommentStyleBlock =
+        ((setCommentStyleBlock.nextConnection || {}).targetConnection || {})
+            .sourceBlock_;
+    } while (
+      setCommentStyleBlock
+    );
+    const old = moveBl.getRelativeToSurfaceXY();
+    let newLoc = goog.math.Coordinate.sum(moveBl.getRelativeToSurfaceXY(), delta);
+    moveBl.moveDuringDrag(newLoc, true);
+    let event = new Blockly.Events.BlockMove(moveBl);
+    event.oldCoordinate = old;
+    event.recordNew();
+    moveBl.moveConnections_(delta.x, delta.y);
+    Blockly.Events.fire(event);
+    // MoveConnections_ should be executed after the fire event is triggered.
+    // Because he calculated it based on the actual block location
+  });
+  batchedElements[1].forEach(frame => {
+    frame.getSvgRoot().style.display = "block";
+    const startXY = frame.getFrameGroupRelativeXY();
+    let newLoc = goog.math.Coordinate.sum(startXY, delta);
+    Object.values(frame.blockDB_).map(function(block) {
+      return Blockly.FrameDragger.initBlockIconData_(block);
+    }).forEach(dragIconData => {
+      // Moving icons moves their associated bubbles.
+      for (var j = 0; j < dragIconData.length; j++) {
+        var data = dragIconData[j];
+        data.icon.setIconLocation(goog.math.Coordinate.sum(data.location, delta));
+      }
+    });
+    frame.moveDuringDrag(newLoc, false);
+    frame.onStopDrag();
+  });
+};
+
+// Export symbols that would otherwise be renamed by Closure compiler.
+if (!goog.global['Blockly']) {
+  goog.global['Blockly'] = {};
+}
+if (!goog.global['Blockly']['Utils']) {
+  goog.global['Blockly']['Utils'] = {};
+}
+goog.global['Blockly']['Utils']['getMouseVectorPosition'] = Blockly.utils.getMouseVectorPosition;

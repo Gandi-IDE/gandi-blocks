@@ -202,10 +202,8 @@ Blockly.onKeyDown_ = function(e) {
     Blockly.DropDownDiv.hide();
     // Pressing esc cancel frame creation
     Blockly.mainWorkspace.setWaitingCreateFrameEnabled(false);
-    Blockly.mainWorkspace.setResizingFrame(false);
   } else if (e.keyCode == 65) {
     Blockly.mainWorkspace.setWaitingCreateFrameEnabled(true);
-    Blockly.mainWorkspace.setResizingFrame(true);
   }  else if (e.keyCode == 8 || e.keyCode == 46) {
     // Delete or backspace.
     // Stop the browser from going back to the previous page.
@@ -213,7 +211,9 @@ Blockly.onKeyDown_ = function(e) {
     // data loss.
     e.preventDefault();
     // Don't allow delete while the batchSelector is running.
-    if (Blockly.batchSelectedBlocks && Blockly.batchSelectedBlocks.length > 0) {
+    if (Blockly.batchSelectedElements &&
+          (Object.keys(Blockly.batchSelectedElements[0]).length > 0 ||
+          (Object.keys(Blockly.batchSelectedElements[1])).length > 0)) {
       return;
     }
     // Don't delete while dragging.  Jeez.
@@ -226,7 +226,9 @@ Blockly.onKeyDown_ = function(e) {
     }
   }else if (e.altKey || e.ctrlKey || e.metaKey) {
     // Don't allow delete while the batchSelector is running.
-    if (Blockly.batchSelectedBlocks && Blockly.batchSelectedBlocks.length > 0) {
+    if (Blockly.batchSelectedElements &&
+      (Object.keys(Blockly.batchSelectedElements[0]).length > 0 ||
+      (Object.keys(Blockly.batchSelectedElements[1])).length > 0)) {
       return;
     }
     // Don't use meta keys during drags.
@@ -242,7 +244,7 @@ Blockly.onKeyDown_ = function(e) {
         // 'c' for copy.
         Blockly.hideChaff();
         Blockly.copy_(Blockly.selected);
-        Blockly.clipboardBatchBlocks = null;
+        Blockly.clipboardBatchElements = null;
       } else if (e.keyCode == 88 && !Blockly.selected.workspace.isFlyout) {
         // 'x' for cut, but not in a flyout.
         // Don't even copy the selected item in the flyout.
@@ -252,7 +254,7 @@ Blockly.onKeyDown_ = function(e) {
     }
     if (e.keyCode == 86) {
       // 'v' for paste.
-      if (Blockly.clipboardBatchBlocks && Blockly.clipboardBatchBlocks.length > 0) {
+      if (Blockly.clipboardBatchElements && Blockly.clipboardBatchElements.length > 0) {
         return;
       }
       if (Blockly.clipboardXml_) {
@@ -291,6 +293,8 @@ Blockly.onKeyDown_ = function(e) {
 Blockly.copy_ = function(toCopy) {
   if (toCopy.isComment) {
     var xml = toCopy.toXmlWithXY();
+  } else if (toCopy instanceof Blockly.Frame) {
+    var xml = Blockly.Xml.frameToDom(toCopy, true);
   } else {
     var xml = Blockly.Xml.blockToDom(toCopy);
     // Encode start position in XML.

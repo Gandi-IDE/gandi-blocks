@@ -24,6 +24,8 @@ goog.provide('Blockly.Events.FrameBase');
 goog.provide('Blockly.Events.FrameCreate');
 goog.provide('Blockly.Events.FrameDelete');
 goog.provide('Blockly.Events.FrameRetitle');
+goog.provide('Blockly.Events.DragFrameOutside');
+goog.provide('Blockly.Events.EndFrameDrag');
 goog.provide('Blockly.Events.FrameChange');
 
 goog.require('Blockly.Events');
@@ -292,6 +294,111 @@ Blockly.Events.FrameRetitle.prototype.run = function(forward) {
   } else {
     workspace.retitleFrameById(this.frameId, this.oldTitle);
   }
+};
+
+/**
+ * Class for a frame drag event. Fired when frame dragged into or out of
+ * the frame UI.
+ * @param {Blockly.Frame} frame The moved frame.  Null for a blank event.
+ * @extends {Blockly.Events.FrameBase}
+ * @constructor
+ */
+Blockly.Events.DragFrameOutside = function(frame) {
+  if (!frame) {
+    return;  // Blank event to be populated by fromJson.
+  }
+  Blockly.Events.DragFrameOutside.superClass_.constructor.call(this, frame);
+  this.recordUndo = false;
+};
+goog.inherits(Blockly.Events.DragFrameOutside, Blockly.Events.FrameBase);
+
+/**
+ * Type of this event.
+ * @type {string}
+ */
+Blockly.Events.DragFrameOutside.prototype.type = Blockly.Events.FRAME_DRAG_OUTSIDE;
+
+/**
+ * Encode the event as JSON.
+ * @return {!Object} JSON representation.
+ */
+Blockly.Events.DragFrameOutside.prototype.toJson = function() {
+  var json = Blockly.Events.DragFrameOutside.superClass_.toJson.call(this);
+  if (this.isOutside) {
+    json['isOutside'] = this.isOutside;
+  }
+  return json;
+};
+
+/**
+ * Decode the JSON event.
+ * @param {!Object} json JSON representation.
+ */
+Blockly.Events.DragFrameOutside.prototype.fromJson = function(json) {
+  Blockly.Events.DragBlockOutside.superClass_.fromJson.call(this, json);
+  this.isOutside = json['isOutside'];
+};
+
+/**
+ * Class for a frame end drag event.
+ * @param {Blockly.Frame} frame The moved frame.  Null for a blank event.
+ * @param {boolean} isOutside True if the moved frame is outside of the
+ *     blocks workspace.
+ * @extends {Blockly.Events.FrameBase}
+ * @constructor
+ */
+Blockly.Events.EndFrameDrag = function(frame, isOutside) {
+  if (!frame) {
+    return;  // Blank event to be populated by fromJson.
+  }
+  Blockly.Events.EndFrameDrag.superClass_.constructor.call(this, frame);
+  this.isOutside = isOutside;
+  // If drag ends outside the blocks workspace, send the block XML
+  if (isOutside) {
+    this.xml = Blockly.Xml.frameToDom(frame, true);
+  }
+  this.recordUndo = false;
+  this.batchFramesXml = [];
+  if (frame.temporaryBatchElements && frame.temporaryBatchElements[1]) {
+    this.batchFramesXml = frame.temporaryBatchElements[1].reduce((acc, item) => {
+      if (item.id !== frame.id) {
+        return [...acc, Blockly.Xml.frameToDom(item, true)];
+      }
+      return acc;
+    }, []);
+  }
+};
+goog.inherits(Blockly.Events.EndFrameDrag, Blockly.Events.FrameBase);
+
+/**
+ * Type of this event.
+ * @type {string}
+ */
+Blockly.Events.EndFrameDrag.prototype.type = Blockly.Events.FRAME_END_DRAG;
+
+/**
+ * Encode the event as JSON.
+ * @return {!Object} JSON representation.
+ */
+Blockly.Events.EndFrameDrag.prototype.toJson = function() {
+  var json = Blockly.Events.EndFrameDrag.superClass_.toJson.call(this);
+  if (this.isOutside) {
+    json['isOutside'] = this.isOutside;
+  }
+  if (this.xml) {
+    json['xml'] = this.xml;
+  }
+  return json;
+};
+
+/**
+ * Decode the JSON event.
+ * @param {!Object} json JSON representation.
+ */
+Blockly.Events.EndFrameDrag.prototype.fromJson = function(json) {
+  Blockly.Events.EndFrameDrag.superClass_.fromJson.call(this, json);
+  this.isOutside = json['isOutside'];
+  this.xml = json['xml'];
 };
 
 /**

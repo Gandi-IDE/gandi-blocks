@@ -1128,6 +1128,24 @@ Blockly.Gesture.prototype.forceStartBlockDrag = function(fakeEvent, block) {
 };
 
 /**
+ * Don't even think about using this function before talking to rachel-fenichel.
+ *
+ * Force a drag to start without clicking and dragging the frame itself.  Used
+ * to attach duplicated frame to the mouse pointer.
+ * @param {!Object} fakeEvent An object with the properties needed to start a
+ *     drag, including clientX and clientY.
+ * @param {!Blockly.Frame} frame The frame to start dragging.
+ * @package
+ */
+Blockly.Gesture.prototype.forceStartFrameDrag = function(fakeEvent, frame) {
+  this.handleFrameStart(fakeEvent, frame);
+  this.handleWsStart(fakeEvent, frame.workspace);
+  this.isDraggingFrame_ = true;
+  this.hasExceededDragRadius_ = true;
+  this.startDraggingFrame_();
+};
+
+/**
  * Duplicate the target block and start dragging the duplicated block.
  * This should be done once we are sure that it is a block drag, and no earlier.
  * Specifically for argument reporters in custom block defintions.

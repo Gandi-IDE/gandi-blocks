@@ -33,7 +33,9 @@ goog.require('Blockly.ConnectionDB');
 goog.require('Blockly.constants');
 goog.require('Blockly.DataCategory');
 goog.require('Blockly.DropDownDiv');
+goog.require('Blockly.ColorSelector');
 goog.require('Blockly.Events.BlockCreate');
+goog.require('Blockly.Events.FrameCreate');
 goog.require('Blockly.Gesture');
 goog.require('Blockly.Grid');
 goog.require('Blockly.Options');
@@ -58,6 +60,14 @@ goog.require('goog.dom');
 goog.require('goog.math.Coordinate');
 goog.require('goog.userAgent');
 goog.require('goog.math.Rect');
+
+/**
+ * Split the block by column.
+ * @typedef {Object} Col
+ * @property {number} x - The horizontal value of the current column.
+ * @property {number} count - A count.
+ * @property {Array<Blockly.Block>} blocks - Blocks in the current column.
+ */
 
 /**
  * Class for a workspace.  This is an onscreen area with optional trashcan,
@@ -483,7 +493,7 @@ Blockly.WorkspaceSvg.prototype.createDom = function(opt_backgroundClass) {
     }
   }
 
-  this.intersectionObserver = new Blockly.IntersectionObserver(this);
+  // this.intersectionObserver = new Blockly.IntersectionObserver(this);
 
   // Determine if there needs to be a category tree, or a simple list of
   // blocks.  This cannot be changed later, since the UI is very different.
@@ -1033,6 +1043,8 @@ Blockly.WorkspaceSvg.prototype.paste = function(xmlBlock) {
   }
   if (xmlBlock.tagName.toLowerCase() == 'comment') {
     this.pasteWorkspaceComment_(xmlBlock);
+  } else if (xmlBlock.tagName.toLowerCase() == 'custom-frame') {
+    this.pasteFrame_(xmlBlock);
   } else {
     this.pasteBlock_(xmlBlock);
   }
@@ -1048,6 +1060,7 @@ Blockly.WorkspaceSvg.prototype.pasteBlock_ = function(xmlBlock) {
     var block = Blockly.Xml.domToBlock(xmlBlock, this);
     // Scratch-specific: Give shadow dom new IDs to prevent duplicating on paste
     Blockly.scratchBlocksUtils.changeObscuredShadowIds(block);
+    
     // Move the duplicate to original position.
     var blockX = parseInt(xmlBlock.getAttribute('x'), 10);
     var blockY = parseInt(xmlBlock.getAttribute('y'), 10);
@@ -1098,6 +1111,53 @@ Blockly.WorkspaceSvg.prototype.pasteBlock_ = function(xmlBlock) {
     Blockly.Events.fire(new Blockly.Events.BlockCreate(block));
   }
   block.select();
+};
+
+/**
+ * Paste the provided block onto the workspace.
+ * @param {!Element} xmlFrame XML block element.
+ */
+Blockly.WorkspaceSvg.prototype.pasteFrame_ = function(xmlFrame) {
+  Blockly.Events.disable();
+  try {
+    var blocks = [];
+    for (var j = 0, xmlBlock; xmlBlock = xmlFrame.children[j]; j++) {
+      var id = Blockly.utils.genUid();
+      // Reset the blocks ID
+      xmlBlock.setAttribute('id', id);
+      blocks.push(id);
+    
+      const newBlock = Blockly.Xml.domToBlock(xmlBlock, this);
+      // Scratch-specific: Give shadow dom new IDs to prevent duplicating on paste
+      Blockly.scratchBlocksUtils.changeObscuredShadowIds(newBlock);
+
+      // The position of the old block in workspace coordinates.
+      var blockX = parseInt(xmlBlock.getAttribute('x'), 10);
+      var blockY = parseInt(xmlBlock.getAttribute('y'), 10);
+      // Place the new block as the same position as the old block.
+      newBlock.moveBy(blockX, blockY);
+    }
+    xmlFrame.setAttribute('blocks', blocks.join(' '));
+    var frame = Blockly.Xml.domToFrame(xmlFrame, this);
+    var frameX = parseInt(xmlFrame.getAttribute('x'), 10);
+    var frameY = parseInt(xmlFrame.getAttribute('y'), 10);
+    if (!isNaN(frameX) && !isNaN(frameY)) {
+      if (this.RTL) {
+        frameX = -frameX;
+      }
+      frame.moveBy(Blockly.SNAP_RADIUS, Blockly.SNAP_RADIUS * 2);
+    }
+  } finally {
+    Blockly.Events.enable();
+  }
+  if (Blockly.Events.isEnabled()) {
+    for (const key in frame.blockDB_) {
+      const newBlock = frame.blockDB_[key];
+      Blockly.Events.fire(new Blockly.Events.BlockCreate(newBlock));
+    }
+    Blockly.Events.fire(new Blockly.Events.FrameCreate(frame));
+  }
+  frame.select();
 };
 
 /**
@@ -1437,31 +1497,205 @@ Blockly.WorkspaceSvg.prototype.getBlocksBoundingBox = function() {
 
 /**
  * Clean up the workspace by ordering all the blocks in a column.
+ * @param {Blockly.BlockSvg=} block Building blocks that need to make space.
  */
-Blockly.WorkspaceSvg.prototype.cleanUp = function() {
+Blockly.WorkspaceSvg.prototype.cleanUp = function(block) {
   this.setResizesEnabled(false);
+  let makeSpaceForBlock = block && block.getRootBlock && block.getRootBlock();
+
   Blockly.Events.setGroup(true);
-  var topBlocks = this.getTopBlocks(true);
-  var topFrames = this.getTopFrames(true);
-  var cursorY = 0;
-  for (var i = 0, frame; frame = topFrames[i]; i++) {
-    var xy = frame.getFrameGroupRelativeXY();
-    frame.moveBy(-xy.x, cursorY - xy.y);
-    cursorY = frame.getFrameGroupRelativeXY().y +
-    frame.getHeight() + Blockly.BlockSvg.MIN_BLOCK_Y;
+
+  let result = this.getOrderedTopBlockColumns(true);
+  let columns = result.cols;
+  let cursorX = 48;
+  let maxWidths = result.maxWidths;
+
+  for (const column of columns) {
+    let cursorY = 64;
+    let maxWidth = 0;
+
+    for (const block of column.blocks) {
+      let extraWidth = block === makeSpaceForBlock ? 380 : 0;
+      let extraHeight = block === makeSpaceForBlock ? 480 : 72;
+      let xy = block.getRelativeToSurfaceXY();
+      if (cursorX - xy.x !== 0 || cursorY - xy.y !== 0) {
+        block.moveBy(cursorX - xy.x, cursorY - xy.y);
+      }
+      let heightWidth = block.getHeightWidth();
+      cursorY += heightWidth.height + extraHeight;
+
+      let maxWidthWithComments = maxWidths[block.id] || 0;
+      maxWidth = Math.max(maxWidth, Math.max(heightWidth.width + extraWidth, maxWidthWithComments));
+    }
+
+    for (const frame of column.frames) {
+      let extraWidth = 0;
+      let extraHeight = 72;
+      let xy = frame.getFrameGroupRelativeXY();
+      if (cursorX - xy.x !== 0 || cursorY - xy.y !== 0) {
+        frame.moveBy(cursorX - xy.x, cursorY - xy.y);
+      }
+      cursorY += frame.getHeight() + extraHeight;
+
+      let maxWidthWithComments = maxWidths[frame.id] || 0;
+      maxWidth = Math.max(maxWidth, Math.max(frame.getWidth() + extraWidth, maxWidthWithComments));
+    }
+
+    cursorX += maxWidth + 96;
   }
-  for (var i = 0, block; block = topBlocks[i]; i++) {
-    if (block.hidden || block.getSelfFrame()) {
+
+  let topComments = this.getTopComments();
+  for (const comment of topComments) {
+    if (comment.setVisible) {
+      comment.setVisible(false);
+      comment.needsAutoPositioning_ = true;
+      comment.setVisible(true);
+    }
+  }
+
+  setTimeout(() => {
+    let map = this.getVariableMap();
+    let vars = map.getVariablesOfType("");
+    let unusedLocals = [];
+
+    for (const row of vars) {
+      if (row.isLocal) {
+        let usages = map.getVariableUsesById(row.getId());
+        if (!usages || usages.length === 0) {
+          unusedLocals.push(row);
+        }
+      }
+    }
+
+    // Locate unused local lists...
+    let lists = map.getVariablesOfType("list");
+    let unusedLists = [];
+
+    for (const row of lists) {
+      if (row.isLocal) {
+        let usages = map.getVariableUsesById(row.getId());
+        if (!usages || usages.length === 0) {
+          unusedLists.push(row);
+        }
+      }
+    }
+    Blockly.Events.setGroup(false);
+  }, 100);
+
+  this.setResizesEnabled(true);
+};
+
+/**
+ * Split the top blocks into ordered columns
+ * @param {boolean} separateOrphans true to keep all orphans separate
+ * @returns {{orphans: {blocks: [Block], x: number, count: number}, cols: [Col]}} Splitted blocks.
+ */
+Blockly.WorkspaceSvg.prototype.getOrderedTopBlockColumns = function(separateOrphans) {
+  let topBlocks = this.getTopBlocks();
+  let topFrames = this.getTopFrames(true);
+  let maxWidths = {};
+
+  if (separateOrphans) {
+    let topComments = this.getTopComments();
+
+    // todo: tie comments to blocks... find widths and width of block stack row...
+    for (const comment of topComments) {
+      // comment.autoPosition_();
+      // Hiding and showing repositions the comment right next to it's block - nice!
+      if (comment.setVisible) {
+        comment.setVisible(false);
+        comment.needsAutoPositioning_ = true;
+        comment.setVisible(true);
+
+        // let bb = comment.block_.svgPath_.getBBox();
+        let right = comment.getBoundingRectangle().bottomRight.x;
+
+        // Get top block for stack...
+        let root = comment.block_.getRootBlock();
+        let left = root.getBoundingRectangle().topLeft.x;
+        maxWidths[root.id] = Math.max(right - left, maxWidths[root.id] || 0);
+      }
+    }
+  }
+
+  // Default scratch ordering is horrid... Lets try something more clever.
+
+  /**
+   * @type {Col[]}
+   */
+  let cols = [];
+  const TOLERANCE = 256;
+  let orphans = { x: -999999, count: 0, blocks: [] };
+
+  for (let i = 0, frame; frame = topFrames[i]; i++) {
+    if (frame.locked) continue;
+    const xy = frame.getFrameGroupRelativeXY();
+
+    let bestCol = null;
+    let bestError = TOLERANCE;
+
+    // Find best columns
+    for (const col of cols) {
+      let err = Math.abs(xy.x - col.x);
+      if (err < bestError) {
+        bestError = err;
+        bestCol = col;
+      }
+    }
+
+    if (bestCol) {
+      // We found a column that we fitted into
+      // re-average the columns as more items get added...
+      bestCol.x = (bestCol.x * bestCol.count + xy.x) / ++bestCol.count;
+      bestCol.frames.push(frame);
+    } else {
+      // Create a new column
+      cols.push({x: xy.x, count: 1, blocks: [], frames: [frame]});
+    }
+  }
+
+  for (const topBlock of topBlocks) {
+    if (topBlock.hidden || topBlock.getSelfFrame()) {
       continue;
     }
-    var xy = block.getRelativeToSurfaceXY();
-    block.moveBy(-xy.x, cursorY - xy.y);
-    block.snapToGrid();
-    cursorY = block.getRelativeToSurfaceXY().y +
-        block.getHeightWidth().height + Blockly.BlockSvg.MIN_BLOCK_Y;
+    let position = topBlock.getRelativeToSurfaceXY();
+
+    if (separateOrphans && !!topBlock.outputConnection) {
+      orphans.blocks.push(topBlock);
+      continue;
+    }
+
+    let bestCol = null;
+    let bestError = TOLERANCE;
+
+    // Find best columns
+    for (const col of cols) {
+      let err = Math.abs(position.x - col.x);
+      if (err < bestError) {
+        bestError = err;
+        bestCol = col;
+      }
+    }
+
+    if (bestCol) {
+      // We found a column that we fitted into
+      // re-average the columns as more items get added...
+      bestCol.x = (bestCol.x * bestCol.count + position.x) / ++bestCol.count;
+      bestCol.blocks.push(topBlock);
+    } else {
+      // Create a new column
+      cols.push({x: position.x, count: 1, blocks: [topBlock], frames: []});
+    }
   }
-  Blockly.Events.setGroup(false);
-  this.setResizesEnabled(true);
+
+
+  // Sort columns, then blocks inside the columns
+  cols.sort((a, b) => a.x - b.x);
+  for (const col of cols) {
+    col.blocks.sort((a, b) => a.getRelativeToSurfaceXY().y - b.getRelativeToSurfaceXY().y);
+  }
+
+  return { cols: cols, orphans: orphans, maxWidths: maxWidths };
 };
 
 /**
@@ -1527,7 +1761,7 @@ Blockly.WorkspaceSvg.prototype.showContextMenu_ = function(e) {
   // Scratch-specific: don't count shadow blocks in delete count
   var deleteCount = 0;
   for (var i = 0; i < deleteList.length; i++) {
-    if (!deleteList[i].isShadow()) {
+    if (!deleteList[i].isShadow() && (!deleteList[i].isInLockedFrame())) {
       deleteCount++;
     }
   }
@@ -1548,9 +1782,10 @@ Blockly.WorkspaceSvg.prototype.showContextMenu_ = function(e) {
   }
 
   var deleteOption = {
-    text: deleteCount == 1 ? Blockly.Msg.DELETE_BLOCK :
-        Blockly.Msg.DELETE_X_BLOCKS.replace('%1', String(deleteCount)),
+    text: Blockly.utils.createMenuOptionNode(deleteCount == 1 ? Blockly.Msg.DELETE_BLOCK :
+        Blockly.Msg.DELETE_X_BLOCKS.replace('%1', String(deleteCount)), '⌫', 'var(--theme-error-color)'),
     enabled: deleteCount > 0,
+    separator: true,
     callback: function() {
       if (ws.currentGesture_) {
         ws.currentGesture_.cancel();
@@ -2434,6 +2669,24 @@ Blockly.WorkspaceSvg.prototype.startDragWithFakeEvent = function(fakeEvent,
   Blockly.Touch.checkTouchIdentifier(fakeEvent);
   var gesture = block.workspace.getGesture(fakeEvent);
   gesture.forceStartBlockDrag(fakeEvent, block);
+};
+
+/**
+ * Don't even think about using this function before talking to rachel-fenichel.
+ *
+ * Force a drag to start without clicking and dragging the frame itself.  Used
+ * to attach duplicated frame to the mouse pointer.
+ * @param {!Object} fakeEvent An object with the properties needed to start a
+ *     drag, including clientX and clientY.
+ * @param {!Blockly.Frame} frame The frame to start dragging.
+ * @package
+ */
+Blockly.WorkspaceSvg.prototype.startDragFrameWithFakeEvent = function(fakeEvent,
+    frame) {
+  Blockly.Touch.clearTouchIdentifier();
+  Blockly.Touch.checkTouchIdentifier(fakeEvent);
+  var gesture = frame.workspace.getGesture(fakeEvent);
+  gesture.forceStartFrameDrag(fakeEvent, frame);
 };
 
 /**

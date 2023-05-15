@@ -67,7 +67,7 @@ Blockly.Block = function(workspace, prototypeName, opt_id) {
   this.id = (opt_id && !workspace.getBlockById(opt_id) &&
       (!flyoutWorkspace || !flyoutWorkspace.getBlockById(opt_id))) ?
       opt_id : Blockly.utils.genUid();
-  /** @type {string} */
+  /** @type {Blockly.Frame} */
   this.frame_ = null;
   workspace.blockDB_[this.id] = this;
   /** @type {Blockly.Connection} */
@@ -637,6 +637,16 @@ Blockly.Block.prototype.getDescendants = function(ordered, opt_ignoreShadows) {
 Blockly.Block.prototype.isDeletable = function() {
   return this.deletable_ && !this.isShadow_ &&
       !(this.workspace && this.workspace.options.readOnly);
+};
+
+Blockly.Block.prototype.isInLockedFrame = function() {
+  let frame = this.frame_;
+  let block = this;
+  while (block.parentBlock_ && !frame) {
+    frame = block.parentBlock_.frame_;
+    block = block.parentBlock_;
+  }
+  return frame && frame.locked;
 };
 
 /**
