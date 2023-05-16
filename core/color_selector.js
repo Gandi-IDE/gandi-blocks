@@ -100,15 +100,14 @@ Blockly.ColorSelector.onSelect = function(e) {
 
 Blockly.ColorSelector.position_ = function(e) {
   const { width, height } = this.selectorRoot_.getBoundingClientRect();
-  const { left, bottom } = e.target.getBoundingClientRect();
+  const { left, bottom, top } = e.target.getBoundingClientRect();
   const windowWidth = window.innerWidth;
-  const windowHeight = window.innerHeight;
+  let padding = 6;
   let pl = left;
-  let pt = bottom;
-  let padding = 4;
+  let pt = top - height - padding;
 
-  if (windowHeight - bottom - padding  < height) {
-    pt = bottom - height - padding;
+  if (top - padding  < height) {
+    pt = bottom + padding;
   }
 
   if (windowWidth - left - padding < width) {
