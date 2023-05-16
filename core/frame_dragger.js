@@ -162,6 +162,9 @@ Blockly.FrameDragger.prototype.dragFrame = function(e, currentDragDeltaXY) {
   const delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
   const newLoc = goog.math.Coordinate.sum(this.startXY_, delta);
   this.draggingFrame_.moveDuringDrag(newLoc);
+  // Make sure internal state is fresh.
+  // If the block has a comment, the comment can move with it.
+  this.dragBlocksIcons_(delta);
   this.wouldDeleteFrame_ = this.workspace_.isDeleteArea(e);
 
   const isOutside = Blockly.utils.isDom(e.target) ? !this.rootDiv.contains(e.target) : false;
@@ -196,8 +199,6 @@ Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
 
   const deleted = this.maybeDeleteFrame_();
   if (!deleted) {
-    // Make sure internal state is fresh.
-    this.dragBlocksIcons_(delta);
     this.dragFrame(e, currentDragDeltaXY);
     this.draggingFrame_.onStopDrag();
   }
@@ -206,6 +207,10 @@ Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
   this.workspace_.resetFrameAndTopBlocksMap();
   Blockly.Events.setGroup(false);
 
+  var toolbox = this.workspace_.getToolbox();
+  if (toolbox) {
+    toolbox.removeStyle('dragStartInWorkspace');
+  }
   var ws = this.workspace_;
 
   if (isOutside) {
@@ -216,10 +221,7 @@ Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
     return;
   }
 
-  var toolbox = this.workspace_.getToolbox();
-  if (toolbox) {
-    toolbox.removeStyle('dragStartInWorkspace');
-  }
+
 };
 
 /**

@@ -195,7 +195,7 @@ Blockly.onKeyDown_ = function(e) {
     // hidden.
     return;
   }
-  var deleteBlock = false;
+  var deleteTarget = false;
   if (e.keyCode == 27) {
     // Pressing esc closes the context menu and any drop-down
     Blockly.hideChaff();
@@ -222,7 +222,7 @@ Blockly.onKeyDown_ = function(e) {
     }
 
     if (Blockly.selected && Blockly.selected.isDeletable()) {
-      deleteBlock = true;
+      deleteTarget = true;
     }
   }else if (e.altKey || e.ctrlKey || e.metaKey) {
     // Don't allow delete while the batchSelector is running.
@@ -249,7 +249,7 @@ Blockly.onKeyDown_ = function(e) {
         // 'x' for cut, but not in a flyout.
         // Don't even copy the selected item in the flyout.
         Blockly.copy_(Blockly.selected);
-        deleteBlock = true;
+        deleteTarget = true;
       }
     }
     if (e.keyCode == 86) {
@@ -276,10 +276,14 @@ Blockly.onKeyDown_ = function(e) {
   }
   // Common code for delete and cut.
   // Don't delete in the flyout.
-  if (deleteBlock && !Blockly.selected.workspace.isFlyout) {
+  if (deleteTarget && !Blockly.selected.workspace.isFlyout) {
     Blockly.Events.setGroup(true);
     Blockly.hideChaff();
-    Blockly.selected.dispose(/* heal */ true, true);
+    if (Blockly.selected instanceof Blockly.Frame) {
+      Blockly.selected.dispose();
+    } else {
+      Blockly.selected.dispose(/* heal */ true, true);
+    }
     Blockly.Events.setGroup(false);
   }
 };

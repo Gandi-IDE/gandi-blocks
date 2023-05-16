@@ -358,5 +358,7 @@ Blockly.scratchBlocksUtils.duplicateFrame = function(oldFrame, isMouseEvent) {
     Blockly.Events.fire(new Blockly.Events.FrameCreate(newFrame));
     Blockly.Events.setGroup(false);
   }
+
+  newFrame.select();
   return newFrame;
 };

@@ -1291,8 +1291,6 @@ Blockly.utils.moveBatchedElements = function(delta, batchedElements) {
   });
   batchedElements[1].forEach(frame => {
     frame.getSvgRoot().style.display = "block";
-    const startXY = frame.getFrameGroupRelativeXY();
-    let newLoc = goog.math.Coordinate.sum(startXY, delta);
     Object.values(frame.blockDB_).map(function(block) {
       return Blockly.FrameDragger.initBlockIconData_(block);
     }).forEach(dragIconData => {
@@ -1302,8 +1300,7 @@ Blockly.utils.moveBatchedElements = function(delta, batchedElements) {
         data.icon.setIconLocation(goog.math.Coordinate.sum(data.location, delta));
       }
     });
-    frame.moveDuringDrag(newLoc, false);
-    frame.onStopDrag();
+    frame.moveBy(delta.x, delta.y);
   });
 };
 

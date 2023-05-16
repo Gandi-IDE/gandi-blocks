@@ -649,6 +649,16 @@ Blockly.Block.prototype.isInLockedFrame = function() {
   return frame && frame.locked;
 };
 
+Blockly.Block.prototype.isInFrame = function() {
+  let frame = this.frame_;
+  let block = this;
+  while (block.parentBlock_ && !frame) {
+    frame = block.parentBlock_.frame_;
+    block = block.parentBlock_;
+  }
+  return frame;
+};
+
 /**
  * Set whether this block is deletable or not.
  * @param {boolean} deletable True if deletable.
