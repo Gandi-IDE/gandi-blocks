@@ -66,7 +66,7 @@ Blockly.ColorSelector.createDom = function() {
   this.selectorRoot_ = goog.dom.createDom('div', "blocklyColorSelector blocklyColorSelectorHidden");
 
   const title = document.createElement("h3");
-  title.innerText = "色彩预设";
+  title.innerText = Blockly.Msg.COLOR;
   const colorListContainer = goog.dom.createDom("div", "blocklyColorOptions");
   this.colors.forEach((color) => {
     const colorOption = goog.dom.createDom("div", "blocklyColorOption" );
