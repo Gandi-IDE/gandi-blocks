@@ -358,14 +358,16 @@ Blockly.Events.EndFrameDrag = function(frame, isOutside) {
     this.xml = Blockly.Xml.frameToDom(frame, true);
   }
   this.recordUndo = false;
-  this.batchFramesXml = [];
-  if (frame.temporaryBatchElements && frame.temporaryBatchElements[1]) {
-    this.batchFramesXml = frame.temporaryBatchElements[1].reduce((acc, item) => {
+  this.batchElements = [[],[]];
+  if (frame.temporaryBatchElements) {
+    frame.temporaryBatchElements[1].forEach(item => {
       if (item.id !== frame.id) {
-        return [...acc, Blockly.Xml.frameToDom(item, true)];
+        this.batchElements[1].push(Blockly.Xml.frameToDom(item, true));
       }
-      return acc;
-    }, []);
+    });
+    frame.temporaryBatchElements[0].forEach(item => {
+      this.batchElements[0].push(Blockly.Xml.blockToDom(item, true));
+    });
   }
 };
 goog.inherits(Blockly.Events.EndFrameDrag, Blockly.Events.FrameBase);

@@ -403,11 +403,6 @@ Blockly.Css.CONTENT = [
     'stroke-width: 1px;',
   '}',
 
-  '.blocklySelected>.blocklyPath {',
-    // 'stroke: #fc3;',
-    // 'stroke-width: 3px;',
-  '}',
-
   '.blocklySelected>.blocklyPathLight {',
     'display: none;',
   '}',
@@ -1254,15 +1249,11 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.blocklyFrameHighlight .blocklyFrameRectangle {',
-    'stroke: rgba(45, 140, 255, 0.2) !important;',
-  '}',
-
-  '.blocklyFrameHighlight .blocklyDraggable {',
-    'pointer-events: none;',
+    'stroke: #57A3FF !important;',
   '}',
 
   '.blocklyFrameHighlight .blocklyFrameTitleInput {',
-    'color: rgba(45, 140, 255, 0.3) !important;',
+    'color: #57A3FF !important;',
   '}',
 
   '.blocklyFrameActionButton {',

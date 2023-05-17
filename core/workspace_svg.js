@@ -54,6 +54,7 @@ goog.require('Blockly.Xml');
 goog.require('Blockly.ZoomControls');
 goog.require('Blockly.IntersectionObserver');
 goog.require('Blockly.Frame');
+goog.require('Blockly.FrameDragger');
 
 goog.require('goog.array');
 goog.require('goog.dom');
@@ -1145,7 +1146,13 @@ Blockly.WorkspaceSvg.prototype.pasteFrame_ = function(xmlFrame) {
       if (this.RTL) {
         frameX = -frameX;
       }
-      frame.moveBy(Blockly.SNAP_RADIUS, Blockly.SNAP_RADIUS * 2);
+      // When the Frame needs to be moved, but the Blockly.Events are disabled,
+      // the Blocks in the Frame need to be moved.
+      const dx = {x: Blockly.SNAP_RADIUS, y: Blockly.SNAP_RADIUS * 2};
+      for (const blockId in frame.blockDB_) {
+        frame.blockDB_[blockId].moveBy(dx.x, dx.y, true);
+      }
+      frame.moveBy(dx.x, dx.y);
     }
   } finally {
     Blockly.Events.enable();
