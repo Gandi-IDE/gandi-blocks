@@ -233,7 +233,9 @@ Blockly.Workspace.prototype.removeTopFrame = function(frame) {
 
 Blockly.Workspace.prototype.resetFrameAndTopBlocksMap = function() {
   this.topFrames_.forEach(frame => {
-    frame.updateOwnedBlocks();
+    if (!frame.locked) {
+      frame.updateOwnedBlocks();
+    }
   });
 };
 
