@@ -45,21 +45,26 @@ Blockly.ColorSelector.colors = [
   "234, 105, 47",
 ];
 
+Blockly.ColorSelector.isOpen = false;
+
 Blockly.ColorSelector.show = function(e, color, onChange) {
   this.targetNode = e.target;
 
   this.setColor(color || this.selectedColor_);
   this.onChange = onChange;
 
+  this.isOpen = true;
   this.position_(e);
   this.selectorRoot_.classList.remove('blocklyColorSelectorHidden');
   this.closeListener = Blockly.bindEvent_(document, 'mouseup', this, this.handleClose);
 };
 
 Blockly.ColorSelector.hide = function() {
-  this.selectorRoot_.classList.add('blocklyColorSelectorHidden');
-  Blockly.unbindEvent_(this.closeListener);
-  this.onChange = null;
+  if (this.isOpen) {
+    this.selectorRoot_.classList.add('blocklyColorSelectorHidden');
+    Blockly.unbindEvent_(this.closeListener);
+    this.onChange = null;
+  }
 };
 
 Blockly.ColorSelector.createDom = function() {
