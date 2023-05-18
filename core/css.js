@@ -1379,9 +1379,9 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.blocklyResizeButtonNE,.blocklyResizeButtonSE,.blocklyResizeButtonSW,.blocklyResizeButtonNW{',
-    'width: calc(10px / var(--scale, 1));',
-    'height: calc(10px / var(--scale, 1));',
-    'transform: translate(calc(5px - 5px / var(--scale, 1)),calc(5px - 5px / var(--scale, 1)));',
+    'width: calc(8px / var(--scale, 1));',
+    'height: calc(8px / var(--scale, 1));',
+    'transform: translate(calc(4px - 4px / var(--scale, 1)),calc(4px - 4px / var(--scale, 1)));',
   '}',
 
   '.scratchNotePickerKeyLabel {',

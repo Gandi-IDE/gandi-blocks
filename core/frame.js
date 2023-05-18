@@ -199,14 +199,14 @@ Blockly.Frame.prototype.minHeight_ = 20;
  * @type {string}
  * @private
  */
-Blockly.Frame.prototype.resizeButtonWidth_ = 10;
+Blockly.Frame.prototype.resizeButtonWidth_ = 8;
 
 /**
  * The height of the resize button.
  * @type {string}
  * @private
  */
-Blockly.Frame.prototype.resizeButtonHeight_ = 10;
+Blockly.Frame.prototype.resizeButtonHeight_ = 8;
 
 /**
  * The height of the title input.
@@ -852,6 +852,7 @@ Blockly.Frame.prototype.setMovable = function(movable) {
 Blockly.Frame.prototype.moveToDragSurface_ = function(e) {
   var xy = this.getFrameGroupRelativeXY();
   this.clearTransformAttributes_();
+  Blockly.ColorSelector.hide();
   this.workspace.blockDragSurface_.translateSurface(xy.x, xy.y);
   // Execute the move on the top-level SVG component
   this.workspace.blockDragSurface_.setBlocksAndShow(this.getSvgRoot(), this.isBatchElement, e);
@@ -1230,7 +1231,9 @@ Blockly.Frame.prototype.requestMoveInBlock = function(block) {
   if (block.frame_ && block.frame_ !== this) {
     removeAble = false;
   } else if (x > left && x < right && y > top && y < bottom) {
-    removeAble = !this.locked;
+    // Already within the current frame,
+    // or the frame is not locked, and within the boundaries of the frame.
+    removeAble = block.frame_ === this || !this.locked;
   }
   if(removeAble) {
     this.addBlock(block);
@@ -1330,7 +1333,7 @@ Blockly.Frame.prototype.setTitle = function(newTitle) {
  */
 Blockly.Frame.prototype.setColor = function(color) {
   if (this.color !== color) {
-    this.fireFrameChange('color', this.color, color);
+    this.fireFrameChange('color', {color: this.color}, {color: color});
     this.color = color;
     this.svgRect_.setAttribute('fill', `rgba(${color},0.12)`);
     this.colorButton_.style.setProperty('--color', `rgb(${color})`);
@@ -1341,7 +1344,7 @@ Blockly.Frame.prototype.setColor = function(color) {
  * Toggle lock state.
  */
 Blockly.Frame.prototype.triggerChangeLock = function() {
-  this.fireFrameChange('locked', this.locked, !this.locked);
+  this.fireFrameChange('locked', {locked: this.locked}, {locked: !this.locked});
   this.locked = !this.locked;
   if (this.locked) {
     this.frameGroup_.classList.add('blocklyFrameLocked');

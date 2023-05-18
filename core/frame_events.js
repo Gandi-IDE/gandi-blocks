@@ -505,7 +505,7 @@ Blockly.Events.FrameChange.prototype.run = function(forward) {
       frame.render(value);
       break;
     case 'color':
-      frame.setColor(value);
+      frame.setColor(value.color);
       break;
     case 'locked':
       frame.triggerChangeLock();
