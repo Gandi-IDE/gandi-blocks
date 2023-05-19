@@ -532,7 +532,7 @@ Blockly.Frame.prototype.cleanUp = function() {
   var height = padding;
   var width = 0;
 
-  const { cols: columns, maxWidths } = this.getOrderedBlockColumns(true);
+  const { cols: columns, maxWidths } = this.getOrderedBlockColumns();
   let cursorX = padding;
 
   for (const column of columns) {
@@ -569,24 +569,18 @@ Blockly.Frame.prototype.cleanUp = function() {
   this.workspace.setResizesEnabled(true);
 };
 
-Blockly.Frame.prototype.getOrderedBlockColumns = function(separateOrphans) {
+Blockly.Frame.prototype.getOrderedBlockColumns = function() {
   const blocks = Object.values(this.blockDB_);
   let maxWidths = {};
   let cols = [];
   let orphans = { x: -999999, count: 0, blocks: [] };
   const TOLERANCE = 256;
 
-
   for (const block of blocks) {
     if (block.hidden) {
       continue;
     }
     let position = block.getRelativeToSurfaceXY();
-
-    if (separateOrphans && !!block.outputConnection) {
-      orphans.blocks.push(block);
-      continue;
-    }
 
     let bestCol = null;
     let bestError = TOLERANCE;
@@ -610,7 +604,6 @@ Blockly.Frame.prototype.getOrderedBlockColumns = function(separateOrphans) {
       cols.push({x: position.x, count: 1, blocks: [block]});
     }
   }
-
 
   // Sort columns, then blocks inside the columns
   cols.sort((a, b) => a.x - b.x);
