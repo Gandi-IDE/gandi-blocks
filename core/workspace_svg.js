@@ -1778,7 +1778,7 @@ Blockly.WorkspaceSvg.prototype.showContextMenu_ = function(e) {
     Blockly.Events.setGroup(eventGroup);
     var block = deleteList.shift();
     if (block) {
-      if (block.workspace) {
+      if (block.workspace && !block.isInLockedFrame()) {
         block.dispose(false, true);
         setTimeout(deleteNext, DELAY);
       } else {
