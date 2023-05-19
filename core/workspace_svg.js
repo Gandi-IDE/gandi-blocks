@@ -1635,7 +1635,6 @@ Blockly.WorkspaceSvg.prototype.getOrderedTopBlockColumns = function(separateOrph
   let orphans = { x: -999999, count: 0, blocks: [] };
 
   for (let i = 0, frame; frame = topFrames[i]; i++) {
-    if (frame.locked) continue;
     const xy = frame.getFrameGroupRelativeXY();
 
     let bestCol = null;
