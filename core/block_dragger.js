@@ -286,16 +286,20 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
     // These are expensive and don't need to be done if we're deleting.
     this.draggingBlock_.moveConnections_(delta.x, delta.y);
     this.draggingBlock_.setDragging(false);
-    this.fireMoveEvent_();
     if (this.draggedConnectionManager_.wouldConnectBlock()) {
       // Applying connections also rerenders the relevant blocks.
       this.draggedConnectionManager_.applyConnections();
     } else {
       this.draggingBlock_.render();
     }
+    // It is necessary to confirm whether the block is within the frame before firing the BlockMove event,
+    // so that when using the undo function, it can correctly determine whether the block is within the frame."
+    this.workspace_.resetFrameAndTopBlocksMap();
+    this.fireMoveEvent_();
     this.draggingBlock_.scheduleSnapAndBump();
+  } else {
+    this.workspace_.resetFrameAndTopBlocksMap();
   }
-  this.workspace_.resetFrameAndTopBlocksMap();
   this.workspace_.setResizesEnabled(true);
   this.workspace_.setDraggingBlock(false);
 
