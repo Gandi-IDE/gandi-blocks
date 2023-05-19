@@ -640,6 +640,7 @@ Blockly.ContextMenu.appendDynamicMenuItem = function(e, options) {
 
   const gesture = Blockly.mainWorkspace.currentGesture_;
   if (gesture) {
+    targetFlyout = gesture.flyout_;
     targetBlock = gesture.targetBlock_;
     targetFrame = gesture.targetFrame_;
     targetComment = gesture.startBubble_;
@@ -657,7 +658,7 @@ Blockly.ContextMenu.appendDynamicMenuItem = function(e, options) {
         case 'custom-frame':
           return tag || (!targetFlyout && targetFrame) ;
         case 'comment':
-          return tag || targetComment;
+          return tag || (!targetFlyout && targetComment);
         default:
           break;
       }
