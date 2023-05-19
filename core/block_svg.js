@@ -782,9 +782,14 @@ Blockly.BlockSvg.prototype.createTabList_ = function() {
  * @private
  */
 Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
-  var gesture = this.workspace && this.workspace.getGesture(e);
-  if (gesture) {
-    gesture.handleBlockStart(e, this);
+  var frame = this.isInFrame();
+  // When a block belongs to a frame and the frame is selected,
+  // attempting to click and drag the block should move the entire frame.
+  if (!frame || !frame.boxed) {
+    var gesture = this.workspace && this.workspace.getGesture(e);
+    if (gesture) {
+      gesture.handleBlockStart(e, this);
+    }
   }
 };
 
