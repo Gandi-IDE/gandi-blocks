@@ -317,6 +317,16 @@ Blockly.Frame.prototype.createDom_ = function() {
       this.blocksGroup_);
   this.svgRect_.tooltip = this;
 
+  Blockly.bindEvent_(this.svgRect_, 'mousedown', this, function() {
+    // If the frame is locked, it cannot be selected.
+    if(this.locked || !this.isEmpty_) return;
+
+    if (goog.userAgent.IPAD) {
+      this.titleInput_.style['pointer-events'] = 'auto';
+    }
+    this.select();
+  });
+
   Blockly.bindEventWithChecks_(
       this.frameGroup_, 'mousedown', null, this.onMouseDown_.bind(this));
 
@@ -1398,6 +1408,12 @@ Blockly.Frame.prototype.updateTitleBoxSize = function() {
     var width = this.getWidth();
     this.foreignObject_.setAttribute("height", height);
     this.foreignObject_.setAttribute("width", width);
+    if (width < 40) {
+      width = 40;
+      this.foreignObjectBody_.classList.add("blocklyFrameForeignObjectBodyMini");
+    } else {
+      this.foreignObjectBody_.classList.remove("blocklyFrameForeignObjectBodyMini");
+    }
     this.foreignObject_.style.setProperty('--frame-title-width', width + 'px');
     this.foreignObject_.style.setProperty('--frame-title-height', height + 'px');
   }
