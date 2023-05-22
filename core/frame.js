@@ -845,6 +845,7 @@ Blockly.Frame.prototype.isMovable = function() {
 Blockly.Frame.prototype.setMovable = function(movable) {
   this.movable_ = movable;
 };
+
 /**
  * Move this block to its workspace's drag surface, accounting for positioning.
  * Generally should be called at the same time as setDragging_(true).
@@ -1119,11 +1120,10 @@ Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e, takeOverSubEve
     var xy = this.computeFrameRelativeXY();
     this.translate(xy.x, xy.y);
   } else {
-    var workspaceSvg = this.workspace.svgGroup_;
     this.resizeButtonMouseMoveBindData_ =
-      Blockly.bindEventWithChecks_(workspaceSvg, 'mousemove', null,  this.resizeButtonMouseMove_.bind(this, dir));
+      Blockly.bindEventWithChecks_(document, 'mousemove', null,  this.resizeButtonMouseMove_.bind(this, dir));
     this.resizeButtonMouseUpBindData_ =
-      Blockly.bindEventWithChecks_(workspaceSvg, 'mouseup', null,  this.resizeButtonMouseUp_.bind(this, dir));
+      Blockly.bindEventWithChecks_(document, 'mouseup', null,  this.resizeButtonMouseUp_.bind(this, dir));
   }
   
   e.preventDefault();
@@ -1137,31 +1137,33 @@ Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e, takeOverSubEve
  * @private
  */
 Blockly.Frame.prototype.resizeButtonMouseMove_ = function(dir, e) {
-  var diffX = (e.clientX - this.mostRecentEvent_.clientX) / this.workspace.scale;
-  var diffY = (e.clientY - this.mostRecentEvent_.clientY) / this.workspace.scale;
-  this.mostRecentEvent_ = e;
-  var xDir = dir === 'tr' || dir === 'br' ? 'ltr' : 'rtl';
-  var yDir = dir === 'tl' || dir === 'tr' ? 'btt' : 'ttb';
-  this.updateBoundingClientRect(diffX, diffY, xDir, yDir);
-  var newCoord = this.computeFrameRelativeXY();
-
-  var blocks = Object.values(this.blockDB_);
-  // If there are selected blocks in the frame, it needs to keep their relative position in the workspace unchanged.
-  if(blocks.length) {
-    var oldCoord = Blockly.utils.getRelativeXY(this.getSvgRoot());
-    var dx = oldCoord.x - newCoord.x;
-    var dy = oldCoord.y - newCoord.y;
-    if(dx || dy) {
-      blocks.forEach((block) => {
-        var xy = block.getRelativeToSurfaceXY(true);
-        block.translate(xy.x + dx, xy.y + dy);
-      });
+  if (this.workspace.isInWorkspaceSvg(e)) {
+    var diffX = (e.clientX - this.mostRecentEvent_.clientX) / this.workspace.scale;
+    var diffY = (e.clientY - this.mostRecentEvent_.clientY) / this.workspace.scale;
+    this.mostRecentEvent_ = e;
+    var xDir = dir === 'tr' || dir === 'br' ? 'ltr' : 'rtl';
+    var yDir = dir === 'tl' || dir === 'tr' ? 'btt' : 'ttb';
+    this.updateBoundingClientRect(diffX, diffY, xDir, yDir);
+    var newCoord = this.computeFrameRelativeXY();
+  
+    var blocks = Object.values(this.blockDB_);
+    // If there are selected blocks in the frame, it needs to keep their relative position in the workspace unchanged.
+    if(blocks.length) {
+      var oldCoord = Blockly.utils.getRelativeXY(this.getSvgRoot());
+      var dx = oldCoord.x - newCoord.x;
+      var dy = oldCoord.y - newCoord.y;
+      if(dx || dy) {
+        blocks.forEach((block) => {
+          var xy = block.getRelativeToSurfaceXY(true);
+          block.translate(xy.x + dx, xy.y + dy);
+        });
+      }
     }
+    this.translate(newCoord.x, newCoord.y);
+    this.updateFrameRectSize();
+    this.updateTitleBoxSize();
+    this.updateResizeButtonsPosition();
   }
-  this.translate(newCoord.x, newCoord.y);
-  this.updateFrameRectSize();
-  this.updateTitleBoxSize();
-  this.updateResizeButtonsPosition();
 };
 
 /**

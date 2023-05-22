@@ -1323,6 +1323,15 @@ Blockly.WorkspaceSvg.prototype.recordBlocksArea_ = function() {
 };
 
 /**
+ * Is the mouse event over the workspace svg group?
+ * @param {!Event} e Mouse move event.
+ * @return {?boolean} Whether the svgGroup node contains the mouse event target.
+ */
+Blockly.WorkspaceSvg.prototype.isInWorkspaceSvg = function(e) {
+  return goog.dom.contains(this.svgGroup_, e.target);
+};
+
+/**
  * Is the mouse event over a delete area (toolbox or non-closing flyout)?
  * @param {!Event} e Mouse move event.
  * @return {?number} Null if not over a delete area, or an enum representing
@@ -1512,7 +1521,7 @@ Blockly.WorkspaceSvg.prototype.cleanUp = function(block) {
 
   Blockly.Events.setGroup(true);
 
-  let result = this.getOrderedTopBlockColumns(true);
+  let result = this.getOrderedTopBlockColumns();
   let columns = result.cols;
   let cursorX = 48;
   let maxWidths = result.maxWidths;

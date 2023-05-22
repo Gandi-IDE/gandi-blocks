@@ -626,9 +626,7 @@ Blockly.Gesture.prototype.handleMove = function(e) {
   var stopPropagation = true;
   this.updateFromEvent_(e);
   if (this.startWorkspace_.waitingCreateFrame) {
-    if(this.startWorkspace_.svgGroup_.contains(e.target)) {
-      this.tempFrame_.resizeButtonMouseMove_('br', e);
-    }
+    this.tempFrame_.resizeButtonMouseMove_('br', e);
   } else if (this.isDraggingWorkspace_) {
     this.workspaceDragger_.drag(this.currentDragDeltaXY_);
   } else if (this.isDraggingBlock_) {
