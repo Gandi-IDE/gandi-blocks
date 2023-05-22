@@ -415,17 +415,12 @@ Blockly.Gesture.prototype.updateIsDraggingBubble_ = function() {
  * @private
  */
 Blockly.Gesture.prototype.updateIsDraggingFrame_ = function() {
-  if (!this.targetFrame_ || Blockly.locked) {
+  if (!this.targetFrame_ || Blockly.locked || this.startWorkspace_.waitingCreateFrame) {
     return false;
   }
-
   this.isDraggingFrame_ = true;
-
-  if (this.isDraggingFrame_) {
-    this.startDraggingFrame_();
-    return true;
-  }
-  return false;
+  this.startDraggingFrame_();
+  return true;
 };
 
 /**
@@ -708,6 +703,11 @@ Blockly.Gesture.prototype.cancel = function() {
   if (this.isEnding_) {
     console.log('Trying to cancel a gesture recursively.');
     return;
+  }
+  if (this.startWorkspace_.waitingCreateFrame) {
+    this.tempFrame_.resizeButtonMouseUp_('br', this.mostRecentEvent_, true);
+    this.startWorkspace_.setWaitingCreateFrameEnabled(false);
+    this.tempFrame_ = null;
   }
   this.isEnding_ = true;
   Blockly.longStop_();

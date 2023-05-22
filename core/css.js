@@ -1125,6 +1125,8 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.blocklyColorSelector {',
+    'position: fixed;',
+    'z-index: 40;',
     'width: 234px;',
     'padding: 15px 18px 18px;',
     'background: var(--theme-color-300);',
@@ -1132,7 +1134,6 @@ Blockly.Css.CONTENT = [
     'box-shadow: 0px 4px 15px 2px rgba(0, 0, 0, 0.2);',
     'border-radius: 8px;',
     'box-sizing: border-box;',
-    'position: fixed;',
   '}',
 
   '.blocklyColorSelectorHidden {',

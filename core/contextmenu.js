@@ -58,10 +58,10 @@ Blockly.ContextMenu.eventWrapper_ = [];
 
 /**
  * A list of options that are added dynamically when the menu is displayed.
- * @type {Array.<!Object>}
+ * @type {Map.<!Object>}
  * @private
  */
-Blockly.ContextMenu.appendedMenuItems_ = [];
+Blockly.ContextMenu.appendedMenuItems_ = new Map();
 
 /**
  * Construct the menu based on the list of options and show the menu.
@@ -609,18 +609,20 @@ Blockly.ContextMenu.workspaceCommentOption = function(ws, e) {
  * Add a dynamic insertion menu item.
  * @param {!Function} callback The callback function called before menu is displayed if conditions are met.
  * @param {!Object} config The configuration options for the insertion condition.
- * @return {!Number} The index value of item in list.
+ * @return {!string} The id of the item.
  */
 Blockly.ContextMenu.addDynamicMenuItem = function(callback, config) {
-  return Blockly.ContextMenu.appendedMenuItems_.push({callback, config}) - 1;
+  const id = Blockly.utils.genUid();
+  Blockly.ContextMenu.appendedMenuItems_.set(id, {callback, config});
+  return id;
 };
 
 /**
  * Delete a dynamic insertion menu item.
- * @param {!Number} index The index of the dynamic menu item to delete.
+ * @param {!string} id The id of the item.
  */
-Blockly.ContextMenu.deleteDynamicMenuItem = function(index) {
-  Blockly.ContextMenu.appendedMenuItems_.splice(index, 1);
+Blockly.ContextMenu.deleteDynamicMenuItem = function(id) {
+  Blockly.ContextMenu.appendedMenuItems_.delete(id);
 };
 
 /**
@@ -652,10 +654,10 @@ Blockly.ContextMenu.appendDynamicMenuItem = function(e, options) {
     const injectable = targetNames.reduce((tag, item) => {
       switch (item) {
         case 'workspace':
-          return tag || (!targetBlock && !targetFrame && !targetFlyout && !targetComment);
+          return tag || (!targetFlyout && !target);
         case 'blocks':
           return tag || (!targetFlyout && targetBlock);
-        case 'custom-frame':
+        case 'frame':
           return tag || (!targetFlyout && targetFrame) ;
         case 'comment':
           return tag || (!targetFlyout && targetComment);
