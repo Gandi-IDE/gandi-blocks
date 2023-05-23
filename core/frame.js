@@ -1497,7 +1497,10 @@ Blockly.Frame.prototype.dispose = function(retainBlocks) {
       block.requestMoveOutFrame();
     } else {
       setTimeout(function() {
-        ws.fireDeletionListeners(block);
+        // When a Frame is being destroyed, the blocks it contains may have already been destroyed.
+        if (ws) {
+          ws.fireDeletionListeners(block);
+        }
       });
       block.dispose(false, true);
     }
