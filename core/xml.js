@@ -1026,6 +1026,7 @@ if (!goog.global['Blockly']) {
 if (!goog.global['Blockly']['Xml']) {
   goog.global['Blockly']['Xml'] = {};
 }
+goog.global['Blockly']['Xml']['domToBlock'] = Blockly.Xml.domToBlock;
 goog.global['Blockly']['Xml']['blockToDom'] = Blockly.Xml.blockToDom;
 goog.global['Blockly']['Xml']['frameToDom'] = Blockly.Xml.frameToDom;
 goog.global['Blockly']['Xml']['domToText'] = Blockly.Xml.domToText;
