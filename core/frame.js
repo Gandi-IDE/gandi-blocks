@@ -1541,5 +1541,6 @@ Blockly.Frame.prototype.dispose = function(retainBlocks) {
 
   // Remove from the list of top frames and the frame database.
   this.workspace.removeTopFrame(this);
+  this.workspace.resizeContents();
   this.workspace = null;
 };
