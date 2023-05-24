@@ -1205,11 +1205,14 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
 /**
  * Render the frame.
  * @param {!FrameRectState} rect The frame rect state.
+ * @param {Boolean} moveBlocks Whether to move blocks.
  * @private
  */
-Blockly.Frame.prototype.render = function(rect) {
+Blockly.Frame.prototype.render = function(rect, moveBlocks = true) {
   this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
-  this.recordBlocksRelativeToSurfaceXY();
+  if (moveBlocks) {
+    this.recordBlocksRelativeToSurfaceXY();
+  }
   this.rect_.left = rect.x;
   this.rect_.top = rect.y;
   this.rect_.bottom = this.rect_.top + rect.height;
