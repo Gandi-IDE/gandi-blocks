@@ -90,7 +90,7 @@ Blockly.Xml.variablesToDom = function(variableList) {
 };
 
 /**
- * Encode a list of frames as XML.
+ * Encode a frame as XML.
  * @param {!Blockly.Frame} frame A frame.
  * @param {boolean} createBlocksXml Whether to create xml for the blocks that the frame contains.
  * @return {!Element} List of XML elements.

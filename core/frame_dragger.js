@@ -217,6 +217,7 @@ Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
     // Reset a drag to the outside of scratch-blocks
     setTimeout(function() {
       ws.undo();
+      ws.resizeContents();
     });
     return;
   }
