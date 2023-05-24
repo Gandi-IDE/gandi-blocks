@@ -1002,7 +1002,7 @@ Blockly.Frame.prototype.onStopResizeRect_ = function() {
  */
 Blockly.Frame.prototype.select = function() {
   if (Blockly.locked) return;
-  if (Blockly.selected == this) {
+  if (Blockly.selected == this || !this.workspace) {
     return;
   }
   var oldId = null;
@@ -1215,9 +1215,15 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
  * @private
  */
 Blockly.Frame.prototype.render = function(rect, moveBlocks = true) {
+  const blockMoveEvents = {};
   this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
   if (moveBlocks) {
     this.recordBlocksRelativeToSurfaceXY();
+  } else {
+    Object.values(this.blockDB_).forEach((block) => {
+      const event = new Blockly.Events.BlockMove(block);
+      blockMoveEvents[block.id] = event;
+    });
   }
   this.rect_.left = rect.x;
   this.rect_.top = rect.y;
@@ -1227,6 +1233,12 @@ Blockly.Frame.prototype.render = function(rect, moveBlocks = true) {
   this.rect_.height = rect.height;
   var xy = this.computeFrameRelativeXY();
   this.translate(xy.x, xy.y);
+  if (!moveBlocks) {
+    Object.values(blockMoveEvents).forEach((event) => {
+      event.recordNew();
+      Blockly.Events.fire(event);
+    });
+  }
   this.updateFrameRectSize();
   this.updateTitleBoxSize();
   this.updateResizeButtonsPosition();
