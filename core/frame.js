@@ -363,6 +363,7 @@ Blockly.Frame.prototype.createColorButton_ = function() {
   this.colorButton_.className = 'blocklyFrameActionButton blocklyFrameColorButton';
   this.colorButton_.style.setProperty('--color', `rgb(${this.color || '#2D8CFF'})`);
   Blockly.bindEventWithChecks_(this.colorButton_, 'mousedown', this, function(e) {
+    if (Blockly.locked) return;
     // If the frame is locked, you cannot modify the color.
     if (this.locked) return;
     Blockly.ColorSelector.show(e, this.color, this.setColor.bind(this));
@@ -385,6 +386,7 @@ Blockly.Frame.prototype.createMenuButton_ = function() {
   this.menuButton_ = document.createElementNS(Blockly.HTML_NS, 'div');
   this.menuButton_.className = 'blocklyFrameActionButton blocklyFrameMenuButton';
   Blockly.bindEventWithChecks_(this.menuButton_, 'mousedown', this, function(e) {
+    if (Blockly.locked) return;
     if (this.locked) return;
 
     this.showContextMenu_(e);
@@ -414,6 +416,7 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
     titleInput.style['pointer-events'] = 'none';
   }
   Blockly.bindEvent_(titleWrapper, 'mousedown', this, function() {
+    if (Blockly.locked) return;
     // If the frame is locked, it cannot be selected.
     if(this.locked) return;
 
@@ -424,6 +427,7 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
     this.select();
   });
   Blockly.bindEventWithChecks_(titleWrapper, 'dblclick', this, function() {
+    if (Blockly.locked) return;
     // If the frame is locked, you cannot modify the title.
     if (this.locked) return;
 
@@ -431,11 +435,13 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
     this.titleInput_.focus();
   });
   Blockly.bindEvent_(titleWrapper, 'mouseenter', this, function() {
+    if (Blockly.locked) return;
     if (!this.workspace.draggingBlocks_ && !this.locked) {
       this.frameGroup_.classList.add('blocklyFrameHover');
     }
   });
   Blockly.bindEvent_(titleWrapper, 'mouseleave', this, function() {
+    if (Blockly.locked) return;
     if (!this.workspace.draggingBlocks_) {
       this.frameGroup_.classList.remove('blocklyFrameHover');
     }
