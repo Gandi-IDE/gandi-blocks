@@ -2487,11 +2487,13 @@ Blockly.Workspace.prototype.setDraggingBlock = function(visible) {
  * @param {boolean} visible Whether waiting should be enabled.
  */
 Blockly.Workspace.prototype.setWaitingCreateFrameEnabled = function(visible) {
-  this.waitingCreateFrame = visible;
-  if(visible) {
-    this.svgGroup_.classList.add('waitingCreateFrame');
-  } else {
-    this.svgGroup_.classList.remove('waitingCreateFrame');
+  if (visible !== this.waitingCreateFrame) {
+    this.waitingCreateFrame = visible;
+    if(visible) {
+      this.svgGroup_.classList.add('waitingCreateFrame');
+    } else {
+      this.svgGroup_.classList.remove('waitingCreateFrame');
+    }
   }
 };
 
