@@ -195,19 +195,25 @@ Blockly.onKeyDown_ = function(e) {
     // hidden.
     return;
   }
-  var deleteBlock = false;
+  var deleteTarget = false;
   if (e.keyCode == 27) {
     // Pressing esc closes the context menu and any drop-down
     Blockly.hideChaff();
     Blockly.DropDownDiv.hide();
-  } else if (e.keyCode == 8 || e.keyCode == 46) {
+    // Pressing esc cancel frame creation
+    Blockly.mainWorkspace.setWaitingCreateFrameEnabled(false);
+  } else if (e.keyCode == 65) {
+    Blockly.mainWorkspace.setWaitingCreateFrameEnabled(true);
+  }  else if (e.keyCode == 8 || e.keyCode == 46) {
     // Delete or backspace.
     // Stop the browser from going back to the previous page.
     // Do this first to prevent an error in the delete code from resulting in
     // data loss.
     e.preventDefault();
     // Don't allow delete while the batchSelector is running.
-    if (Blockly.batchSelectedBlocks && Blockly.batchSelectedBlocks.length > 0) {
+    if (Blockly.batchSelectedElements &&
+          (Object.keys(Blockly.batchSelectedElements[0]).length > 0 ||
+          (Object.keys(Blockly.batchSelectedElements[1])).length > 0)) {
       return;
     }
     // Don't delete while dragging.  Jeez.
@@ -216,11 +222,13 @@ Blockly.onKeyDown_ = function(e) {
     }
 
     if (Blockly.selected && Blockly.selected.isDeletable()) {
-      deleteBlock = true;
+      deleteTarget = true;
     }
-  } else if (e.altKey || e.ctrlKey || e.metaKey) {
+  }else if (e.altKey || e.ctrlKey || e.metaKey) {
     // Don't allow delete while the batchSelector is running.
-    if (Blockly.batchSelectedBlocks && Blockly.batchSelectedBlocks.length > 0) {
+    if (Blockly.batchSelectedElements &&
+      (Object.keys(Blockly.batchSelectedElements[0]).length > 0 ||
+      (Object.keys(Blockly.batchSelectedElements[1])).length > 0)) {
       return;
     }
     // Don't use meta keys during drags.
@@ -236,17 +244,17 @@ Blockly.onKeyDown_ = function(e) {
         // 'c' for copy.
         Blockly.hideChaff();
         Blockly.copy_(Blockly.selected);
-        Blockly.clipboardBatchBlocks = null;
+        Blockly.clipboardBatchElements = null;
       } else if (e.keyCode == 88 && !Blockly.selected.workspace.isFlyout) {
         // 'x' for cut, but not in a flyout.
         // Don't even copy the selected item in the flyout.
         Blockly.copy_(Blockly.selected);
-        deleteBlock = true;
+        deleteTarget = true;
       }
     }
     if (e.keyCode == 86) {
       // 'v' for paste.
-      if (Blockly.clipboardBatchBlocks && Blockly.clipboardBatchBlocks.length > 0) {
+      if (Blockly.clipboardBatchElements && Blockly.clipboardBatchElements.length > 0) {
         return;
       }
       if (Blockly.clipboardXml_) {
@@ -268,10 +276,14 @@ Blockly.onKeyDown_ = function(e) {
   }
   // Common code for delete and cut.
   // Don't delete in the flyout.
-  if (deleteBlock && !Blockly.selected.workspace.isFlyout) {
+  if (deleteTarget && !Blockly.selected.workspace.isFlyout) {
     Blockly.Events.setGroup(true);
     Blockly.hideChaff();
-    Blockly.selected.dispose(/* heal */ true, true);
+    if (Blockly.selected instanceof Blockly.Frame) {
+      Blockly.selected.dispose();
+    } else {
+      Blockly.selected.dispose(/* heal */ true, true);
+    }
     Blockly.Events.setGroup(false);
   }
 };
@@ -285,6 +297,8 @@ Blockly.onKeyDown_ = function(e) {
 Blockly.copy_ = function(toCopy) {
   if (toCopy.isComment) {
     var xml = toCopy.toXmlWithXY();
+  } else if (toCopy instanceof Blockly.Frame) {
+    var xml = Blockly.Xml.frameToDom(toCopy, true);
   } else {
     var xml = Blockly.Xml.blockToDom(toCopy);
     // Encode start position in XML.

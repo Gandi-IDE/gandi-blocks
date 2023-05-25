@@ -67,6 +67,8 @@ Blockly.Block = function(workspace, prototypeName, opt_id) {
   this.id = (opt_id && !workspace.getBlockById(opt_id) &&
       (!flyoutWorkspace || !flyoutWorkspace.getBlockById(opt_id))) ?
       opt_id : Blockly.utils.genUid();
+  /** @type {Blockly.Frame} */
+  this.frame_ = null;
   workspace.blockDB_[this.id] = this;
   /** @type {Blockly.Connection} */
   this.outputConnection = null;
@@ -426,6 +428,30 @@ Blockly.Block.prototype.getParent = function() {
 };
 
 /**
+ * Get the frame of the current block.
+ * @return {Blockly.Frame} The current block's frame.
+ */
+Blockly.Block.prototype.getSelfFrame = function() {
+  return this.frame_;
+};
+
+/**
+ * Get the frame of the current block or its top-level parent block.
+ * @return {Blockly.Frame} The current block's frame, or the frame of its top-level parent block.
+ */
+Blockly.Block.prototype.getTopFrame = function() {
+  var block = this;
+  while (block) {
+    if (block.frame_) {
+      return block.frame_;
+    }
+    block = block.parentBlock_;
+  }
+  return null;
+};
+
+
+/**
  * Return the input that connects to the specified block.
  * @param {!Blockly.Block} block A block connected to an input on this block.
  * @return {Blockly.Input} The input that connects to the specified block.
@@ -611,6 +637,26 @@ Blockly.Block.prototype.getDescendants = function(ordered, opt_ignoreShadows) {
 Blockly.Block.prototype.isDeletable = function() {
   return this.deletable_ && !this.isShadow_ &&
       !(this.workspace && this.workspace.options.readOnly);
+};
+
+Blockly.Block.prototype.isInLockedFrame = function() {
+  let frame = this.frame_;
+  let block = this;
+  while (block.parentBlock_ && !frame) {
+    frame = block.parentBlock_.frame_;
+    block = block.parentBlock_;
+  }
+  return frame && frame.locked;
+};
+
+Blockly.Block.prototype.isInFrame = function() {
+  let frame = this.frame_;
+  let block = this;
+  while (block.parentBlock_ && !frame) {
+    frame = block.parentBlock_.frame_;
+    block = block.parentBlock_;
+  }
+  return frame;
 };
 
 /**

@@ -242,8 +242,123 @@ Blockly.scratchBlocksUtils.duplicateAndDragCallback = function(oldBlock, event, 
         ws.startDragWithFakeEvent(fakeEvent, newBlock);
       }
       if (clearClipboard) {
-        Blockly.clipboardBatchBlocks = null;
+        Blockly.clipboardBatchElements = [];
       }
     }, 0);
   };
+};
+
+/**
+ * Creates a callback function for a click on the "duplicate" context menu
+ * option in Scratch Frames.  The frame is duplicated and attached to the mouse,
+ * which acts as though it were pressed and mid-drag.  Clicking the mouse
+ * releases the new dragging frame.
+ * @param {!Blockly.Frame} oldFrame The frame that will be duplicated.
+ * @param {!Event} event Event that caused the context menu to open.
+ * @return {Function} A callback function that duplicates the frame and starts a
+ *     drag.
+ * @package
+ */
+Blockly.scratchBlocksUtils.duplicateAndDragFrameCallback = function(oldFrame, event) {
+  var isMouseEvent = Blockly.Touch.getTouchIdentifierFromEvent(event) === 'mouse';
+
+  return function(e) {
+    // Give the context menu a chance to close.
+    setTimeout(function() {
+      var newFrame = Blockly.scratchBlocksUtils.duplicateFrame(oldFrame, isMouseEvent);
+      if (isMouseEvent) {
+        // e is not a real mouseEvent/touchEvent/pointerEvent.  It's an event
+        // created by the context menu and has the coordinates of the mouse
+        // click that opened the context menu.
+        var fakeEvent = {
+          clientX: event.clientX,
+          clientY: event.clientY,
+          type: 'mousedown',
+          preventDefault: function() {
+            e.preventDefault();
+          },
+          stopPropagation: function() {
+            e.stopPropagation();
+          },
+          target: e.target
+        };
+        oldFrame.workspace.startDragFrameWithFakeEvent(fakeEvent, newFrame);
+      }
+    }, 0);
+  };
+};
+
+/**
+ * Duplicate the frame.
+ * @param {!Blockly.Frame} oldFrame The frame that will be duplicated.
+ * @param {!boolean} isMouseEvent Whether is mouse event.
+ * @return {Blockly.Frame} The duplicated frame.
+ * @package
+ */
+Blockly.scratchBlocksUtils.duplicateFrame = function(oldFrame, isMouseEvent) {
+  var ws = oldFrame.workspace;
+  var svgRootOld = oldFrame.getSvgRoot();
+  if (!svgRootOld) {
+    throw new Error('Old frame is not rendered.');
+  }
+
+  // Create the new frame by cloning the frame in the flyout (via XML).
+  var xml = Blockly.Xml.frameToDom(oldFrame, true);
+  // The target workspace would normally resize during domToBlock, which
+  // will lead to weird jumps.
+  // Resizing will be enabled when the drag ends.
+  ws.setResizesEnabled(false);
+
+  // Disable events and manually emit events after the frame has been
+  // positioned and has had its shadow IDs fixed (Scratch-specific).
+  Blockly.Events.disable();
+  try {
+    var blocks = [];
+    for (var j = 0, xmlBlock; xmlBlock = xml.children[j]; j++) {
+      var id = Blockly.utils.genUid();
+      // Reset the blocks ID
+      xmlBlock.setAttribute('id', id);
+      blocks.push(id);
+    
+      const newBlock = Blockly.Xml.domToBlock(xmlBlock, oldFrame.workspace);
+      // Scratch-specific: Give shadow dom new IDs to prevent duplicating on paste
+      Blockly.scratchBlocksUtils.changeObscuredShadowIds(newBlock);
+
+      // The position of the old block in workspace coordinates.
+      var blockX = parseInt(xmlBlock.getAttribute('x'), 10);
+      var blockY = parseInt(xmlBlock.getAttribute('y'), 10);
+      // Place the new block as the same position as the old block.
+      newBlock.moveBy(blockX, blockY);
+    }
+    xml.setAttribute('blocks', blocks.join(' '));
+    // Using domToFrame instead of domToWorkspace means that the new frame
+    // will be placed at position (0, 0) in main workspace units.
+    var newFrame = Blockly.Xml.domToFrame(xml, ws);
+
+    var svgRootNew = newFrame.getSvgRoot();
+    if (!svgRootNew) {
+      throw new Error('New frame is not rendered.');
+    }
+
+    if (!isMouseEvent) {
+      var offsetX = ws.RTL ? -100 : 100;
+      var offsetY = 100;
+      newFrame.moveBy(offsetX, offsetY); // Just offset the block for touch.
+    }
+  } finally {
+    Blockly.Events.enable();
+  }
+
+  if (Blockly.Events.isEnabled()) {
+    Blockly.Events.setGroup(true);
+    for (const key in newFrame.blockDB_) {
+      const newBlock = newFrame.blockDB_[key];
+      Blockly.Events.fire(new Blockly.Events.BlockCreate(newBlock));
+    }
+    Blockly.Events.fire(new Blockly.Events.FrameCreate(newFrame));
+    Blockly.Events.setGroup(false);
+  }
+
+  newFrame.select();
+  return newFrame;
 };

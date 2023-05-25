@@ -135,6 +135,10 @@ Blockly.Css.CONTENT = [
     'display: block;',
   '}',
 
+  '.blocklyReadonly .blocklyBlockCanvas, .blocklyReadonly .blocklyBubbleCanvas {',
+    'pointer-events: none;',
+  '}',
+
   /* Necessary to position the drag surface */
   '.blocklyRelativeWrapper {',
     'position: relative;',
@@ -219,6 +223,11 @@ Blockly.Css.CONTENT = [
     'right: 0;',
     'bottom: 0;',
     'overflow: visible !important;',
+    /*
+        Fix an issue where the drag surface was preventing hover events for sharing blocks.
+        This does not prevent user interaction on the blocks themselves.
+    */
+    'pointer-events: none;',
     'z-index: 50;', /* Display above the toolbox */
   '}',
 
@@ -392,11 +401,6 @@ Blockly.Css.CONTENT = [
 
   '.blocklyPath {',
     'stroke-width: 1px;',
-  '}',
-
-  '.blocklySelected>.blocklyPath {',
-    // 'stroke: #fc3;',
-    // 'stroke-width: 3px;',
   '}',
 
   '.blocklySelected>.blocklyPathLight {',
@@ -591,7 +595,7 @@ Blockly.Css.CONTENT = [
     'background: #191E25;',
     'border-radius: 8px;',
     'border: 1px solid rgba(46, 54, 68, 0.6);',
-    'box-shadow: 0px 10px 24px rgba(0, 0, 0, 0.15), 0px 2px 16px rgba(0, 0, 0, 0.5);',
+    'box-shadow: 0px 4px 15px 2px rgba(0, 0, 0, 0.2);',
     'z-index: 990;',
   '}',
 
@@ -938,6 +942,15 @@ Blockly.Css.CONTENT = [
     'background: url(<<<PATH>>>/sprites.png) no-repeat -48px -16px !important;',
   '}',
 
+  '.keyboard-shortcuts-item {',
+    'display: flex;',
+    'justify-content: space-between;',
+  '}',
+
+  '.keyboard-shortcuts {',
+    'color: var(--theme-color-g500, #6B7280);',
+  '}',
+
   /* Category tree in Toolbox. */
   '.blocklyToolboxDiv {',
     'color: $colour_toolboxText;',
@@ -1111,6 +1124,282 @@ Blockly.Css.CONTENT = [
     'float: left;',
   '}',
 
+  '.blocklyColorSelector {',
+    'position: fixed;',
+    'z-index: 40;',
+    'width: 234px;',
+    'padding: 15px 18px 18px;',
+    'background: var(--theme-color-300);',
+    'border: 1px solid var(--theme-color-200);',
+    'box-shadow: 0px 4px 15px 2px rgba(0, 0, 0, 0.2);',
+    'border-radius: 8px;',
+    'box-sizing: border-box;',
+  '}',
+
+  '.blocklyColorSelectorHidden {',
+    'visibility: hidden;',
+  '}',
+
+  '.blocklyColorSelector h3 {',
+    'font-weight: 400;',
+    'color: var(--theme-text-primary);',
+    'font-size: 14px;',
+    'line-height: 20px;',
+    'margin: 0px;',
+    'margin-bottom: 15px;',
+  '}',
+
+  '.blocklyColorOptions {',
+    'display: grid;',
+    'grid-template-columns: repeat(5, 28px);',
+   ' grid-gap: 14px;',
+  '}',
+
+  '.blocklyColorOption {',
+    'width: 28px;',
+    'height: 28px;',
+    'border-radius: 28px;',
+    'cursor: pointer;',
+    'position: relative;',
+    'z-index: 2;',
+  '}',
+
+  '.blocklyColorOption::before {',
+    'content: "";',
+    'width: 28px;',
+    'height: 28px;',
+    'border-radius: 28px;',
+    'cursor: pointer;',
+    'position: absolute;',
+    'background-color: var(--color);',
+    'z-index: 2;',
+  '}',
+
+  '.blocklyColorOption::after {',
+    'content: "";',
+    'display: block;',
+    'width: 28px;',
+    'height: 28px;',
+    'background-color: transparent;',
+    'border: 1px solid #2d8cff;',
+    'position: absolute;',
+    'border-radius: 32px;',
+    'left: 50%;',
+    'top: 50%;',
+    'transform: translate(-50%, -50%);',
+    'transition: all 0.3s ease;',
+    'box-sizing: border-box;',
+    'z-index: 1;',
+  '}',
+
+  '.blocklyColorSelectorHidden .blocklyColorOption::after {',
+    'transition: none;',
+  '}',
+
+  '.blocklyColorOption:hover::after, .blocklyColorOptionSelected::after {',
+    'width: 34px;',
+    'height: 34px;',
+  '}',
+
+  '.waitingCreateFrame {',
+    'cursor: crosshair;',
+  '}',
+
+  '.resizingFrame .blocklyFrame {',
+    'cursor: not-allowed;',
+  '}',
+
+  '.frameSelected:hover {',
+    'cursor: grab;',
+  '}',
+
+  '.blocklyFrame.blocklyDragging, .blocklyFrame.blocklyDragging .blocklyFrameForeignObject {',
+    'cursor: grabbing;',
+  '}',
+  
+  '.blocklyFrame.blocklyFrameLocked {',
+    'pointer-events: none;',
+  '}',
+
+  '.blocklyFrame .frameResizeButtons {',
+    'visibility: hidden;',
+  '}',
+
+  '.frameSelected .frameResizeButtons {',
+    'visibility: visible;',
+  '}',
+
+  '.frameSelected .blocklyFrameMenuButton, .frameSelected .blocklyFrameLockButton, .blocklyFrameLocked .blocklyFrameLockButton {',
+    'display: block;',
+  '}',
+
+  '.draggingBlocks .blocklyFrameBlockCanvas:hover .blocklyFrameRectangle {',
+    'stroke: var(--theme-brand-color, #2D8CFF);',
+  '}',
+
+  '.blocklyFrameForeignObject:hover:not(.draggingBlocks .blocklyFrameForeignObject) .blocklyFrameTitleInput {',
+    'color: var(--theme-brand-color, #2D8CFF);',
+  '}',
+
+  '.blocklyFrameHover .blocklyFrameTitleInput, .blocklyFrame.frameSelected .blocklyFrameTitleInput {',
+    'color: var(--theme-brand-color, #2D8CFF);',
+  '}',
+
+  '.blocklyFrameHover .blocklyFrameRectangle, .blocklyFrame.frameSelected .blocklyFrameRectangle {',
+    'stroke: var(--theme-brand-color, #2D8CFF);',
+  '}',
+
+  '.blocklyFrameHighlight .blocklyFrameRectangle {',
+    'stroke: #57A3FF !important;',
+  '}',
+
+  '.blocklyFrameHighlight .blocklyFrameTitleInput {',
+    'color: #57A3FF !important;',
+  '}',
+
+  '.blocklyFrameActionButton {',
+    'cursor: pointer;',
+    'flex-shrink: 0;',
+    'width: 20px;',
+    'height: 20px;',
+    'border-radius: 4px;',
+    'position: relative;',
+    'background-repeat: no-repeat;',
+  '}',
+
+  '.blocklyFrameActionButton:first-child {',
+    'margin-left: 0;',
+  '}',
+
+  '.blocklyFrameActionButton:last-child {',
+    'margin-right: 0;',
+  '}',
+
+  '.blocklyFrameActionButton:hover {',
+    'background-color: var(--theme-color-300);',
+  '}',
+
+  '.blocklyFrameMenuButton {',
+    'display: none;',
+    'margin-left: 8px;',
+    'background-image: url("<<<PATH>>>/dots-horizontal.svg");',
+  '}',
+
+  '.blocklyFrameLockButton {',
+    'display: none;',
+    'margin-left: auto;',
+    'background-image: url("<<<PATH>>>/unlocked.svg");',
+    'pointer-events: auto !important;',
+  '}',
+
+  '.blocklyFrameLocked .blocklyFrameLockButton {',
+    'background-image: url("<<<PATH>>>/locked.svg");',
+  '}',
+
+  '.blocklyFrameColorButton:after {',
+    'content: "";',
+    'display: block;',
+    'position: absolute;',
+    'left: 6px;',
+    'top: 6px;',
+    'width: 8px;',
+    'height: 8px;',
+    'border-radius: 8px;',
+    'background-color: var(--color);',
+  '}',
+
+  '.blocklyFrameForeignObject {',
+    'transform: scale(calc(1 / var(--scale, 1)));',
+    'transform-origin: 4px var(--frame-title-height, 20);',
+    'width: calc(var(--frame-title-width) * var(--scale, 1));',
+  '}',
+
+  '.blocklyFrameForeignObjectBody {',
+    'background: transparent !important;',
+    'display: flex;',
+  '}',
+
+  '.blocklyFrameForeignObjectBodyMini {',
+    'position: relative;',
+  '}',
+
+  '.blocklyFrameForeignObjectBodyMini > div:not(:nth-child(2)) {',
+    'display: none;',
+  '}',
+
+  '.blocklyFrameForeignObjectBodyMini .blocklyFrameTitleWrapper {',
+    'position: absolute;',
+    'width: 100%;',
+  '}',
+
+  '.blocklyFrameTitleWrapper {',
+    'flex: 1;',
+    'display: flex;',
+    'align-items: center;',
+    'line-height: 20px;',
+    'height: 20px;',
+    'min-width: 25px;',
+    'margin: 0 8px 0 0;',
+    'padding: 0px 2px;',
+    'overflow: hidden;',
+    'position: relative;',
+    /* font family is very important */
+    'font-family: "PingFang SC", sans-serif;',
+    'font-size: 12px;',
+    'box-sizing: border-box;',
+    'border: 1px solid transparent;',
+    'cursor: pointer;',
+  '}',
+
+  '.blocklyFrameTitleWrapper:focus-within {',
+    'background-color: white;',
+    'border-color: var(--theme-brand-color);',
+  '}',
+
+  '.blocklyFrameTitleLabel {',
+    'display: inline-block;',
+    'font-size: inherit;',
+    'line-height: normal;',
+    'visibility: hidden;',
+    'font-family: inherit;',
+    'color: var(--theme-color-g400, #9CA3AF);',
+  '}',
+
+  '.blocklyFrameTitleInput {',
+    'display: inline;',
+    'font-size: inherit;',
+    'font-family: inherit;',
+    'line-height: normal;',
+    'width: calc(100% - 8px);',
+    'color: var(--theme-color-g400, #9CA3AF);',
+    'border: 0;',
+    'outline: 0;',
+    'padding: 0;',
+    'position: absolute;',
+    'overflow: hidden;',
+    'text-overflow: ellipsis;',
+    'white-space: nowrap;',
+    'background-color: transparent;',
+  '}',
+
+  '.blocklyFrame .blocklyFrameTitleInput:focus {',
+    'color: #000000 !important;',
+  '}',
+
+  '.blocklyResizeButtonNW,.blocklyResizeButtonSE{',
+    'cursor: nwse-resize;',
+  '}',
+
+  '.blocklyResizeButtonNE,.blocklyResizeButtonSW{',
+    'cursor: nesw-resize;',
+  '}',
+
+  '.blocklyResizeButtonNE,.blocklyResizeButtonSE,.blocklyResizeButtonSW,.blocklyResizeButtonNW{',
+    'width: calc(8px / var(--scale, 1));',
+    'height: calc(8px / var(--scale, 1));',
+    'transform: translate(calc(4px - 4px / var(--scale, 1)),calc(4px - 4px / var(--scale, 1)));',
+  '}',
+
   '.scratchNotePickerKeyLabel {',
     'font-family: "Helvetica Neue", Helvetica, sans-serif;',
     'font-size: 0.75rem;',
@@ -1138,7 +1427,7 @@ Blockly.Css.CONTENT = [
     'background-color: var(--theme-color-300);',
     'border: 1px solid var(--theme-color-200);',
     'border-radius: 12px;',
-    'box-shadow: 0px 2px 16px rgba(0, 0, 0, 0.5), 0px 26px 26px rgba(0, 0, 0, 0.15);',
+    'box-shadow: 0px 4px 15px 2px rgba(0, 0, 0, 0.2);',
     'transition: opacity 0.2s ease;',
     'padding: 8px 0px;',
     'min-width: 208px;',
@@ -1219,6 +1508,14 @@ Blockly.Css.CONTENT = [
     'padding-right: 28px;',
   '}',
 
+  '.goog-menu-separator {',
+    'border-top: 1px solid var(--theme-color-200, #3E495B)',
+  '}',
+
+  '.goog-menuitem-disabled .keyboard-shortcuts-item > span:first-child {',
+    'color: var(--theme-color-g500) !important;',
+  '}',
+  
   /* If a menu doesn't have checkable items or items with icons, remove padding. */
   '.blocklyWidgetDiv .goog-menu-nocheckbox .goog-menuitem,',
   '.blocklyWidgetDiv .goog-menu-noicon .goog-menuitem, ',
@@ -1260,8 +1557,14 @@ Blockly.Css.CONTENT = [
   /* State: hover. */
   '.blocklyWidgetDiv .goog-menuitem-highlight,',
   '.blocklyWidgetDiv .goog-menuitem-hover {',
+    'color: white;',
     'cursor: pointer;',
-    'background-color: var(--theme-brand-color-p3);',
+    'background-color: var(--theme-brand-color);',
+  '}',
+
+  '.blocklyWidgetDiv .goog-menuitem-highlight .keyboard-shortcuts,',
+  '.blocklyWidgetDiv .goog-menuitem-hover .keyboard-shortcuts{',
+    'color: white;',
   '}',
 
   '.blocklyDropDownDiv .goog-menuitem-highlight,',

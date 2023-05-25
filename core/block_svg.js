@@ -353,10 +353,15 @@ Blockly.BlockSvg.prototype.setParent = function(newParent) {
   // If we are losing a parent, we want to move our DOM element to the
   // root of the workspace.
   else if (oldParent) {
-    this.workspace.getCanvas().appendChild(svgRoot);
-    this.translate(oldXY.x, oldXY.y);
+    if(this.frame_) {
+      var blockGroupXY = this.frame_.getBlockGroupRelativeXY();
+      this.frame_.blocksGroup_.appendChild(svgRoot);
+      this.translate(oldXY.x - blockGroupXY.x, oldXY.y - blockGroupXY.y);
+    } else {
+      this.workspace.getCanvas().appendChild(svgRoot);
+      this.translate(oldXY.x, oldXY.y);
+    }
   }
-
 };
 
 /**
@@ -365,10 +370,11 @@ Blockly.BlockSvg.prototype.setParent = function(newParent) {
  * If the block is on the workspace, (0, 0) is the origin of the workspace
  * coordinate system.
  * This does not change with workspace scale.
+ * @param {boolean} notIgnoreFrame Whether frames should be treated as surfaces.
  * @return {!goog.math.Coordinate} Object with .x and .y properties in
  *     workspace coordinates.
  */
-Blockly.BlockSvg.prototype.getRelativeToSurfaceXY = function() {
+Blockly.BlockSvg.prototype.getRelativeToSurfaceXY = function(notIgnoreFrame) {
   // The drawing surface is relative to either the workspace canvas
   // or to the drag surface group.
   var x = 0;
@@ -393,31 +399,114 @@ Blockly.BlockSvg.prototype.getRelativeToSurfaceXY = function() {
         y += surfaceTranslation.y;
       }
       element = element.parentNode;
+      if (element && notIgnoreFrame && Blockly.utils.hasClass(element, 'blocklyFrameBlockCanvas')) {
+        break;
+      }
     } while (element && element != this.workspace.getCanvas() &&
         element != dragSurfaceGroup);
   }
   return new goog.math.Coordinate(x, y);
 };
 
+Blockly.BlockSvg.prototype.getRemovableToFrame = function(ignoreParentBlock) {
+  var tag = !this.isShadow_ && !this.isInsertionMarker_ && this.workspace
+    && this.workspace.options.hasCategories;
+  if (ignoreParentBlock) {
+    return tag;
+  }
+  return tag && !this.parentBlock_;
+};
+
 /**
  * Move a block by a relative offset.
  * @param {number} dx Horizontal offset in workspace units.
  * @param {number} dy Vertical offset in workspace units.
+ * @param {boolean} keepStill Whether to leave the block position unchanged.
  */
-Blockly.BlockSvg.prototype.moveBy = function(dx, dy) {
+Blockly.BlockSvg.prototype.moveBy = function(dx, dy, keepStill) {
   goog.asserts.assert(!this.parentBlock_, 'Block has parent.');
   var eventsEnabled = Blockly.Events.isEnabled();
   if (eventsEnabled) {
     var event = new Blockly.Events.BlockMove(this);
   }
-  var xy = this.getRelativeToSurfaceXY();
-  this.translate(xy.x + dx, xy.y + dy);
+  if (!keepStill) {
+    var xy = this.getRelativeToSurfaceXY(true);
+    this.translate(xy.x + dx, xy.y + dy);
+  }
   this.moveConnections_(dx, dy);
   if (eventsEnabled) {
     event.recordNew();
     Blockly.Events.fire(event);
   }
   this.workspace.resizeContents();
+};
+
+/**
+ * Moves the block to its associated container（workspace or frame）.
+ @param {string} container The name of the container.
+ */
+Blockly.BlockSvg.prototype.moveBlockToContainer = function(container) {
+  // If container is empty or not associate any frame, return immediately.
+  if (!container || !this.frame_) {
+    return;
+  }
+
+  var root = this.getSvgRoot();
+  var xy = Blockly.utils.getRelativeXY(root);
+  var blockGroupXY = this.frame_.getBlockGroupRelativeXY();
+
+  switch (container) {
+    case 'frame':
+      goog.dom.removeNode(root);
+      this.translate(xy.x - blockGroupXY.x, xy.y - blockGroupXY.y);
+      this.frame_.blocksGroup_.appendChild(root);
+      break;
+    case 'workspace':
+      var bxy = this.getRelativeToSurfaceXY();
+      goog.dom.removeNode(root);
+      this.translate(bxy.x, bxy.y);
+      this.workspace.getCanvas().appendChild(root);
+      break;
+    default:
+      break;
+  }
+};
+
+/**
+ * Move out a block from a frame.
+ * @return {!Boolean} Whither the block is successfully moved into frame.
+ */
+Blockly.BlockSvg.prototype.requestMoveInFrame = function() {
+  if (this.getRemovableToFrame()) {
+    var frame = this.workspace.requestAddBlockToFrame(this);
+    if (frame) {
+      // If the frame of the block associated was changed, update the block group position.
+      if (frame !== this.frame_ || !frame.getSvgRoot().contains(this.getSvgRoot())) {
+        this.frame_ = frame;
+        this.moveBlockToContainer('frame');
+      }
+    } else if (this.frame_) {
+      this.requestMoveOutFrame();
+      this.frame_ = null;
+    } else {
+      this.frame_ = null;
+    }
+    return Boolean(frame);
+  }
+  return false;
+};
+
+/**
+ * Move out a block from a frame.
+ */
+Blockly.BlockSvg.prototype.requestMoveOutFrame = function() {
+  if (this.frame_) {
+    this.frame_.removeBlock(this);
+    if (!this.parentBlock_) {
+      this.moveBlockToContainer('workspace');
+    }
+    this.frame_ = null;
+  }
 };
 
 /**
@@ -446,11 +535,15 @@ Blockly.BlockSvg.prototype.moveToDragSurface_ = function(e) {
   // is equal to the current relative-to-surface position,
   // to keep the position in sync as it move on/off the surface.
   // This is in workspace coordinates.
-  var xy = this.getRelativeToSurfaceXY();
+  var xy = this.getRelativeToSurfaceXY(true);
   this.clearTransformAttributes_();
+  var frame = this.getTopFrame();
+  if (frame) {
+    xy = goog.math.Coordinate.sum(xy, frame.getBlockGroupRelativeXY());
+  }
   this.workspace.blockDragSurface_.translateSurface(xy.x, xy.y);
   // Execute the move on the top-level SVG component
-  this.workspace.blockDragSurface_.setBlocksAndShow(this.getSvgRoot(), this.isBatchBlock, e);
+  this.workspace.blockDragSurface_.setBlocksAndShow(this.getSvgRoot(), this.isBatchElement, e);
 };
 
 /**
@@ -468,6 +561,10 @@ Blockly.BlockSvg.prototype.moveOffDragSurface_ = function(newXY) {
   // Translate to current position, turning off 3d.
   this.translate(newXY.x, newXY.y);
   this.workspace.blockDragSurface_.clearAndHide(this.workspace.getCanvas());
+  // If the block in frame, move it to the frame;
+  if(this.frame_) {
+    this.moveBlockToContainer('frame');
+  }
 };
 
 /**
@@ -480,9 +577,12 @@ Blockly.BlockSvg.prototype.moveOffDragSurface_ = function(newXY) {
  * @package
  */
 Blockly.BlockSvg.prototype.moveDuringDrag = function(newLoc, selfDrag) {
-  if (this.useDragSurface_ && !selfDrag) {
+  if (this.useDragSurface_ && !selfDrag && this.workspace) {
     this.workspace.blockDragSurface_.translateSurface(newLoc.x, newLoc.y);
   } else {
+    if (this.frame_) {
+      this.moveBlockToContainer('workspace');
+    }
     this.svgGroup_.translate_ = 'translate(' + newLoc.x + ',' + newLoc.y + ')';
     this.svgGroup_.setAttribute('transform',
         this.svgGroup_.translate_);
@@ -526,7 +626,7 @@ Blockly.BlockSvg.prototype.snapToGrid = function() {
   dx = Math.round(dx);
   dy = Math.round(dy);
   if (dx != 0 || dy != 0) {
-    this.moveBy(dx, dy);
+    this.moveBy(dx, dy, this.frame_);
   }
 };
 
@@ -538,7 +638,7 @@ Blockly.BlockSvg.prototype.snapToGrid = function() {
  *    Object with top left and bottom right coordinates of the bounding box.
  */
 Blockly.BlockSvg.prototype.getBoundingRectangle = function() {
-  var blockXY = this.getRelativeToSurfaceXY(this);
+  var blockXY = this.getRelativeToSurfaceXY(true);
   var blockBounds = this.getHeightWidth();
   var topLeft;
   var bottomRight;
@@ -682,9 +782,14 @@ Blockly.BlockSvg.prototype.createTabList_ = function() {
  * @private
  */
 Blockly.BlockSvg.prototype.onMouseDown_ = function(e) {
-  var gesture = this.workspace && this.workspace.getGesture(e);
-  if (gesture) {
-    gesture.handleBlockStart(e, this);
+  var frame = this.isInFrame();
+  // When a block belongs to a frame and the frame is selected,
+  // attempting to click and drag the block should move the entire frame.
+  if (!frame || !frame.boxed) {
+    var gesture = this.workspace && this.workspace.getGesture(e);
+    if (gesture) {
+      gesture.handleBlockStart(e, this);
+    }
   }
 };
 
@@ -873,6 +978,9 @@ Blockly.BlockSvg.prototype.dispose = function(healStack, animate) {
   if (!this.workspace) {
     // The block has already been deleted.
     return;
+  }
+  if (this.getRemovableToFrame() && this.frame_) {
+    this.frame_.removeBlock(this);
   }
   Blockly.Tooltip.hide();
   Blockly.Field.startCache();

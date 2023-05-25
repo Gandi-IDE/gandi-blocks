@@ -72,6 +72,17 @@ Blockly.Workspace = function(opt_options) {
    * @private
    */
   this.listeners_ = [];
+  /**
+   * @type {!Object<Blockly.frame>}
+   * @private
+   */
+  this.topFrames_ = [];
+
+  /**
+   * @type {!Object}
+   * @private
+   */
+  this.frameDB_ = Object.create(null);
 
   /** @type {!Array.<!Function>} */
   this.tapListeners_ = [];
@@ -179,6 +190,92 @@ Blockly.Workspace.prototype.dispose = function() {
  * See: http://tvtropes.org/pmwiki/pmwiki.php/Main/DiagonalBilling.
  */
 Blockly.Workspace.SCAN_ANGLE = 3;
+
+/**
+ * Add a block to some frame.
+ * @param {!Blockly.Block} block Block to add.
+ * @returns {!Blockly.Frame} If the addition is successful, the Frame to which it belongs is returned
+ */
+Blockly.Workspace.prototype.requestAddBlockToFrame = function(block) {
+  return Object.values(this.frameDB_).reverse().find(function(frame) {
+    return frame.requestMoveInBlock(block);
+  });
+};
+
+/**
+ * Add a frame to the list of top frames.
+ * @param {!Blockly.Frame} frame Frame to add.
+ * @package
+ */
+Blockly.Workspace.prototype.addTopFrame = function(frame) {
+  this.topFrames_.push(frame);
+
+  // Note: If the frame database starts to hold block frames, this may need
+  // to move to a separate function.
+  if (this.frameDB_[frame.id]) {
+    console.warn('Overriding an existing frame on this workspace, with id "' +
+        frame.id + '"');
+  }
+  this.frameDB_[frame.id] = frame;
+};
+
+/**
+ * Remove a frame from the list of top frames.
+ * @param {!Blockly.Frame} frame Frame to remove.
+ */
+Blockly.Workspace.prototype.removeTopFrame = function(frame) {
+  if (!goog.array.remove(this.topFrames_, frame)) {
+    throw 'Frame not present in workspace\'s list of top-most frames.';
+  }
+  
+  delete this.frameDB_[frame.id];
+};
+
+Blockly.Workspace.prototype.resetFrameAndTopBlocksMap = function() {
+  this.topFrames_.forEach(frame => {
+    if (!frame.locked) {
+      frame.updateOwnedBlocks();
+    }
+  });
+};
+
+/**
+ * Finds the top-level frames and returns them.  Frames are optionally sorted
+ * by position; top to bottom (with slight LTR or RTL bias).
+ * @param {boolean} ordered Sort the list if true.
+ * @return {!Array.<!Blockly.Frame>} The top-level frame objects.
+ * @package
+ */
+Blockly.Workspace.prototype.getTopFrames = function(ordered) {
+  // Copy the topFrames_ list.
+  var frames = [].concat(this.topFrames_);
+  if (ordered && frames.length > 1) {
+    var offset = Math.sin(goog.math.toRadians(Blockly.Workspace.SCAN_ANGLE));
+    if (this.RTL) {
+      offset *= -1;
+    }
+    frames.sort(function(a, b) {
+      var aXY = a.getFrameGroupRelativeXY();
+      var bXY = b.getFrameGroupRelativeXY();
+      return (aXY.y + offset * aXY.x) - (bXY.y + offset * bXY.x);
+    });
+  }
+  return frames;
+};
+
+/**
+ * Move this frame to the front of the workspace.
+ * @param {!Blockly.Frame} frame Frame to move.
+ * @package
+ */
+Blockly.Workspace.prototype.setFrameToFront = function(frame) {
+  var index = this.topFrames_.indexOf(frame);
+  if(index !== -1) {
+    this.topFrames_.splice(index, 1, frame);
+    var frameGroup = frame.getSvgRoot();
+    frameGroup.parentNode.appendChild(frameGroup);
+  }
+};
 
 /**
  * Add a block to the list of top blocks.
@@ -316,6 +413,9 @@ Blockly.Workspace.prototype.clear = function() {
   }
   while (this.topBlocks_.length) {
     this.topBlocks_[0].dispose();
+  }
+  while (this.topFrames_.length) {
+    this.topFrames_[0].dispose();
   }
   while (this.topComments_.length) {
     this.topComments_[this.topComments_.length - 1].dispose();
@@ -473,6 +573,53 @@ Blockly.Workspace.prototype.getAllVariables = function() {
 };
 /* End functions that are just pass-throughs to the variable map. */
 
+/**
+ * Create a frame with a given title, id, and blocks.
+ * @param {!object} opt_options Dictionary of options.
+ * @property {string} id - Use this ID if provided, otherwise
+ *     create a new ID.  If the ID conflicts with an in-use ID, a new one will
+ *     be generated.
+ * @property {Array<string>} blocks - All blocks contained in the frame.
+ * @property {number} x - the X coordinate of the workspace's origin.
+ * @property {number} y - the Y coordinate of the workspace's origin.
+ * @property {number} width - the width of the frame's rect.
+ * @property {number} height - the height of the frame's rect.
+ * @return {!Blockly.Frame} The newly created frame.
+ */
+Blockly.Workspace.prototype.createFrame = function(opt_options) {
+  var frame = new Blockly.Frame(this, opt_options);
+  this.frameDB_[frame.id] = frame;
+  return frame;
+};
+
+/**
+ * Delete a frame and all of its uses from this workspace by the passed
+ * in ID. May prompt the user for confirmation.
+ * @param {string} id ID of frame to delete.
+ * @param {?boolean} retainBlocks Whether to keep blocks or not.
+ */
+Blockly.Workspace.prototype.deleteFrameById = function(id, retainBlocks) {
+  this.frameDB_[id].dispose(retainBlocks);
+  delete this.frameDB_[id];
+};
+
+/**
+ * Identify the frame to retitle with the given ID.
+ * @param {string} id ID of the frame to retitle.
+ * @param {string} newTitle New frame title.
+ */
+Blockly.Workspace.prototype.retitleFrameById = function(id, newTitle) {
+  var frame = this.getFrameById(id);
+  frame.setTitle(newTitle);
+};
+
+/**
+ * Return all frames of all types.
+ * @return {!Array.<Blockly.VariableModel>} List of frame models.
+ */
+Blockly.Workspace.prototype.getAllFrames = function() {
+  return Object.values(this.frameDB_);
+};
 
 /** CCW Global Procedures **/
 
@@ -613,6 +760,15 @@ Blockly.Workspace.prototype.fireChangeListener = function(event) {
   for (var i = 0, func; func = currentListeners[i]; i++) {
     func(event);
   }
+};
+
+/**
+ * Find the frame by the given ID and return it. Return null if it is not found.
+ * @param {string} id ID of frame to delete.
+ * @return {!Blockly.Frame} The frame with the given ID.
+ */
+Blockly.Workspace.prototype.getFrameById = function(id) {
+  return this.frameDB_[id] || null;
 };
 
 /**

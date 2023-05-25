@@ -96,8 +96,17 @@ Blockly.Events.EndBlockDrag = function(block, isOutside) {
     this.xml = Blockly.Xml.blockToDom(block, true /* opt_noId */);
   }
   this.recordUndo = false;
-  this.batchHeadBlocksXml = (block.temporaryBatchBlocks || []).filter(bl => bl.id !== block.id)
-      .map(bl => Blockly.Xml.blockToDom(bl, true /* opt_noId */));
+  this.batchElements = [[],[]];
+  if (block.temporaryBatchElements) {
+    block.temporaryBatchElements[0].forEach(item => {
+      if (item.id !== block.id) {
+        this.batchElements[0].push(Blockly.Xml.blockToDom(item, true));
+      }
+    });
+    block.temporaryBatchElements[1].forEach(item => {
+      this.batchElements[1].push(Blockly.Xml.frameToDom(item, true));
+    });
+  }
 };
 goog.inherits(Blockly.Events.EndBlockDrag, Blockly.Events.BlockBase);
 
