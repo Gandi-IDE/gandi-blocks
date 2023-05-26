@@ -1522,6 +1522,7 @@ Blockly.Frame.prototype.dispose = function(retainBlocks) {
 
   if (Blockly.selected === this) {
     Blockly.selected = null;
+    this.workspace.cancelCurrentGesture();
   }
 
   goog.dom.removeNode(this.frameGroup_);
