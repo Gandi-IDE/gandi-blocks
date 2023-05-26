@@ -321,9 +321,6 @@ Blockly.Frame.prototype.createDom_ = function() {
     // If the frame is locked, it cannot be selected.
     if(this.locked || !this.isEmpty_) return;
 
-    if (goog.userAgent.IPAD) {
-      this.titleInput_.style['pointer-events'] = 'auto';
-    }
     this.select();
   });
 
@@ -402,37 +399,35 @@ Blockly.Frame.prototype.createMenuButton_ = function() {
 Blockly.Frame.prototype.createTitleEditor_ = function() {
   // Width adaptive input box
   var titleWrapper = goog.dom.createDom('div', {class: 'blocklyFrameTitleWrapper'});
-  var titleLabel = goog.dom.createDom('label', {class: 'blocklyFrameTitleLabel'}, this.title);
-  titleWrapper.appendChild(titleLabel);
   var titleInput = goog.dom.createDom('input', {
     class: 'blocklyFrameTitleInput',
     dir: this.workspace.RTL ? 'RTL' : 'LTR',
     maxlength: 200,
   });
+  this.titleInput_ = titleInput;
+  this.titleInput_.tooltip = this;
   titleWrapper.appendChild(titleInput);
-  titleWrapper.appendChild(titleLabel);
   titleInput.value = this.title;
-  if (!goog.userAgent.IPAD) {
-    titleInput.style['pointer-events'] = 'none';
-  }
-  Blockly.bindEvent_(titleWrapper, 'mousedown', this, function() {
-    if (Blockly.locked) return;
-    // If the frame is locked, it cannot be selected.
-    if(this.locked) return;
 
-    if (goog.userAgent.IPAD) {
-      this.titleInput_.style['pointer-events'] = 'auto';
-      this.titleInput_.focus();
+  requestAnimationFrame(() => this.onInputTitle());
+
+  Blockly.bindEvent_(titleInput, 'mousedown', this, function(e) {
+    if (!goog.userAgent.IPAD) {
+      e.preventDefault();
     }
+    
+    // If the frame is locked or the workspace is locked, it cannot be selected.
+    if (Blockly.locked || this.locke) return;
     this.select();
   });
-  Blockly.bindEventWithChecks_(titleWrapper, 'dblclick', this, function() {
-    if (Blockly.locked) return;
-    // If the frame is locked, you cannot modify the title.
-    if (this.locked) return;
 
-    this.titleInput_.style['pointer-events'] = 'auto';
-    this.titleInput_.focus();
+  Blockly.bindEventWithChecks_(titleWrapper, 'dblclick', this, function(e) {
+    if (e.target.className === 'blocklyFrameTitleInput') {
+      // If the frame is locked or the workspace is locked, you cannot modify the title.
+      if (Blockly.locked || this.locke) return;
+      this.titleInput_.focus();
+      this.titleInput_.select();
+    }
   });
   Blockly.bindEvent_(titleWrapper, 'mouseenter', this, function() {
     if (Blockly.locked) return;
@@ -447,8 +442,6 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
     }
   });
   this.foreignObjectBody_.appendChild(titleWrapper);
-  this.titleLabel_ = titleLabel;
-  this.titleInput_ = titleInput;
 
   var xy = this.computeFrameRelativeXY();
   this.translate(xy.x, xy.y);
@@ -465,14 +458,7 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
       this.onTitleChange(newValue);
     }
   });
-  Blockly.bindEventWithChecks_(titleInput, 'input', this, function(e) {
-    this.titleLabel_.innerHTML = e.target.value;
-  });
-  Blockly.bindEventWithChecks_(titleInput, 'blur', this, function(e) {
-    if (!goog.userAgent.IPAD) {
-      e.target.style['pointer-events'] = 'none';
-    }
-  });
+  Blockly.bindEventWithChecks_(titleInput, 'input', this, this.onInputTitle);
   this.updateTitleBoxSize();
 };
 
@@ -987,6 +973,11 @@ Blockly.Frame.prototype.onStopDrag = function() {
  */
 Blockly.Frame.prototype.onStartResizeRect_ = function() {
   this.foreignObject_.style['pointer-events'] = 'none';
+};
+
+Blockly.Frame.prototype.onInputTitle = function() {
+  this.titleInput_.style.width = '10px';
+  this.titleInput_.style.width = this.titleInput_.scrollWidth + 10 + 'px';
 };
 
 /**
