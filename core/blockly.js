@@ -202,7 +202,7 @@ Blockly.onKeyDown_ = function(e) {
     Blockly.DropDownDiv.hide();
     // Pressing esc cancel frame creation
     Blockly.mainWorkspace.setWaitingCreateFrameEnabled(false);
-  } else if (e.keyCode == 65) {
+  } else if (e.keyCode == 65 && !Blockly.locked) {
     Blockly.mainWorkspace.setWaitingCreateFrameEnabled(true);
   }  else if (e.keyCode == 8 || e.keyCode == 46) {
     // Delete or backspace.
