@@ -1348,12 +1348,6 @@ Blockly.Css.CONTENT = [
     'font-size: 12px;',
     'box-sizing: border-box;',
     'border: 1px solid transparent;',
-    'cursor: pointer;',
-  '}',
-
-  '.blocklyFrameTitleWrapper:focus-within {',
-    'background-color: white;',
-    'border-color: var(--theme-brand-color);',
   '}',
 
   '.blocklyFrameTitleLabel {',
@@ -1370,9 +1364,9 @@ Blockly.Css.CONTENT = [
     'font-size: inherit;',
     'font-family: inherit;',
     'line-height: normal;',
-    'width: calc(100% - 8px);',
+    'max-width: calc(100% - 8px);',
     'color: var(--theme-color-g400, #9CA3AF);',
-    'border: 0;',
+    'border: 1px solid transparent;',
     'outline: 0;',
     'padding: 0;',
     'position: absolute;',
@@ -1380,10 +1374,13 @@ Blockly.Css.CONTENT = [
     'text-overflow: ellipsis;',
     'white-space: nowrap;',
     'background-color: transparent;',
+    'cursor: pointer;',
   '}',
 
   '.blocklyFrame .blocklyFrameTitleInput:focus {',
     'color: #000000 !important;',
+    'background-color: white;',
+    'border-color: var(--theme-brand-color);',
   '}',
 
   '.blocklyResizeButtonNW,.blocklyResizeButtonSE{',

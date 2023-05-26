@@ -42,6 +42,7 @@ Blockly.Options = function(options) {
     var hasCategories = false;
     var hasTrashcan = false;
     var hasCollapse = false;
+    var hasFrames = false;
     var hasComments = false;
     var hasDisable = false;
     var hasSounds = false;
@@ -61,6 +62,10 @@ Blockly.Options = function(options) {
     var hasCollapse = options['collapse'];
     if (hasCollapse === undefined) {
       hasCollapse = hasCategories;
+    }
+    var hasFrames = options['frames'];
+    if (hasFrames === undefined) {
+      hasFrames = true;
     }
     var hasComments = options['comments'];
     if (hasComments === undefined) {
@@ -121,6 +126,7 @@ Blockly.Options = function(options) {
   this.RTL = rtl;
   this.oneBasedIndex = oneBasedIndex;
   this.collapse = hasCollapse;
+  this.frames = hasFrames;
   this.comments = hasComments;
   this.disable = hasDisable;
   this.readOnly = readOnly;
