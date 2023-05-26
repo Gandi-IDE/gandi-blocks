@@ -149,6 +149,12 @@ Blockly.WorkspaceSvg.prototype.rendered = true;
 Blockly.WorkspaceSvg.prototype.resizingFrame = false;
 
 /**
+ * Represents whether the workspace is currently in focus or not.
+ * @type {boolean}
+ */
+Blockly.WorkspaceSvg.prototype.isWorkspaceFocused = false;
+
+/**
  * Whether the workspace is visible.  False if the workspace has been hidden
  * by calling `setVisible(false)`.
  * @type {boolean}
@@ -485,6 +491,12 @@ Blockly.WorkspaceSvg.prototype.createDom = function(opt_backgroundClass) {
   }
 
   if (!this.isFlyout) {
+    Blockly.bindEvent_(this.svgGroup_, 'mouseenter', this,
+        this.onMouseEnter_);
+    Blockly.bindEvent_(this.svgGroup_, 'mouseleave', this,
+        this.onMouseLeave_);
+    Blockly.bindEvent_(document, 'mousedown', this,
+        this.onDocumentMouseDown_);
     Blockly.bindEventWithChecks_(this.svgGroup_, 'mousedown', this,
         this.onMouseDown_);
     if (this.options.zoomOptions && this.options.zoomOptions.wheel) {
@@ -1376,6 +1388,31 @@ Blockly.WorkspaceSvg.prototype.onMouseDown_ = function(e) {
 };
 
 /**
+ * Handle a mouse-down on document body.
+ * @param {!Event} e Mouse down event.
+ * @private
+ */
+Blockly.WorkspaceSvg.prototype.onDocumentMouseDown_ = function(e) {
+  this.isWorkspaceFocused = e.target.contains(this.svgGroup_);
+};
+
+/**
+ * Handle a mouse-over on SVG drawing surface.
+ * @private
+ */
+Blockly.WorkspaceSvg.prototype.onMouseEnter_ = function() {
+  this.isWorkspaceFocused = true;
+};
+
+/**
+ * Handle a mouse-over on SVG drawing surface.
+ * @private
+ */
+Blockly.WorkspaceSvg.prototype.onMouseLeave_ = function() {
+  this.isWorkspaceFocused = false;
+};
+
+/**
  * Start tracking a drag of an object on this workspace.
  * @param {!Event} e Mouse down event.
  * @param {!goog.math.Coordinate} xy Starting location of object.
@@ -1735,7 +1772,9 @@ Blockly.WorkspaceSvg.prototype.showContextMenu_ = function(e) {
   menuOptions.push(Blockly.ContextMenu.wsRedoOption(this));
 
   // Option to create a frame.
-  menuOptions.push(Blockly.ContextMenu.wsCreateFrameOption(this));
+  if (this.options.frames) {
+    menuOptions.push(Blockly.ContextMenu.wsCreateFrameOption(this));
+  }
 
   // Option to clean up blocks.
   if (this.scrollbar) {

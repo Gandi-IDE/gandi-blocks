@@ -187,7 +187,8 @@ Blockly.svgResize = function(workspace) {
 // TODO (https://github.com/google/blockly/issues/1998) handle cases where there are multiple workspaces
 // and non-main workspaces are able to accept input.
 Blockly.onKeyDown_ = function(e) {
-  if (Blockly.mainWorkspace.options.readOnly || Blockly.utils.isTargetInput(e)
+  const {options, isWorkspaceFocused} = Blockly.mainWorkspace;
+  if (options.readOnly || Blockly.utils.isTargetInput(e)
       || (Blockly.mainWorkspace.rendered && !Blockly.mainWorkspace.isVisible())) {
     // No key actions on readonly workspaces.
     // When focused on an HTML text input widget, don't trap any keys.
@@ -195,14 +196,14 @@ Blockly.onKeyDown_ = function(e) {
     // hidden.
     return;
   }
-  var deleteTarget = false;
+  let deleteTarget = false;
   if (e.keyCode == 27) {
     // Pressing esc closes the context menu and any drop-down
     Blockly.hideChaff();
     Blockly.DropDownDiv.hide();
     // Pressing esc cancel frame creation
     Blockly.mainWorkspace.setWaitingCreateFrameEnabled(false);
-  } else if (e.keyCode == 65 && !Blockly.locked) {
+  } else if (e.keyCode == 65 && !Blockly.locked && options.frames && isWorkspaceFocused) {
     Blockly.mainWorkspace.setWaitingCreateFrameEnabled(true);
   }  else if (e.keyCode == 8 || e.keyCode == 46) {
     // Delete or backspace.
