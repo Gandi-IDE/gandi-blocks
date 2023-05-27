@@ -653,7 +653,7 @@ Blockly.Gesture.prototype.handleUp = function(e) {
   Blockly.longStop_();
   if (this.isWaitingCreateFrame() && this.tempFrame_) {
     this.tempFrame_.resizeButtonMouseUp_('br', e, true);
-    this.startWorkspace_.setWaitingCreateFrameEnabled(false);
+    this.startWorkspace_ && this.startWorkspace_.setWaitingCreateFrameEnabled(false);
     this.tempFrame_ = null;
   }
   if (this.isEnding_) {
@@ -707,7 +707,7 @@ Blockly.Gesture.prototype.cancel = function() {
   }
   if (this.isWaitingCreateFrame() && this.tempFrame_) {
     this.tempFrame_.resizeButtonMouseUp_('br', this.mostRecentEvent_, true);
-    this.startWorkspace_.setWaitingCreateFrameEnabled(false);
+    this.startWorkspace && this.startWorkspace_.setWaitingCreateFrameEnabled(false);
     this.tempFrame_ = null;
   }
   this.isEnding_ = true;
