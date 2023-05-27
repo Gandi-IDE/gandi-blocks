@@ -599,8 +599,11 @@ Blockly.Workspace.prototype.createFrame = function(opt_options) {
  * @param {?boolean} retainBlocks Whether to keep blocks or not.
  */
 Blockly.Workspace.prototype.deleteFrameById = function(id, retainBlocks) {
-  this.frameDB_[id].dispose(retainBlocks);
-  delete this.frameDB_[id];
+  if (this.frameDB_[id]) {
+    const frame = this.frameDB_[id];
+    delete this.frameDB_[id];
+    frame.dispose(retainBlocks);
+  }
 };
 
 /**
