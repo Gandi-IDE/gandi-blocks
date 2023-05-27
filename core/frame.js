@@ -88,7 +88,7 @@ Blockly.Frame = function(workspace, opt_options) {
    * @private
    */
   this.deletable_ = true;
-  
+
   /**
    * The frame's title
    */
@@ -119,7 +119,7 @@ Blockly.Frame = function(workspace, opt_options) {
   */
   this.selected = false;
 
-  
+
   this.rect_ = {
     width: this.options.width,
     height: this.options.height,
@@ -128,7 +128,7 @@ Blockly.Frame = function(workspace, opt_options) {
     right: this.options.x + this.options.width,
     bottom: this.options.y + this.options.height
   };
-  
+
   this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
 
   /**
@@ -1122,7 +1122,7 @@ Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e, takeOverSubEve
     this.resizeButtonMouseUpBindData_ =
       Blockly.bindEventWithChecks_(document, 'mouseup', null,  this.resizeButtonMouseUp_.bind(this, dir));
   }
-  
+
   e.preventDefault();
   e.stopPropagation();
 };
@@ -1142,7 +1142,7 @@ Blockly.Frame.prototype.resizeButtonMouseMove_ = function(dir, e) {
     var yDir = dir === 'tl' || dir === 'tr' ? 'btt' : 'ttb';
     this.updateBoundingClientRect(diffX, diffY, xDir, yDir);
     var newCoord = this.computeFrameRelativeXY();
-  
+
     var blocks = Object.values(this.blockDB_);
     // If there are selected blocks in the frame, it needs to keep their relative position in the workspace unchanged.
     if(blocks.length) {
@@ -1532,7 +1532,12 @@ Blockly.Frame.prototype.dispose = function(retainBlocks) {
   this.blockDB_ = {};
 
   // Remove from the list of top frames and the frame database.
-  this.workspace.removeTopFrame(this);
-  this.workspace.resizeContents();
-  this.workspace = null;
+  if (this.workspace) {
+    //FIXME - this.workspace maybe null
+    // when you repeat dragging a very small size frame in short time
+    // and the this.workspace maybe null in here
+    this.workspace.removeTopFrame(this);
+    this.workspace.resizeContents();
+    this.workspace = null;
+  }
 };

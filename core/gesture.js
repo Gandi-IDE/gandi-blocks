@@ -621,7 +621,7 @@ Blockly.Gesture.prototype.bindMouseEvents = function(e) {
 Blockly.Gesture.prototype.handleMove = function(e) {
   var stopPropagation = true;
   this.updateFromEvent_(e);
-  if (this.isWaitingCreateFrame()) {
+  if (this.isWaitingCreateFrame() && this.tempFrame_) {
     this.tempFrame_.resizeButtonMouseMove_('br', e);
   } else if (this.isDraggingWorkspace_) {
     this.workspaceDragger_.drag(this.currentDragDeltaXY_);
@@ -651,7 +651,7 @@ Blockly.Gesture.prototype.handleMove = function(e) {
 Blockly.Gesture.prototype.handleUp = function(e) {
   this.updateFromEvent_(e);
   Blockly.longStop_();
-  if (this.isWaitingCreateFrame()) {
+  if (this.isWaitingCreateFrame() && this.tempFrame_) {
     this.tempFrame_.resizeButtonMouseUp_('br', e, true);
     this.startWorkspace_.setWaitingCreateFrameEnabled(false);
     this.tempFrame_ = null;
@@ -705,7 +705,7 @@ Blockly.Gesture.prototype.cancel = function() {
     console.log('Trying to cancel a gesture recursively.');
     return;
   }
-  if (this.isWaitingCreateFrame()) {
+  if (this.isWaitingCreateFrame() && this.tempFrame_) {
     this.tempFrame_.resizeButtonMouseUp_('br', this.mostRecentEvent_, true);
     this.startWorkspace_.setWaitingCreateFrameEnabled(false);
     this.tempFrame_ = null;
