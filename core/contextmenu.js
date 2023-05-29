@@ -644,7 +644,7 @@ Blockly.ContextMenu.appendDynamicMenuItem = function(e, options) {
   if (gesture) {
     targetFlyout = gesture.flyout_;
     targetBlock = gesture.targetBlock_;
-    targetFrame = gesture.targetFrame_;
+    targetFrame = gesture.startFrame_;
     targetComment = gesture.startBubble_;
     target = targetBlock || targetComment || targetFrame;
   }

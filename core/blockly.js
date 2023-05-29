@@ -204,6 +204,10 @@ Blockly.onKeyDown_ = function(e) {
     // Pressing esc cancel frame creation
     Blockly.mainWorkspace.setWaitingCreateFrameEnabled(false);
   } else if (e.keyCode == 65 && !Blockly.locked && options.frames && isWorkspaceFocused) {
+    // Don't attempt to create a frame during drags.
+    if (Blockly.mainWorkspace.isDragging() || Blockly.mainWorkspace.resizingFrame) {
+      return;
+    }
     Blockly.mainWorkspace.setWaitingCreateFrameEnabled(true);
   }  else if (e.keyCode == 8 || e.keyCode == 46) {
     // Delete or backspace.
@@ -218,7 +222,7 @@ Blockly.onKeyDown_ = function(e) {
       return;
     }
     // Don't delete while dragging.  Jeez.
-    if (Blockly.mainWorkspace.isDragging()) {
+    if (Blockly.mainWorkspace.isDragging() || Blockly.mainWorkspace.resizingFrame) {
       return;
     }
 
@@ -233,7 +237,7 @@ Blockly.onKeyDown_ = function(e) {
       return;
     }
     // Don't use meta keys during drags.
-    if (Blockly.mainWorkspace.isDragging()) {
+    if (Blockly.mainWorkspace.isDragging() || Blockly.mainWorkspace.resizingFrame) {
       return;
     }
     if (Blockly.selected &&

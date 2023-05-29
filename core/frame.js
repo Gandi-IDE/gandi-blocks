@@ -239,18 +239,6 @@ Blockly.Frame.prototype.appendBlocksToBlocksCanvas = function() {
 };
 
 /**
- * Move this frame to the front of the workspace.
- * <g> tags do not respect z-index so SVG renders them in the
- * order that they are in the DOM.  By placing this frame first within the
- * frame group's <g>.
- * @package
- */
-Blockly.Frame.prototype.bringToFront = function() {
-  var frame = this.getSvgRoot();
-  frame.parentNode.appendChild(frame);
-};
-
-/**
  * Check whether the identifiers need to be adjusted after resize。
  * @private
  */
@@ -567,7 +555,7 @@ Blockly.Frame.prototype.cleanUp = function() {
   });
 
   Blockly.Events.setGroup(false);
-  this.bringToFront();
+  this.workspace.setFrameToFront();
   this.workspace.setResizesEnabled(true);
 };
 
@@ -1182,7 +1170,9 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
   if (takeOverSubEvents) {
     if(this.getHeight() < this.minHeight_ || this.getWidth() < this.minWidth_) {
       Blockly.Events.disable();
-      this.workspace.deleteFrameById(this.id);
+      this.workspace.setWaitingCreateFrameEnabled(false);
+      this.workspace.cancelCurrentGesture();
+      this.dispose();
       Blockly.Events.enable();
     } else {
       this.updateOwnedBlocks();
@@ -1500,17 +1490,17 @@ Blockly.Frame.prototype.dispose = function(retainBlocks) {
   }
 
   this.oldBlockIdList_ = this.getBlockIds();
-  var oldBlocks = Object.assign({}, this.blockDB_);
+  const ws = this.workspace;
+  const oldBlocks = Object.assign({}, this.blockDB_);
 
   for (const key in oldBlocks) {
     const block = oldBlocks[key];
-    var ws = block.workspace;
     if (retainBlocks) {
       block.requestMoveOutFrame();
     } else {
       setTimeout(function() {
         // When a Frame is being destroyed, the blocks it contains may have already been destroyed.
-        if (ws) {
+        if (block.workspace) {
           ws.fireDeletionListeners(block);
         }
       });
@@ -1520,24 +1510,18 @@ Blockly.Frame.prototype.dispose = function(retainBlocks) {
 
   Blockly.Events.fire(new Blockly.Events.FrameDelete(this));
 
-  if (Blockly.selected === this) {
-    Blockly.selected = null;
-    this.workspace.cancelCurrentGesture();
-  }
-
   goog.dom.removeNode(this.frameGroup_);
   this.frameGroup_ = null;
   this.rect_ = null;
   this.svgRect_ = null;
   this.blockDB_ = {};
+  this.workspace = null;
 
   // Remove from the list of top frames and the frame database.
-  if (this.workspace) {
-    //FIXME - this.workspace maybe null
-    // when you repeat dragging a very small size frame in short time
-    // and the this.workspace maybe null in here
-    this.workspace.removeTopFrame(this);
-    this.workspace.resizeContents();
-    this.workspace = null;
+  ws.removeTopFrame(this);
+  ws.resizeContents();
+
+  if (Blockly.selected === this) {
+    Blockly.selected = null;
   }
 };

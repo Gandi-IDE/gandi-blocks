@@ -146,6 +146,10 @@ Blockly.WorkspaceSvg.prototype.resizeHandlerWrapper_ = null;
  */
 Blockly.WorkspaceSvg.prototype.rendered = true;
 
+/**
+ * Whether the frame is currently being resized on the workspace.
+ * @type {boolean}
+ */
 Blockly.WorkspaceSvg.prototype.resizingFrame = false;
 
 /**
