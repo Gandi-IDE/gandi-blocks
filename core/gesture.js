@@ -621,7 +621,7 @@ Blockly.Gesture.prototype.handleMove = function(e) {
   var stopPropagation = true;
   this.updateFromEvent_(e);
 
-  if (this.isCreatingFrame() && this.creatingFrame_) {
+  if (this.isCreatingFrame()) {
     this.creatingFrame_.resizeButtonMouseMove_('br', e);
   } else if (this.isDraggingWorkspace_) {
     this.workspaceDragger_.drag(this.currentDragDeltaXY_);
@@ -652,7 +652,7 @@ Blockly.Gesture.prototype.handleUp = function(e) {
   this.updateFromEvent_(e);
   Blockly.longStop_();
 
-  if (this.isCreatingFrame() && this.creatingFrame_) {
+  if (this.isCreatingFrame()) {
     this.creatingFrame_.resizeButtonMouseUp_('br', e, true);
     // It is possible that the previous step did not successfully create a frame and the gesture was destroyed.
     if (this.startWorkspace_) {
