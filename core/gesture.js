@@ -109,11 +109,11 @@ Blockly.Gesture = function(e, creatorWorkspace) {
   this.targetBlock_ = null;
 
   /**
-   * The frame that this gesture targets.
+   * The frame that the gesture started on, or null if it did not start on a frame.
    * @type {Blockly.Frame}
    * @private
    */
-  this.targetFrame_ = null;
+  this.startFrame_ = null;
 
   /**
    * The workspace that the gesture started on.  There may be multiple
@@ -125,11 +125,11 @@ Blockly.Gesture = function(e, creatorWorkspace) {
   this.startWorkspace_ = null;
 
   /**
-   * The frame that created at this gesture started.
+   * A frame is currently being created.
    * @type {Blockly.Frame}
    * @private
    */
-  this.tempFrame_ = null;
+  this.creatingFrame_ = null;
 
   /**
    * The workspace that created this gesture.  This workspace keeps a reference
@@ -284,11 +284,10 @@ Blockly.Gesture.prototype.dispose = function() {
     Blockly.unbindEvent_(this.onUpWrapper_);
   }
 
-
   this.startField_ = null;
+  this.startFrame_ = null;
   this.startBlock_ = null;
   this.targetBlock_ = null;
-  this.targetFrame_ = null;
   this.startWorkspace_ = null;
   this.flyout_ = null;
 
@@ -319,10 +318,10 @@ Blockly.Gesture.prototype.updateFromEvent_ = function(e) {
   var currentXY = new goog.math.Coordinate(e.clientX, e.clientY);
   var changed = this.updateDragDelta_(currentXY);
   // Exceeded the drag radius for the first time.
-  if (changed && !this.isWaitingCreateFrame()) {
+  if (changed && !this.isCreatingFrame()) {
     this.updateIsDragging_(e);
     Blockly.longStop_();
-  } else if (this.isWaitingCreateFrame()) {
+  } else if (this.isCreatingFrame()) {
     Blockly.longStop_();
   }
   this.mostRecentEvent_ = e;
@@ -416,7 +415,7 @@ Blockly.Gesture.prototype.updateIsDraggingBubble_ = function() {
  * @private
  */
 Blockly.Gesture.prototype.updateIsDraggingFrame_ = function() {
-  if (!this.targetFrame_ || Blockly.locked || this.startWorkspace_.waitingCreateFrame) {
+  if (!this.startFrame_ || Blockly.locked || this.startWorkspace_.waitingCreateFrame) {
     return false;
   }
   this.isDraggingFrame_ = true;
@@ -512,7 +511,7 @@ Blockly.Gesture.prototype.updateIsDragging_ = function() {
  * @private
  */
 Blockly.Gesture.prototype.startDraggingFrame_ = function() {
-  this.frameDragger_ = new Blockly.FrameDragger(this.targetFrame_,
+  this.frameDragger_ = new Blockly.FrameDragger(this.startFrame_,
       this.startWorkspace_);
   this.frameDragger_.startFrameDrag(this.mostRecentEvent_, this.currentDragDeltaXY_);
   this.frameDragger_.dragFrame(this.mostRecentEvent_,
@@ -589,8 +588,8 @@ Blockly.Gesture.prototype.doStart = function(e) {
   this.mouseDownXY_ = new goog.math.Coordinate(e.clientX, e.clientY);
 
   if(this.isWaitingCreateFrame()) {
-    this.tempFrame_ = this.startWorkspace_.createFrame();
-    this.tempFrame_.resizeButtonMouseDown_('br', e, true);
+    this.creatingFrame_ = this.startWorkspace_.createFrame();
+    this.creatingFrame_.resizeButtonMouseDown_('br', e, true);
   }
 
   this.currentDragDeltaXY_ = new goog.math.Coordinate(0, 0);
@@ -621,8 +620,9 @@ Blockly.Gesture.prototype.bindMouseEvents = function(e) {
 Blockly.Gesture.prototype.handleMove = function(e) {
   var stopPropagation = true;
   this.updateFromEvent_(e);
-  if (this.isWaitingCreateFrame() && this.tempFrame_) {
-    this.tempFrame_.resizeButtonMouseMove_('br', e);
+
+  if (this.isCreatingFrame() && this.creatingFrame_) {
+    this.creatingFrame_.resizeButtonMouseMove_('br', e);
   } else if (this.isDraggingWorkspace_) {
     this.workspaceDragger_.drag(this.currentDragDeltaXY_);
   } else if (this.isDraggingBlock_) {
@@ -651,10 +651,14 @@ Blockly.Gesture.prototype.handleMove = function(e) {
 Blockly.Gesture.prototype.handleUp = function(e) {
   this.updateFromEvent_(e);
   Blockly.longStop_();
-  if (this.isWaitingCreateFrame() && this.tempFrame_) {
-    this.tempFrame_.resizeButtonMouseUp_('br', e, true);
-    this.startWorkspace_ && this.startWorkspace_.setWaitingCreateFrameEnabled(false);
-    this.tempFrame_ = null;
+
+  if (this.isCreatingFrame() && this.creatingFrame_) {
+    this.creatingFrame_.resizeButtonMouseUp_('br', e, true);
+    // It is possible that the previous step did not successfully create a frame and the gesture was destroyed.
+    if (this.startWorkspace_) {
+      this.startWorkspace_.setWaitingCreateFrameEnabled(false);
+    }
+    this.creatingFrame_ = null;
   }
   if (this.isEnding_) {
     return;
@@ -705,11 +709,6 @@ Blockly.Gesture.prototype.cancel = function() {
     console.log('Trying to cancel a gesture recursively.');
     return;
   }
-  if (this.isWaitingCreateFrame() && this.tempFrame_) {
-    this.tempFrame_.resizeButtonMouseUp_('br', this.mostRecentEvent_, true);
-    this.startWorkspace && this.startWorkspace_.setWaitingCreateFrameEnabled(false);
-    this.tempFrame_ = null;
-  }
   this.isEnding_ = true;
   Blockly.longStop_();
   if (this.isDraggingBubble_) {
@@ -735,8 +734,8 @@ Blockly.Gesture.prototype.cancel = function() {
 Blockly.Gesture.prototype.handleRightClick = function(e) {
   if (Blockly.locked) return;
 
-  if (this.targetFrame_) {
-    this.targetFrame_.showContextMenu_(e);
+  if (this.startFrame_) {
+    this.startFrame_.showContextMenu_(e);
   } else if (this.targetBlock_) {
     this.bringBlockToFront_();
     Blockly.hideChaff(this.flyout_);
@@ -954,7 +953,6 @@ Blockly.Gesture.prototype.setStartFrame = function(frame) {
   // If the gesture already went through a bubble, don't set the start block.
   if (!this.startFrame_) {
     this.startFrame_ = frame;
-    this.targetFrame_ = frame;
   }
 };
 
@@ -1094,12 +1092,16 @@ Blockly.Gesture.prototype.isWorkspaceClick_ = function() {
  * @package
  */
 Blockly.Gesture.prototype.isDragging = function() {
-  return this.isDraggingWorkspace_ || this.isDraggingBlock_ ||
+  return this.isDraggingWorkspace_ || this.isDraggingBlock_ || this.isDraggingFrame_ ||
       this.isDraggingBubble_;
 };
 
 Blockly.Gesture.prototype.isWaitingCreateFrame = function() {
   return !(this.flyout_ || this.startBlock_ || this.startBubble_) && this.startWorkspace_.waitingCreateFrame;
+};
+
+Blockly.Gesture.prototype.isCreatingFrame = function() {
+  return this.isWaitingCreateFrame() && this.creatingFrame_;
 };
 
 /**
