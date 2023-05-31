@@ -392,31 +392,33 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
     dir: this.workspace.RTL ? 'RTL' : 'LTR',
     maxlength: 200,
   });
+  var inputWrapper = goog.dom.createDom('div', {class: 'blocklyFrameInputWrapper'});
   this.titleInput_ = titleInput;
   this.titleInput_.tooltip = this;
-  titleWrapper.appendChild(titleInput);
+  inputWrapper.appendChild(titleInput);
+  titleWrapper.appendChild(inputWrapper);
   titleInput.value = this.title;
 
   requestAnimationFrame(() => this.onInputTitle());
 
-  Blockly.bindEvent_(titleInput, 'mousedown', this, function(e) {
-    if (!goog.userAgent.IPAD) {
-      e.preventDefault();
-    }
-    
+  Blockly.bindEvent_(inputWrapper, 'mousedown', this, function() {
     // If the frame is locked or the workspace is locked, it cannot be selected.
-    if (Blockly.locked || this.locke) return;
+    if (Blockly.locked || this.locked) return;
     this.select();
   });
 
-  Blockly.bindEventWithChecks_(titleWrapper, 'dblclick', this, function(e) {
-    if (e.target.className === 'blocklyFrameTitleInput') {
-      // If the frame is locked or the workspace is locked, you cannot modify the title.
-      if (Blockly.locked || this.locke) return;
+  Blockly.bindEvent_(inputWrapper, 'mouseup', this, function(e) {
+    // If the frame is locked or the workspace is locked, it cannot be selected.
+    if (Blockly.locked || this.locked) return;
+    const now = Date.now();
+    const delta = now - (e.target.getAttribute('last-down') || now);
+    e.target.setAttribute('last-down', now);
+    if (delta > 0 && delta < 250) {
+      this.titleInput_.style['pointer-events'] = 'auto';
       this.titleInput_.focus();
-      this.titleInput_.select();
     }
   });
+
   Blockly.bindEvent_(titleWrapper, 'mouseenter', this, function() {
     if (Blockly.locked) return;
     if (!this.workspace.draggingBlocks_ && !this.locked) {
@@ -445,6 +447,9 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
     } else if (this.title != newValue) {
       this.onTitleChange(newValue);
     }
+  });
+  Blockly.bindEventWithChecks_(titleInput, 'blur', this, function(e) {
+    e.target.style['pointer-events'] = 'none';
   });
   Blockly.bindEventWithChecks_(titleInput, 'input', this, this.onInputTitle);
   this.updateTitleBoxSize();
