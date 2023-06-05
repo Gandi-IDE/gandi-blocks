@@ -235,6 +235,7 @@ Blockly.Events.FrameDelete.prototype.run = function(forward) {
       width: this.width,
       height: this.height
     });
+    workspace.resizeContents();
   }
 };
 
