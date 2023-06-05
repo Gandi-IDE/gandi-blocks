@@ -1078,9 +1078,9 @@ Blockly.Frame.prototype.onTitleChange = function(newTitle) {
 Blockly.Frame.prototype.recordBlocksRelativeToSurfaceXY = function() {
   this.oldBlocksCoordinate_ = {};
   Object.values(this.blockDB_).forEach((block) => {
-    const startXY = block.getRelativeToSurfaceXY();
+    const oldCoordinate = block.getRelativeToSurfaceXY();
     this.oldBlocksCoordinate_[block.id] = {
-      startXY,
+      oldCoordinate,
       dragIconData: block.initIconData()
     };
   });
@@ -1233,6 +1233,7 @@ Blockly.Frame.prototype.render = function(rect, moveBlocks = true) {
   this.updateTitleBoxSize();
   this.updateResizeButtonsPosition();
   this.fireFrameRectChange();
+  this.workspace.resizeContents();
 };
 
 /**

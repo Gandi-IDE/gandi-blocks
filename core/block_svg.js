@@ -1511,7 +1511,6 @@ Blockly.BlockSvg.prototype.scheduleSnapAndBump = function() {
    * on this block and its descendants.
  */
 Blockly.BlockSvg.prototype.fireIconsMoveEvent = function(iconData) {
-  console.log('fireIconsMoveEvent', iconData.length);
   for (var i = 0; i < iconData.length; i++) {
     var data = iconData[i];
     if (data.currentLocation) {

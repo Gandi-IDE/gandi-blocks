@@ -221,8 +221,6 @@ Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
     });
     return;
   }
-
-
 };
 
 /**
