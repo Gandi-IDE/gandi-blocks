@@ -424,19 +424,7 @@ goog.inherits(Blockly.Events.CommentMove, Blockly.Events.CommentBase);
  * @private
  */
 Blockly.Events.CommentMove.prototype.currentLocation_ = function() {
-  var xy = this.comment_.getXY();
-  if (!this.comment_.workspace.RTL) {
-    return xy;
-  }
-
-  var rtlAwareX;
-  if (this.comment_ instanceof Blockly.ScratchBlockComment) {
-    var commentWidth = this.comment_.getBubbleSize().width;
-    rtlAwareX = this.workspaceWidth_ - xy.x - commentWidth;
-  } else {
-    rtlAwareX = this.workspaceWidth_ - xy.x;
-  }
-  return new goog.math.Coordinate(rtlAwareX, xy.y);
+  return this.comment_.currentLocation();
 };
 
 /**

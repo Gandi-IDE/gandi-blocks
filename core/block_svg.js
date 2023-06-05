@@ -31,6 +31,7 @@ goog.require('Blockly.BlockAnimations');
 goog.require('Blockly.ContextMenu');
 goog.require('Blockly.Events.Ui');
 goog.require('Blockly.Events.BlockMove');
+goog.require('Blockly.Events.CommentMove');
 goog.require('Blockly.Grid');
 goog.require('Blockly.RenderedConnection');
 goog.require('Blockly.scratchBlocksUtils');
@@ -284,6 +285,32 @@ Blockly.BlockSvg.prototype.getIcons = function() {
   return icons;
 };
 
+/**
+ * Make a list of all of the icons (comment, warning, and mutator) that are
+ * on this block and its descendants.  Moving an icon moves the bubble that
+ * extends from it if that bubble is open.
+ * @return {!Array.<!Object>} The list of all icons and their locations.
+ */
+Blockly.BlockSvg.prototype.initIconData = function() {
+  // Build a list of icons that need to be moved and where they started.
+  var dragIconData = [];
+  var descendants = this.getDescendants(false);
+  for (var i = 0, descendant; descendant = descendants[i]; i++) {
+    var icons = descendant.getIcons();
+    for (var j = 0; j < icons.length; j++) {
+      var data = {
+        // goog.math.Coordinate with x and y properties (workspace coordinates).
+        location: icons[j].getIconLocation(),
+        // Blockly.Icon
+        icon: icons[j],
+        currentLocation: icons[j].isVisible() ? icons[j].bubble_.comment.currentLocation() : null,
+      };
+      dragIconData.push(data);
+    }
+  }
+  return dragIconData;
+};
+
 Blockly.BlockSvg.prototype.intersects_ = true;
 
 Blockly.BlockSvg.prototype.setIntersects = function(intersects) {
@@ -428,6 +455,7 @@ Blockly.BlockSvg.prototype.moveBy = function(dx, dy, keepStill) {
   var eventsEnabled = Blockly.Events.isEnabled();
   if (eventsEnabled) {
     var event = new Blockly.Events.BlockMove(this);
+    var dragIconData = this.initIconData(this);
   }
   if (!keepStill) {
     var xy = this.getRelativeToSurfaceXY(true);
@@ -437,6 +465,7 @@ Blockly.BlockSvg.prototype.moveBy = function(dx, dy, keepStill) {
   if (eventsEnabled) {
     event.recordNew();
     Blockly.Events.fire(event);
+    this.fireIconsMoveEvent(dragIconData);
   }
   this.workspace.resizeContents();
 };
@@ -1474,6 +1503,24 @@ Blockly.BlockSvg.prototype.scheduleSnapAndBump = function() {
     block.bumpNeighbours_();
     Blockly.Events.setGroup(false);
   }, Blockly.BUMP_DELAY);
+};
+
+/**
+ * Fire a move event at the end of a block drag.
+ * @param {Array.<!Object>} iconData A list of all of the icons (comment, warning, and mutator) that are
+   * on this block and its descendants.
+ */
+Blockly.BlockSvg.prototype.fireIconsMoveEvent = function(iconData) {
+  console.log('fireIconsMoveEvent', iconData.length);
+  for (var i = 0; i < iconData.length; i++) {
+    var data = iconData[i];
+    if (data.currentLocation) {
+      var event = new Blockly.Events.CommentMove(data.icon.bubble_.comment);
+      event.setOldCoordinate(data.currentLocation);
+      event.recordNew();
+      Blockly.Events.fire(event);
+    }
+  }
 };
 
 // powered by xigua start

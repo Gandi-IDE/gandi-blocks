@@ -106,7 +106,7 @@ Blockly.BlockDragger = function(block, workspace) {
    * @type {Array.<!Object>}
    * @private
    */
-  this.dragIconData_ = Blockly.BlockDragger.initIconData_(block);
+  this.dragIconData_ = this.draggingBlock_.initIconData();
 };
 
 /**
@@ -125,32 +125,6 @@ Blockly.BlockDragger.prototype.dispose = function() {
   }
 };
 
-/**
- * Make a list of all of the icons (comment, warning, and mutator) that are
- * on this block and its descendants.  Moving an icon moves the bubble that
- * extends from it if that bubble is open.
- * @param {!Blockly.BlockSvg} block The root block that is being dragged.
- * @return {!Array.<!Object>} The list of all icons and their locations.
- * @private
- */
-Blockly.BlockDragger.initIconData_ = function(block) {
-  // Build a list of icons that need to be moved and where they started.
-  var dragIconData = [];
-  var descendants = block.getDescendants(false);
-  for (var i = 0, descendant; descendant = descendants[i]; i++) {
-    var icons = descendant.getIcons();
-    for (var j = 0; j < icons.length; j++) {
-      var data = {
-        // goog.math.Coordinate with x and y properties (workspace coordinates).
-        location: icons[j].getIconLocation(),
-        // Blockly.Icon
-        icon: icons[j]
-      };
-      dragIconData.push(data);
-    }
-  }
-  return dragIconData;
-};
 
 /**
  * Start dragging a block.  This includes moving it to the drag surface.
@@ -264,7 +238,6 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
     Blockly.utils.moveBatchedElements(delta, [batchHeadBlocks, batchedFrames]);
   }
 
-  this.dragIconData_ = [];
   var isOutside = this.wasOutside_;
   this.fireEndDragEvent_(isOutside);
   this.draggingBlock_.setMouseThroughStyle(false);
@@ -300,6 +273,8 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
   } else {
     this.workspace_.resetFrameAndTopBlocksMap();
   }
+  // The data of dragIconData must be reset after executing the fireMoveEvent.
+  this.dragIconData_ = [];
   this.workspace_.setResizesEnabled(true);
   this.workspace_.setDraggingBlock(false);
 
@@ -427,6 +402,7 @@ Blockly.BlockDragger.prototype.fireMoveEvent_ = function() {
   event.oldCoordinate = this.startXY_;
   event.recordNew();
   Blockly.Events.fire(event);
+  this.draggingBlock_.fireIconsMoveEvent(this.dragIconData_);
 };
 
 /**

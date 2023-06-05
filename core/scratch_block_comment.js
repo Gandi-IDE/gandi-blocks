@@ -532,6 +532,30 @@ Blockly.ScratchBlockComment.prototype.getXY = function() {
 };
 
 /**
+ * Calculate the current, language agnostic location of the comment.
+ * This value should not report different numbers in LTR vs. RTL.
+ * @return {goog.math.Coordinate} The location of the comment.
+ * @private
+ */
+Blockly.ScratchBlockComment.prototype.currentLocation = function() {
+  var xy = this.getXY();
+  if (!this.workspace.RTL) {
+    return xy;
+  }
+
+  var rtlAwareX;
+
+  var workspaceWidth = this.workspace.getWidth();
+  if (this instanceof Blockly.ScratchBlockComment) {
+    var commentWidth = this.getBubbleSize().width;
+    rtlAwareX = workspaceWidth - xy.x - commentWidth;
+  } else {
+    rtlAwareX = workspaceWidth - xy.x;
+  }
+  return new goog.math.Coordinate(rtlAwareX, xy.y);
+};
+
+/**
  * Get the height and width of this comment.
  * Note: this does not use the current bubble size because
  * the bubble may be minimized.

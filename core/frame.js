@@ -675,13 +675,14 @@ Blockly.Frame.prototype.fireFrameBlocksCoordinatesChange = function(isFollowFram
       if (Object.hasOwnProperty.call(this.blockDB_, key)) {
         var block = this.blockDB_[key];
         var event = new Blockly.Events.BlockMove(block, isFollowFrame);
-        var oldCoordinate = this.oldBlocksCoordinate_[block.id];
-        if (oldCoordinate) {
-          event.oldCoordinate = oldCoordinate;
+        var data = this.oldBlocksCoordinate_[block.id];
+        if (data) {
+          event.oldCoordinate = data.oldCoordinate;
           event.recordNew();
           var dxy = goog.math.Coordinate.difference(event.newCoordinate, event.oldCoordinate);
           block.moveBy(dxy.x, dxy.y, true);
           Blockly.Events.fire(event);
+          block.fireIconsMoveEvent(data.dragIconData);
         }
       }
     }
@@ -1078,7 +1079,10 @@ Blockly.Frame.prototype.recordBlocksRelativeToSurfaceXY = function() {
   this.oldBlocksCoordinate_ = {};
   Object.values(this.blockDB_).forEach((block) => {
     const startXY = block.getRelativeToSurfaceXY();
-    this.oldBlocksCoordinate_[block.id] = startXY;
+    this.oldBlocksCoordinate_[block.id] = {
+      startXY,
+      dragIconData: block.initIconData()
+    };
   });
 };
 
