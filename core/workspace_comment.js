@@ -211,6 +211,30 @@ Blockly.WorkspaceComment.prototype.getXY = function() {
 };
 
 /**
+ * Calculate the current, language agnostic location of the comment.
+ * This value should not report different numbers in LTR vs. RTL.
+ * @return {goog.math.Coordinate} The location of the comment.
+ * @private
+ */
+Blockly.WorkspaceComment.prototype.currentLocation = function() {
+  var xy = this.getXY();
+  if (!this.workspace.RTL) {
+    return xy;
+  }
+
+  var rtlAwareX;
+
+  var workspaceWidth = this.workspace.getWidth();
+  if (this instanceof Blockly.ScratchBlockComment) {
+    var commentWidth = this.getBubbleSize().width;
+    rtlAwareX = workspaceWidth - xy.x - commentWidth;
+  } else {
+    rtlAwareX = workspaceWidth - xy.x;
+  }
+  return new goog.math.Coordinate(rtlAwareX, xy.y);
+};
+
+/**
  * Move a comment by a relative offset.
  * @param {number} dx Horizontal offset, in workspace units.
  * @param {number} dy Vertical offset, in workspace units.
