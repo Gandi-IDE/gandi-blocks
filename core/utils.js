@@ -1302,4 +1302,5 @@ if (!goog.global['Blockly']) {
 if (!goog.global['Blockly']['Utils']) {
   goog.global['Blockly']['Utils'] = {};
 }
+goog.global['Blockly']['Utils']['tokenizeInterpolation'] = Blockly.utils.tokenizeInterpolation;
 goog.global['Blockly']['Utils']['getMouseVectorPosition'] = Blockly.utils.getMouseVectorPosition;
