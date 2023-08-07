@@ -1098,7 +1098,7 @@ Blockly.utils.CACHED_BLOCK_SVG_DATA = Object.create(null);
 /**
  * Render block.
  * @param {Blockly.Block} block Block to be converted into SVG.
- * @param {string} blockId Unique identifier of BlockSvg, which is used during caching.
+ * @param {string=} blockId Unique identifier of BlockSvg, which is used during caching.
  * @return {object} Block' svg image.
  */
 Blockly.utils.getBlockSvgImage = function(
@@ -1127,8 +1127,8 @@ Blockly.utils.getBlockSvgImage = function(
     "control_repeat_until",
   ];
   const ADDONS_BLOCK_SCALE = 3 / 4;
-  if (this.CACHED_BLOCK_SVG_DATA[blockId]) {
-    return this.CACHED_BLOCK_SVG_DATA[blockId];
+  if (Blockly.utils.CACHED_BLOCK_SVG_DATA[blockId]) {
+    return Blockly.utils.CACHED_BLOCK_SVG_DATA[blockId];
   }
   const svgContent = svgGroup.outerHTML.replace(/&nbsp;/g, " ");
   const svg = document.createElementNS(SVG_NS, "svg");
@@ -1200,29 +1200,35 @@ Blockly.utils.getBlockSvgImage = function(
   );
   let svgData = svg.outerHTML;
   // resolve image path
-  this.BLOCKS_ICONS.forEach(([key, value]) => {
+  Blockly.utils.BLOCKS_ICONS.forEach(([key, value]) => {
     svgData = svgData.replace(key, `"${value}"`);
   });
 
   const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
 
   // Ensure a maximum cache of 1000 to avoid excessive memory usage and lagging.
-  const cachedBlockSvgs = Object.keys(this.CACHED_BLOCK_SVG_DATA);
+  const cachedBlockSvgs = Object.keys(Blockly.utils.CACHED_BLOCK_SVG_DATA);
   if (cachedBlockSvgs.length > 1000) {
-    cachedBlockSvgs.slice(0, 100).forEach(key => delete this.CACHED_BLOCK_SVG_DATA[key]);
+    cachedBlockSvgs.slice(0, 100).forEach(key => delete Blockly.utils.CACHED_BLOCK_SVG_DATA[key]);
   }
 
-  this.CACHED_BLOCK_SVG_DATA[blockId] = {
+  const result = {
     url: URL.createObjectURL(svgBlob),
     height: height * ADDONS_BLOCK_SCALE,
     width: width * ADDONS_BLOCK_SCALE,
   };
-  return this.CACHED_BLOCK_SVG_DATA[blockId];
+
+  // The procedures_call type block does not undergo caching.
+  if (type !== "procedures_call") {
+    Blockly.utils.CACHED_BLOCK_SVG_DATA[blockId] = result;
+  }
+
+  return Blockly.utils.CACHED_BLOCK_SVG_DATA[blockId];
 };
 
-Blockly.utils.getDropDownBlock = function(block, doms) {
-  var desc = "";
-  var process = ({ inputList }) => {
+Blockly.utils.getBlockDesc = function(block, doms) {
+  let desc = "";
+  const process = ({ inputList }) => {
     for (const input of inputList) {
       const fields = input.fieldRow;
       for (const field of fields) {
@@ -1286,6 +1292,7 @@ if (!goog.global['Blockly']) {
 if (!goog.global['Blockly']['Utils']) {
   goog.global['Blockly']['Utils'] = {};
 }
+goog.global['Blockly']['Utils']['getBlockDesc'] = Blockly.utils.getBlockDesc;
 goog.global['Blockly']['Utils']['getBlockSvgImage'] = Blockly.utils.getBlockSvgImage;
 goog.global['Blockly']['Utils']['tokenizeInterpolation'] = Blockly.utils.tokenizeInterpolation;
 goog.global['Blockly']['Utils']['getMouseVectorPosition'] = Blockly.utils.getMouseVectorPosition;

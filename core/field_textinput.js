@@ -403,7 +403,7 @@ Blockly.FieldTextInput.prototype.showDropDown = function() {
     const block = topBlocks[index];
     const idx = Blockly.FieldTextInput.DROP_DOWN_CODE.findIndex((i) => i === block.type);
     if (idx !== -1) {
-      newOptions.push(Blockly.utils.getDropDownBlock(block, doms));
+      newOptions.push(Blockly.utils.getBlockDesc(block, doms));
     }
   }
   this._options = newOptions;
