@@ -285,15 +285,41 @@ Blockly.FieldTextInput.prototype.createMenus = function(menuOptions) {
   } else {
     contentDiv.style.display = 'block';
   }
-  for (var i = 0; i < menuOptions.length; i++) {
-    var {svg, desc} = menuOptions[i]; // Human-readable text or image.
-    // An image, not text.
+  // Maximum of 10 renderings for the first time.
+  let maxMenu = Math.min(menuOptions.length, 10);
+
+  const handler = (option, idx) => {
+    const {desc, block} = option;
+    const key = block.id + desc;
+    const svg = Blockly.utils.getBlockSvgImage(block, key);
+
     var image = new Image(svg['width'], svg['height']);
     image.src = svg['url'];
     image.alt = desc;
     var menuItem = new goog.ui.MenuItem(image);
-    menuItem.setValue(i);
+    menuItem.setValue(idx);
     Blockly.FieldTextInput.menuInput_.addChild(menuItem, true);
+  };
+
+  for (var i = 0; i < maxMenu; i++) {
+    handler(menuOptions[i], i);
+  }
+
+  if (menuOptions.length > 10) {
+    let frameId = null;
+    const oldOnHide_ = Blockly.DropDownDiv.onHide_;
+    Blockly.DropDownDiv.onHide_ = () => {
+      cancelAnimationFrame(frameId);
+      oldOnHide_ && oldOnHide_();
+    };
+    const frameHandler = () => {
+      handler(menuOptions[maxMenu], maxMenu);
+      maxMenu++;
+      if (maxMenu < menuOptions.length) {
+        frameId = requestAnimationFrame(frameHandler);
+      }
+    };
+    frameId = requestAnimationFrame(frameHandler);
   }
 };
 
@@ -361,24 +387,25 @@ Blockly.FieldTextInput.prototype.showDropDown = function() {
   const menu = new goog.ui.Menu();
   Blockly.FieldTextInput.menuInput_ = menu;
   // get blocks
-  const blocks = Blockly.utils.getDropDownBlocks(this.workspace_);
-  var tempOptions = [];
-  blocks.forEach((item) => {
-    const idx = Blockly.FieldTextInput.DROP_DOWN_CODE.findIndex((i) => i === item.block.type);
+  const toolbox = this.workspace_.getToolbox();
+  const toolboxWorkspace = toolbox.flyout_.getWorkspace();
+  const topBlocks = toolboxWorkspace.getTopBlocks();
+  const fullDom = Blockly.Xml.workspaceToDom(toolboxWorkspace);
+  const doms = {};
+  const newOptions = [];
+  for (const x of fullDom.children) {
+    if (x.tagName === "BLOCK") {
+      const id = x.getAttribute("id");
+      doms[id] = x;
+    }
+  }
+  for (let index = 0; index < topBlocks.length; index++) {
+    const block = topBlocks[index];
+    const idx = Blockly.FieldTextInput.DROP_DOWN_CODE.findIndex((i) => i === block.type);
     if (idx !== -1) {
-      if (tempOptions[idx]) {
-        tempOptions[idx].push(item);
-      } else {
-        tempOptions[idx] = [item];
-      }
+      newOptions.push(Blockly.utils.getDropDownBlock(block, doms));
     }
-  });
-  const newOptions = tempOptions.reduce((t, i) => {
-    if (i) {
-      return [...t, ...i];
-    }
-    return t;
-  }, []);
+  }
   this._options = newOptions;
   this.createMenus(newOptions);
 

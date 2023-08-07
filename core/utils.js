@@ -1093,15 +1093,17 @@ Blockly.utils.CODE_HASH = {
   "[operator_or,operator_and,operator_not]": "[sensing_touchingobject,sensing_touchingcolor,sensing_coloristouchingcolor,sensing_keypressed,sensing_mousedown,operator_gt,operator_lt,operator_equals,operator_and,operator_or,operator_not]"
 };
 
+Blockly.utils.CACHED_BLOCK_SVG_DATA = Object.create(null);
+
 /**
  * Render block.
- * @param {object} svgGroup Block's svgGroup.
- * @param {string} allBlockIds All the block ids that need to be processed
+ * @param {Blockly.Block} block Block to be converted into SVG.
+ * @param {string} blockId Unique identifier of BlockSvg, which is used during caching.
  * @return {object} Block' svg image.
  */
 Blockly.utils.getBlockSvgImage = function(
     { svgGroup_: svgGroup, type },
-    allBlockIds
+    blockId
 ) {
   const SVG_NS = "http://www.w3.org/2000/svg";
   const PATH_D_LENGTH_KEY_HASH = {
@@ -1125,7 +1127,9 @@ Blockly.utils.getBlockSvgImage = function(
     "control_repeat_until",
   ];
   const ADDONS_BLOCK_SCALE = 3 / 4;
-
+  if (this.CACHED_BLOCK_SVG_DATA[blockId]) {
+    return this.CACHED_BLOCK_SVG_DATA[blockId];
+  }
   const svgContent = svgGroup.outerHTML.replace(/&nbsp;/g, " ");
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("xmlns", SVG_NS);
@@ -1147,18 +1151,6 @@ Blockly.utils.getBlockSvgImage = function(
   rootNode.style.display = "";
   let isChanged = false;
   let reducedDistance = 0;
-  for (let index = 0; index < rootNode.children.length; index++) {
-    const childrenNode = rootNode.children[index];
-    if (
-      childrenNode.classList.contains("blocklyDraggable") &&
-      allBlockIds &&
-      allBlockIds.has(childrenNode.dataset.id)
-    ) {
-      childrenNode.parentNode.removeChild(childrenNode);
-      index--;
-      isChanged = true;
-    }
-  }
   if (isChanged && SPECIAL_BLOCK.includes(type)) {
     const path = rootNode.children[0];
     let lastNodeReducedDistance = 0;
@@ -1213,52 +1205,44 @@ Blockly.utils.getBlockSvgImage = function(
   });
 
   const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-  return {
+
+  // Ensure a maximum cache of 1000 to avoid excessive memory usage and lagging.
+  const cachedBlockSvgs = Object.keys(this.CACHED_BLOCK_SVG_DATA);
+  if (cachedBlockSvgs.length > 1000) {
+    cachedBlockSvgs.slice(0, 100).forEach(key => delete this.CACHED_BLOCK_SVG_DATA[key]);
+  }
+
+  this.CACHED_BLOCK_SVG_DATA[blockId] = {
     url: URL.createObjectURL(svgBlob),
     height: height * ADDONS_BLOCK_SCALE,
     width: width * ADDONS_BLOCK_SCALE,
   };
+  return this.CACHED_BLOCK_SVG_DATA[blockId];
 };
 
-Blockly.utils.getDropDownBlocks = function(workspace) {
-  const getItem = (block,doms) => {
-    var desc = "";
-    var process = ({ inputList }) => {
-      for (const input of inputList) {
-        const fields = input.fieldRow;
-        for (const field of fields) {
-          const text = field.getText();
-          desc = (desc ? `${desc} ` : "") + text;
-        }
-        if (input.connection) {
-          const innerBlock = input.connection.targetBlock();
-          if (innerBlock) {
-            process(innerBlock); // Recursive process connected child blocks...
-          }
+Blockly.utils.getDropDownBlock = function(block, doms) {
+  var desc = "";
+  var process = ({ inputList }) => {
+    for (const input of inputList) {
+      const fields = input.fieldRow;
+      for (const field of fields) {
+        const text = field.getText();
+        desc = (desc ? `${desc} ` : "") + text;
+      }
+      if (input.connection) {
+        const innerBlock = input.connection.targetBlock();
+        if (innerBlock) {
+          process(innerBlock); // Recursive process connected child blocks...
         }
       }
-    };
-    process(block);
-    return {
-      desc: desc,
-      block: block,
-      dom: doms[block.id],
-      svg: this.getBlockSvgImage(block),
-    };
-  };
-  const toolbox = workspace.getToolbox();
-  const toolboxWorkspace = toolbox.flyout_.getWorkspace();
-  const topBlocks = toolboxWorkspace.getTopBlocks();
-  const fullDom = Blockly.Xml.workspaceToDom(toolboxWorkspace);
-  const doms = {};
-  for (const x of fullDom.children) {
-    if (x.tagName === "BLOCK") {
-      const id = x.getAttribute("id");
-      doms[id] = x;
     }
-  }
-  const allBlocks = topBlocks.map(block => getItem(block, doms));
-  return allBlocks;
+  };
+  process(block);
+  return {
+    desc: desc,
+    block: block,
+    dom: doms[block.id]
+  };
 };
 
 Blockly.utils.moveBatchedElements = function(delta, batchedElements) {
@@ -1302,5 +1286,6 @@ if (!goog.global['Blockly']) {
 if (!goog.global['Blockly']['Utils']) {
   goog.global['Blockly']['Utils'] = {};
 }
+goog.global['Blockly']['Utils']['getBlockSvgImage'] = Blockly.utils.getBlockSvgImage;
 goog.global['Blockly']['Utils']['tokenizeInterpolation'] = Blockly.utils.tokenizeInterpolation;
 goog.global['Blockly']['Utils']['getMouseVectorPosition'] = Blockly.utils.getMouseVectorPosition;
