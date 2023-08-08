@@ -292,13 +292,14 @@ Blockly.FieldTextInput.prototype.createMenus = function(menuOptions) {
     const {desc, block} = option;
     const key = block.id + desc;
     const svg = Blockly.utils.getBlockSvgImage(block, key);
-
-    var image = new Image(svg['width'], svg['height']);
-    image.src = svg['url'];
-    image.alt = desc;
-    var menuItem = new goog.ui.MenuItem(image);
-    menuItem.setValue(idx);
-    Blockly.FieldTextInput.menuInput_.addChild(menuItem, true);
+    if (svg.url) {
+      var image = new Image(svg['width'], svg['height']);
+      image.src = svg['url'];
+      image.alt = desc;
+      var menuItem = new goog.ui.MenuItem(image);
+      menuItem.setValue(idx);
+      Blockly.FieldTextInput.menuInput_.addChild(menuItem, true);
+    }
   };
 
   for (var i = 0; i < maxMenu; i++) {

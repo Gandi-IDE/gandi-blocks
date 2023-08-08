@@ -1130,6 +1130,9 @@ Blockly.utils.getBlockSvgImage = function(
   if (Blockly.utils.CACHED_BLOCK_SVG_DATA[blockId]) {
     return Blockly.utils.CACHED_BLOCK_SVG_DATA[blockId];
   }
+  if (!svgGroup) {
+    return { url: '', height: 0, width: 0 };
+  }
   const svgContent = svgGroup.outerHTML.replace(/&nbsp;/g, " ");
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("xmlns", SVG_NS);
