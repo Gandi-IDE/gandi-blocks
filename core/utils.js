@@ -1223,7 +1223,7 @@ Blockly.utils.getBlockSvgImage = function(
     Blockly.utils.CACHED_BLOCK_SVG_DATA[blockId] = result;
   }
 
-  return Blockly.utils.CACHED_BLOCK_SVG_DATA[blockId];
+  return result;
 };
 
 Blockly.utils.getBlockDesc = function(block, doms) {
