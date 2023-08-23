@@ -47,16 +47,17 @@ Blockly.ColorSelector.colors = [
 
 Blockly.ColorSelector.isOpen = false;
 
-Blockly.ColorSelector.show = function(e, color, onChange) {
-  this.targetNode = e.target;
+Blockly.ColorSelector.show = function(target, color, onChange) {
+  this.targetNode = target;
 
   this.setColor(color || this.selectedColor_);
   this.onChange = onChange;
-
   this.isOpen = true;
-  this.position_(e);
+  this.position_(target);
   this.selectorRoot_.classList.remove('blocklyColorSelectorHidden');
-  this.closeListener = Blockly.bindEvent_(document, 'mouseup', this, this.handleClose);
+  setTimeout(() => {
+    this.closeListener = Blockly.bindEvent_(document, 'mouseup', this, this.handleClose);
+  }, 1);
 };
 
 Blockly.ColorSelector.hide = function() {
@@ -69,9 +70,6 @@ Blockly.ColorSelector.hide = function() {
 
 Blockly.ColorSelector.createDom = function() {
   this.selectorRoot_ = goog.dom.createDom('div', "blocklyColorSelector blocklyColorSelectorHidden");
-
-  const title = document.createElement("h3");
-  title.innerText = Blockly.Msg.COLOR;
   const colorListContainer = goog.dom.createDom("div", "blocklyColorOptions");
   this.colors.forEach((color) => {
     const colorOption = goog.dom.createDom("div", "blocklyColorOption" );
@@ -80,7 +78,6 @@ Blockly.ColorSelector.createDom = function() {
     colorListContainer.appendChild(colorOption);
     Blockly.bindEvent_(colorOption, 'mouseup', this, this.onSelect);
   });
-  this.selectorRoot_.appendChild(title);
   this.selectorRoot_.appendChild(colorListContainer);
 
   this.setColor(this.colors[0]);
@@ -103,20 +100,19 @@ Blockly.ColorSelector.onSelect = function(e) {
   this.hide();
 };
 
-Blockly.ColorSelector.position_ = function(e) {
+Blockly.ColorSelector.position_ = function(target) {
   const { width, height } = this.selectorRoot_.getBoundingClientRect();
-  const { left, bottom, top } = e.target.getBoundingClientRect();
+  const { width: bw, left, bottom, top } = target.getBoundingClientRect();
   const windowWidth = window.innerWidth;
-  let padding = 6;
-  let pl = left;
-  let pt = top - height - padding;
+  let pl = left + bw;
+  let pt = top;
 
-  if (top - padding  < height) {
-    pt = bottom + padding;
+  if (top < height) {
+    pt = bottom;
   }
 
-  if (windowWidth - left - padding < width) {
-    pl = left - width - padding;
+  if (windowWidth - left - bw < width) {
+    pl = left - width;
   }
   this.selectorRoot_.style.left = pl + 'px';
   this.selectorRoot_.style.top = pt + 'px';

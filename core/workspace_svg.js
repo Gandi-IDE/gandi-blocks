@@ -1592,7 +1592,11 @@ Blockly.WorkspaceSvg.prototype.cleanUp = function(block) {
       if (cursorX - xy.x !== 0 || cursorY - xy.y !== 0) {
         frame.moveBy(cursorX - xy.x, cursorY - xy.y);
       }
-      cursorY += frame.getHeight() + extraHeight;
+      if (frame.isCollapsed) {
+        cursorY += 65 + extraHeight;
+      } else {
+        cursorY += frame.getHeight() + extraHeight;
+      }
 
       let maxWidthWithComments = maxWidths[frame.id] || 0;
       maxWidth = Math.max(maxWidth, Math.max(frame.getWidth() + extraWidth, maxWidthWithComments));

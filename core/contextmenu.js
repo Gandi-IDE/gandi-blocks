@@ -113,7 +113,7 @@ Blockly.ContextMenu.populate_ = function(options, rtl) {
     }
     if (option.enabled) {
       goog.events.listen(
-          menuItem, goog.ui.Component.EventType.ACTION, option.callback);
+          menuItem, option.eventType || goog.ui.Component.EventType.ACTION, option.callback);
       menuItem.handleContextMenu = function(/* e */) {
         // Right-clicking on menu option should count as a click.
         goog.events.dispatchEvent(this, goog.ui.Component.EventType.ACTION);
@@ -360,6 +360,24 @@ Blockly.ContextMenu.frameDuplicateOption = function(frame, event) {
     text: Blockly.utils.createMenuOptionNode(Blockly.Msg.DUPLICATE, goog.userAgent.WINDOWS ? 'Ctrl C' : '⌘ C'),
     enabled: true,
     callback: Blockly.scratchBlocksUtils.duplicateAndDragFrameCallback(frame, event)
+  };
+  return deleteOption;
+};
+
+Blockly.ContextMenu.frameSetColorOption = function(frame) {
+  const element = Blockly.utils.createMenuOptionNode(Blockly.Msg.COLOR);
+  const callback = function(color){
+    frame.setColor(color);
+    Blockly.ContextMenu.hide();
+  };
+  var deleteOption = {
+    text: element,
+    enabled: true,
+    callback: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      Blockly.ColorSelector.show(e.target.element_, frame.color, callback);
+    }
   };
   return deleteOption;
 };

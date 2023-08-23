@@ -329,12 +329,14 @@ Blockly.utils.createSvgElement = function(name, attrs, parent /*, opt_workspace 
 Blockly.utils.createMenuOptionNode = function(text, shortcutKey, textColor) {
   const element = goog.dom.createDom('div', {class: 'keyboard-shortcuts-item'});
   const textNode = goog.dom.createDom('span', {}, text);
+  element.appendChild(textNode);
   if (textColor) {
     textNode.style.color = textColor;
   }
-  const shortcutKeyNode = goog.dom.createDom('span', {class: 'keyboard-shortcuts'}, shortcutKey);
-  element.appendChild(textNode);
-  element.appendChild(shortcutKeyNode);
+  if (shortcutKey) {
+    const shortcutKeyNode = goog.dom.createDom('span', {class: 'keyboard-shortcuts'}, shortcutKey);
+    element.appendChild(shortcutKeyNode);
+  }
   return element;
 };
 

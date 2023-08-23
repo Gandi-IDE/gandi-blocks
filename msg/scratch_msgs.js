@@ -259,6 +259,7 @@ Blockly.ScratchMsgs.locales["en"] =
   "UNDO": "Undo",
   "REDO": "Redo",
   "FRAME": "Frame",
+  "COLLAPSED_X_BLOCKS": "Collapsed %1 blocks",
   "COLOR": "Color",
   "CREATE_FRAME": "Create Frame",
   "EDIT_PROCEDURE": "Edit",
