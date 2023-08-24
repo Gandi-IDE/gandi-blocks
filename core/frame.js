@@ -218,7 +218,7 @@ Blockly.Frame.prototype.resizeButtonHeight_ = 8;
  * @type {string}
  * @private
  */
-Blockly.Frame.prototype.titleInputHeight_ = 20;
+Blockly.Frame.prototype.titleInputHeight_ = 24;
 
 /**
  * The frame border color.
@@ -339,9 +339,6 @@ Blockly.Frame.prototype.createDom_ = function() {
   this.foreignObjectBody_ = document.createElementNS(Blockly.HTML_NS, 'body');
   this.foreignObjectBody_.setAttribute('xmlns', Blockly.HTML_NS);
   this.foreignObjectBody_.className = 'blocklyMinimalBody blocklyFrameForeignObjectBody';
-  this.foreignObjectHeader_ = document.createElementNS(Blockly.HTML_NS, 'div');
-  this.foreignObjectHeader_.className = 'blocklyMinimalBody blocklyFrameForeignObjectHeader';
-  this.foreignObjectBody_.appendChild(this.foreignObjectHeader_);
   this.foreignObject_.appendChild(this.foreignObjectBody_);
   this.createCollapseButton_();
   this.createTitleEditor_();
@@ -354,20 +351,34 @@ Blockly.Frame.prototype.createCollapseButton_ = function() {
   this.collapseButton_ = document.createElementNS(Blockly.HTML_NS, 'div');
   this.collapseButton_.className = 'blocklyFrameActionButton blocklyFrameCollapseButton';
   Blockly.bindEventWithChecks_(this.collapseButton_, 'mousedown', this, this.triggerChangeCollapsed);
-  this.foreignObjectHeader_.appendChild(this.collapseButton_);
+  this.foreignObjectBody_.appendChild(this.collapseButton_);
 };
 
 Blockly.Frame.prototype.createCollapsedContent_ = function() {
+  var tx = this.resizeButtonWidth_ / 2;
+  var ty = this.titleInputHeight_ + this.resizeButtonHeight_ / 2;
+
+  this.collapseContentForeignObject_ = Blockly.utils.createSvgElement('foreignObject', {
+    class: 'blocklyFrameCollapsedContent',
+    'x': tx,
+    'y': ty,
+    height: 40,
+    width: this.rect_.width
+  }, this.frameGroup_);
+  this.collapseContentForeignObjectBody_ = document.createElementNS(Blockly.HTML_NS, 'body');
+  this.collapseContentForeignObjectBody_.setAttribute('xmlns', Blockly.HTML_NS);
+  this.collapseContentForeignObjectBody_.className = 'blocklyMinimalBody blocklyFrameForeignObjectBody';
+  this.collapseContentForeignObject_.appendChild(this.collapseContentForeignObjectBody_);
+
   this.collapseContent_ = document.createElementNS(Blockly.HTML_NS, 'div');
-  this.collapseContent_.className = 'blocklyFrameContent';
+  this.collapseContent_.className = 'collapsedContent';
 
   if (this.isCollapsed) {
     this.frameGroup_.classList.add('blocklyFrameCollapsed');
     this.blocksGroup_.style.display = 'none';
     this.resizeGroup_.style.display = 'none';
     this.updateCollapsedContent_();
-    this.foreignObject_.setAttribute('height', this.titleInputHeight_ + 45);
-    this.foreignObjectBody_.appendChild(this.collapseContent_);
+    this.collapseContentForeignObjectBody_.appendChild(this.collapseContent_);
     setTimeout(() => {
       Object.values(this.blockDB_).forEach((block) => {
         block.getConnections_().forEach(c => c.hideAll());
@@ -387,7 +398,7 @@ Blockly.Frame.prototype.createLockButton_ = function() {
   this.lockButton_ = document.createElementNS(Blockly.HTML_NS, 'div');
   this.lockButton_.className = 'blocklyFrameActionButton blocklyFrameLockButton';
   Blockly.bindEventWithChecks_(this.lockButton_, 'mousedown', this, this.triggerChangeLock);
-  this.foreignObjectHeader_.appendChild(this.lockButton_);
+  this.foreignObjectBody_.appendChild(this.lockButton_);
 };
 
 /**
@@ -404,7 +415,7 @@ Blockly.Frame.prototype.createMenuButton_ = function() {
     this.showContextMenu_(e);
     e.stopPropagation();
   });
-  this.foreignObjectHeader_.appendChild(this.menuButton_);
+  this.foreignObjectBody_.appendChild(this.menuButton_);
 };
 
 /**
@@ -458,7 +469,7 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
       this.frameGroup_.classList.remove('blocklyFrameHover');
     }
   });
-  this.foreignObjectHeader_.appendChild(titleWrapper);
+  this.foreignObjectBody_.appendChild(titleWrapper);
 
   var xy = this.computeFrameRelativeXY();
   this.translate(xy.x, xy.y);
@@ -1409,7 +1420,7 @@ Blockly.Frame.prototype.setColor = function(color) {
     this.fireFrameChange('color', {color: this.color}, {color: color});
     this.color = color;
     this.svgRect_.setAttribute('fill', `rgba(${color},0.12)`);
-    this.collapseButton_.style.setProperty('--color', `rgb(${color})`);
+    this.collapseContent_.style.backgroundColor = `rgb(${this.color})`;
   }
 };
 
@@ -1440,13 +1451,13 @@ Blockly.Frame.prototype.triggerChangeCollapsed = function() {
   if (this.locked) return;
   this.fireFrameChange('collapsed', {collapsed: this.isCollapsed}, {collapsed: !this.isCollapsed});
   this.isCollapsed = !this.isCollapsed;
+  this.collapseContentForeignObject_.setAttribute("width", Math.abs(this.rect_.width));
   if (this.isCollapsed) {
     this.frameGroup_.classList.add('blocklyFrameCollapsed');
     this.blocksGroup_.style.display = 'none';
     this.resizeGroup_.style.display = 'none';
     this.updateCollapsedContent_();
-    this.foreignObject_.setAttribute('height', this.titleInputHeight_ + 45);
-    this.foreignObjectBody_.appendChild(this.collapseContent_);
+    this.collapseContentForeignObjectBody_.appendChild(this.collapseContent_);
     Object.values(this.blockDB_).forEach((block) => {
       block.getConnections_().forEach(c => c.hideAll());
     });
@@ -1454,9 +1465,8 @@ Blockly.Frame.prototype.triggerChangeCollapsed = function() {
     this.frameGroup_.classList.remove('blocklyFrameCollapsed');
     this.blocksGroup_.style.display = 'block';
     this.resizeGroup_.style.display = 'block';
-    this.foreignObject_.setAttribute('height', this.titleInputHeight_);
     if (this.collapseContent_.parentNode) {
-      this.foreignObjectBody_.removeChild(this.collapseContent_);
+      this.collapseContentForeignObjectBody_.removeChild(this.collapseContent_);
     }
     Object.values(this.blockDB_).forEach((block) => {
       block.getConnections_().forEach(c => c.unhideAll());
@@ -1464,7 +1474,6 @@ Blockly.Frame.prototype.triggerChangeCollapsed = function() {
   }
   const frameXY = this.getFrameGroupRelativeXY();
   const frameWH = this.getHeightWidth();
-  const scale = this.workspace.scale;
   const topBlocks = this.workspace.getTopBlocks();
   const topFrames = this.workspace.getTopFrames(true);
   const items = topBlocks.concat(topFrames);
@@ -1475,9 +1484,9 @@ Blockly.Frame.prototype.triggerChangeCollapsed = function() {
     const landscape = !(itemXY.x + itemWH.width < frameXY.x) && !(frameXY.x + frameWH.width < itemXY.x);
     const vertical = itemXY.y > frameXY.y;
     if (landscape && vertical) {
-      let distance = this.isCollapsed ? (-(frameWH.height - 45 / scale)) : (frameWH.height - 45 / scale);
+      let distance = this.isCollapsed ? (-(frameWH.height - 40)) : (frameWH.height - 40);
       if (this.isCollapsed && itemXY.y - frameXY.y < frameWH.height) {
-        distance =  -(itemXY.y - frameXY.y - 65 / scale);
+        distance =  frameXY.y - itemXY.y + 80;
       }
       item.moveBy(0, distance);
     }

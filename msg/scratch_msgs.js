@@ -552,6 +552,7 @@ Blockly.ScratchMsgs.locales["zh-cn"] =
   "DELETE_X_BLOCKS": "删除 %1 个积木",
   "DELETE_ALL_BLOCKS": "删除全部 %1 个积木？",
   "CLEAN_UP": "整理积木",
+  "COLLAPSED_X_BLOCKS": "已折叠 %1 块积木",
   "HELP": "帮助",
   "UNDO": "撤销",
   "REDO": "重做",
