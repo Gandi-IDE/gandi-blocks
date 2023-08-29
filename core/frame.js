@@ -1461,6 +1461,12 @@ Blockly.Frame.prototype.triggerChangeCollapsed = function() {
     Object.values(this.blockDB_).forEach((block) => {
       block.getConnections_().forEach(c => c.hideAll());
     });
+    for (const key in this.workspace.commentDB_) {
+      const comment = this.workspace.commentDB_[key];
+      if (comment.block_ && comment.block_.isInFrame() === this) {
+        comment.bubble_.bubbleGroup_.style.display = 'none';
+      }
+    }
   } else {
     this.frameGroup_.classList.remove('blocklyFrameCollapsed');
     this.blocksGroup_.style.display = 'block';
@@ -1471,6 +1477,12 @@ Blockly.Frame.prototype.triggerChangeCollapsed = function() {
     Object.values(this.blockDB_).forEach((block) => {
       block.getConnections_().forEach(c => c.unhideAll());
     });
+    for (const key in this.workspace.commentDB_) {
+      const comment = this.workspace.commentDB_[key];
+      if (comment.block_ && comment.block_.isInFrame() === this) {
+        comment.bubble_.bubbleGroup_.style.display = 'block';
+      }
+    }
   }
   const frameXY = this.getFrameGroupRelativeXY();
   const frameWH = this.getHeightWidth();
@@ -1623,6 +1635,10 @@ Blockly.Frame.prototype.dispose = function(retainBlocks) {
   const ws = this.workspace;
   const oldBlocks = Object.assign({}, this.blockDB_);
 
+  // Before deleting a block, it is necessary to fire the "delete Frame" event.
+  // This will allow the block to fall back onto the frame when undoing the deletion of the frame.
+  Blockly.Events.fire(new Blockly.Events.FrameDelete(this));
+
   for (const key in oldBlocks) {
     const block = oldBlocks[key];
     if (retainBlocks) {
@@ -1637,8 +1653,6 @@ Blockly.Frame.prototype.dispose = function(retainBlocks) {
       block.dispose(false, true);
     }
   }
-
-  Blockly.Events.fire(new Blockly.Events.FrameDelete(this));
 
   goog.dom.removeNode(this.frameGroup_);
   this.frameGroup_ = null;
