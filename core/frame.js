@@ -1451,12 +1451,16 @@ Blockly.Frame.prototype.triggerChangeLock = function() {
 
 /**
  * Toggle collapsed state.
+ * @param {Event | boolean} isCollapsed Whether the frame is collapsed.
  */
-Blockly.Frame.prototype.triggerChangeCollapsed = function() {
-  if (Blockly.locked) return;
-  if (this.locked) return;
-  this.fireFrameChange('collapsed', {collapsed: this.isCollapsed}, {collapsed: !this.isCollapsed});
-  this.isCollapsed = !this.isCollapsed;
+Blockly.Frame.prototype.triggerChangeCollapsed = function(isCollapsed) {
+  if (Blockly.locked || this.locked) return;
+  const newStatus = typeof isCollapsed === 'boolean' ? isCollapsed : !this.isCollapsed;
+  if (newStatus === this.isCollapsed) return;
+
+  Blockly.Events.setGroup(true);
+  this.fireFrameChange('collapsed', {collapsed: this.isCollapsed}, {collapsed: newStatus});
+  this.isCollapsed = newStatus;
   this.collapseContentForeignObject_.setAttribute("width", Math.abs(this.rect_.width));
   if (this.isCollapsed) {
     this.frameGroup_.classList.add('blocklyFrameCollapsed');
@@ -1490,6 +1494,11 @@ Blockly.Frame.prototype.triggerChangeCollapsed = function() {
       }
     }
   }
+
+  if (typeof isCollapsed === 'boolean') {
+    Blockly.Events.setGroup(false);
+    return;
+  }
   const frameXY = this.getFrameGroupRelativeXY();
   const frameWH = this.getHeightWidth();
   const topBlocks = this.workspace.getTopBlocks();
@@ -1509,6 +1518,8 @@ Blockly.Frame.prototype.triggerChangeCollapsed = function() {
       item.moveBy(0, distance);
     }
   }
+  Blockly.Events.setGroup(false);
+
   this.workspace.queueIntersectionCheck();
 };
 
