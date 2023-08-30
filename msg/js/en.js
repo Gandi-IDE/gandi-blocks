@@ -274,6 +274,7 @@ Blockly.Msg["DELETE_VARIABLE"] = "Delete the \"%1\" variable";
 Blockly.Msg["DISABLED_VARIABLE"] = "This \"%1\" only can be deleted、rename in stage.";
 Blockly.Msg["VARIABLE"] = "variable";
 Blockly.Msg["LIST"] = "list";
+Blockly.Msg["COLLAPSED_X_BLOCKS"] = "Collapsed %1 blocks";
 Blockly.Msg["NEW_PROCEDURE"] = "Make a Block";
 Blockly.Msg["PROCEDURE_ALREADY_EXISTS"] = "A procedure named \"%1\" already exists.";
 Blockly.Msg["PROCEDURE_DEFAULT_NAME"] = "block name";

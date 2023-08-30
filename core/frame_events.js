@@ -83,6 +83,7 @@ Blockly.Events.FrameCreate = function(frame) {
   this.title = frame.title;
   this.color = frame.color;
   this.locked = frame.locked;
+  this.collapsed = frame.isCollapsed;
   this.blocks = Object.keys(frame.blockDB_);
   this.x = frame.rect_.left;
   this.y = frame.rect_.top;
@@ -106,6 +107,7 @@ Blockly.Events.FrameCreate.prototype.toJson = function() {
   json['title'] = this.title;
   json['color'] = this.color;
   json['locked'] = this.locked;
+  json['collapsed'] = this.collapsed;
   json['blocks'] = this.blocks;
   json['x'] = this.x;
   json['y'] = this.y;
@@ -123,6 +125,7 @@ Blockly.Events.FrameCreate.prototype.fromJson = function(json) {
   this.title = json['title'];
   this.color = json['color'];
   this.locked = json['locked'];
+  this.collapsed = json['collapsed'];
   this.blocks = json['blocks'];
   this.x = json['x'];
   this.y = json['y'];
@@ -142,6 +145,7 @@ Blockly.Events.FrameCreate.prototype.run = function(forward) {
       title: this.title,
       color: this.color,
       locked: this.locked,
+      collapsed: this.collapsed,
       blocks: this.blocks,
       x: this.x,
       y: this.y,
@@ -168,6 +172,7 @@ Blockly.Events.FrameDelete = function(frame) {
   this.title = frame.title;
   this.color = frame.color;
   this.locked = frame.locked;
+  this.collapsed = frame.isCollapsed;
   this.blocks = Object.keys(frame.blockDB_);
   this.x = frame.rect_.left;
   this.y = frame.rect_.top;
@@ -191,6 +196,7 @@ Blockly.Events.FrameDelete.prototype.toJson = function() {
   json['title'] = this.title;
   json['color'] = this.color;
   json['locked'] = this.locked;
+  json['collapsed'] = this.collapsed;
   json['blocks'] = this.blocks;
   json['x'] = this.x;
   json['y'] = this.y;
@@ -208,6 +214,7 @@ Blockly.Events.FrameDelete.prototype.fromJson = function(json) {
   this.title = json['title'];
   this.color = json['color'];
   this.locked = json['locked'];
+  this.collapsed = json['collapsed'];
   this.blocks = json['blocks'];
   this.x = json['x'];
   this.y = json['y'];
@@ -229,6 +236,7 @@ Blockly.Events.FrameDelete.prototype.run = function(forward) {
       title: this.title,
       color: this.color,
       locked: this.locked,
+      isCollapsed: this.collapsed,
       blocks: this.blocks,
       x: this.x,
       y: this.y,
@@ -507,6 +515,9 @@ Blockly.Events.FrameChange.prototype.run = function(forward) {
       break;
     case 'color':
       frame.setColor(value.color);
+      break;
+    case 'collapsed':
+      frame.triggerChangeCollapsed(value.collapsed);
       break;
     case 'locked':
       frame.triggerChangeLock();
