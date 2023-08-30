@@ -113,6 +113,13 @@ Blockly.ScratchBlockComment = function(block, text, id, x, y, minimized) {
    */
   this.blockId = block.id;
 
+  /**
+   * The comment's bubble inner and outer display types.
+   * @type {string}
+   * @package
+   */
+  this.display_ = "block";
+
   if (!block.rendered) {
     Blockly.ScratchBlockComment.fireCreateEvent(this);
   }
@@ -368,6 +375,7 @@ Blockly.ScratchBlockComment.prototype.setVisible = function(visible) {
     this.bubble_.registerDeleteEvent(this.dispose.bind(this));
     this.bubble_.registerContextMenuCallback(this.showContextMenu_.bind(this));
     this.updateColour();
+    this.updateDisplay();
   } else {
     // Dispose of the bubble.
     this.bubble_.dispose();
@@ -381,6 +389,17 @@ Blockly.ScratchBlockComment.prototype.setVisible = function(visible) {
   this.setBubbleSize(size.width, size.height);
   if (visible) {
     Blockly.ScratchBlockComment.fireCreateEvent(this);
+  }
+};
+
+Blockly.ScratchBlockComment.prototype.setDisplay = function(value) {
+  this.display_ = value;
+  this.updateDisplay();
+};
+
+Blockly.ScratchBlockComment.prototype.updateDisplay = function() {
+  if (this.isVisible()) {
+    this.bubble_.setDisplay(this.display_);
   }
 };
 

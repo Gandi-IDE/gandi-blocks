@@ -600,6 +600,14 @@ Blockly.Bubble.prototype.setColour = function(hexColour) {
 };
 
 /**
+ * Change the display of a bubble.
+ * @param {string} value Block or none.
+ */
+Blockly.Bubble.prototype.setDisplay = function(value) {
+  this.bubbleGroup_.style.display = value;
+};
+
+/**
  * Dispose of this bubble.
  */
 Blockly.Bubble.prototype.dispose = function() {

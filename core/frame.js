@@ -386,7 +386,7 @@ Blockly.Frame.prototype.createCollapsedContent_ = function() {
       for (const key in this.workspace.commentDB_) {
         const comment = this.workspace.commentDB_[key];
         if (comment.block_ && comment.block_.isInFrame() === this) {
-          comment.bubble_.bubbleGroup_.style.display = 'none';
+          comment.setDisplay('none');
         }
       }
     }, 1);
@@ -1474,7 +1474,7 @@ Blockly.Frame.prototype.triggerChangeCollapsed = function(isCollapsed) {
     for (const key in this.workspace.commentDB_) {
       const comment = this.workspace.commentDB_[key];
       if (comment.block_ && comment.block_.isInFrame() === this) {
-        comment.bubble_.bubbleGroup_.style.display = 'none';
+        comment.setDisplay('none');
       }
     }
   } else {
@@ -1490,7 +1490,7 @@ Blockly.Frame.prototype.triggerChangeCollapsed = function(isCollapsed) {
     for (const key in this.workspace.commentDB_) {
       const comment = this.workspace.commentDB_[key];
       if (comment.block_ && comment.block_.isInFrame() === this) {
-        comment.bubble_.bubbleGroup_.style.display = 'block';
+        comment.setDisplay('block');
       }
     }
   }
