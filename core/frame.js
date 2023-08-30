@@ -383,6 +383,12 @@ Blockly.Frame.prototype.createCollapsedContent_ = function() {
       Object.values(this.blockDB_).forEach((block) => {
         block.getConnections_().forEach(c => c.hideAll());
       });
+      for (const key in this.workspace.commentDB_) {
+        const comment = this.workspace.commentDB_[key];
+        if (comment.block_ && comment.block_.isInFrame() === this) {
+          comment.bubble_.bubbleGroup_.style.display = 'none';
+        }
+      }
     }, 1);
   }
 };
