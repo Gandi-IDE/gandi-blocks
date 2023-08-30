@@ -1324,7 +1324,7 @@ Blockly.Css.CONTENT = [
     'text-align: center;',
     'font-size: 12pt;',
     'font-weight: 500;',
-    'line-height: 40px;',
+    'line-height: 60px;',
     'padding: 0 5px;',
     'white-space: nowrap;',
     'overflow: hidden;',

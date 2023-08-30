@@ -362,7 +362,7 @@ Blockly.Frame.prototype.createCollapsedContent_ = function() {
     class: 'blocklyFrameCollapsedContent',
     'x': tx,
     'y': ty,
-    height: 40,
+    height: 60,
     width: this.rect_.width
   }, this.frameGroup_);
   this.collapseContentForeignObjectBody_ = document.createElementNS(Blockly.HTML_NS, 'body');
@@ -1496,9 +1496,9 @@ Blockly.Frame.prototype.triggerChangeCollapsed = function() {
     const landscape = !(itemXY.x + itemWH.width < frameXY.x) && !(frameXY.x + frameWH.width < itemXY.x);
     const vertical = itemXY.y > frameXY.y;
     if (landscape && vertical) {
-      let distance = this.isCollapsed ? (-(frameWH.height - 40)) : (frameWH.height - 40);
+      let distance = this.isCollapsed ? (-(frameWH.height - 60)) : (frameWH.height - 60);
       if (this.isCollapsed && itemXY.y - frameXY.y < frameWH.height) {
-        distance =  frameXY.y - itemXY.y + 80;
+        distance =  frameXY.y - itemXY.y + 100;
       }
       item.moveBy(0, distance);
     }
