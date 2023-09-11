@@ -640,13 +640,21 @@ Blockly.Block.prototype.isDeletable = function() {
 };
 
 Blockly.Block.prototype.isInLockedFrame = function() {
-  let frame = this.frame_;
-  let block = this;
-  while (block.parentBlock_ && !frame) {
-    frame = block.parentBlock_.frame_;
-    block = block.parentBlock_;
-  }
+  const frame = this.isInFrame();
   return frame && frame.locked;
+};
+
+/**
+ * Get whether this block is selectable or not.
+ * @return {boolean} True if selectable.
+ */
+Blockly.Block.prototype.isSelectable = function() {
+  let selectable = true;
+  const frame = this.isInFrame();
+  if (frame && (frame.locked || frame.isCollapsed)) {
+    selectable = false;
+  }
+  return selectable;
 };
 
 Blockly.Block.prototype.isInFrame = function() {
