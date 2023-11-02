@@ -580,7 +580,6 @@ Blockly.ScratchMsgs.locales["zh-cn"] =
   "DELETE_VARIABLE_CONFIRMATION": "删除%1处「%2」变量吗？",
   "CANNOT_DELETE_VARIABLE_PROCEDURE": "无法删除变量「%1」，因为函数「%2」的定义中用到了它",
   "DELETE_VARIABLE": "删除变量「%1」",
-  "DISABLED_VARIABLE": "该%1只能在舞台背景中进行修改或删除",
   "VARIABLE": "变量",
   "LIST": "列表",
   "NEW_PROCEDURE": "制作新的积木",

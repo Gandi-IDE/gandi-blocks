@@ -959,7 +959,6 @@ Blockly.Css.CONTENT = [
     'border: 1px solid var(--theme-color-200);',
     'border-radius: 8px;',
     'display: flex;',
-    'overflow: hidden;',
     'flex-direction: column;',
     'font-family: "Helvetica Neue", Helvetica, sans-serif;',
     'z-index: 40;', /* so blocks go over toolbox when dragging */
@@ -1684,7 +1683,7 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.disabled .blocklyTouchTargetBackground {',
-    'cursor: var(--cursor-icon-disable);',
+    'cursor: not-allowed;',
   '}',
 
   '.blocklyFlyoutCheckboxPath {',
@@ -1708,6 +1707,8 @@ Blockly.Css.CONTENT = [
     'height: calc(100% - 29px);',
     'flex: 1;',
     'cursor: auto;',
+    'overflow: hidden;',
+    'border-radius: 0 0 8px 8px;',
   '}',
 
   '.dragStartInWorkspace .toolboxBody:hover::after {',

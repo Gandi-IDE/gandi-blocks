@@ -329,7 +329,6 @@ Blockly.Msg.VARIABLE_ALREADY_EXISTS_FOR_ANOTHER_TYPE = 'A variable named "%1" al
 Blockly.Msg.DELETE_VARIABLE_CONFIRMATION = 'Delete %1 uses of the "%2" variable?';
 Blockly.Msg.CANNOT_DELETE_VARIABLE_PROCEDURE = 'Can\'t delete the variable "%1" because it\'s part of the definition of the function "%2"';
 Blockly.Msg.DELETE_VARIABLE = 'Delete the "%1" variable';
-Blockly.Msg.DISABLED_VARIABLE = 'This "%1" only can be deleted、rename in stage.';
 Blockly.Msg.VARIABLE = 'variable';
 Blockly.Msg.LIST = 'list';
 

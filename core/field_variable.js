@@ -347,22 +347,13 @@ Blockly.FieldVariable.prototype.onItemSelected = function(menu, menuItem) {
   var id = menuItem.getValue();
   if (this.sourceBlock_ && this.sourceBlock_.workspace) {
     var workspace = this.sourceBlock_.workspace;
-    var variableEditable = Blockly.utils.getVariableIsEditable(this.value_);
     if (id == Blockly.RENAME_VARIABLE_ID) {
-      if(variableEditable) {
-        // Rename variable.
-        Blockly.Variables.renameVariable(workspace, this.variable_);
-      } else {
-        Blockly.utils.toast(Blockly.Msg.DISABLED_VARIABLE.replace('%1', Blockly.Msg[this.name]));
-      }
+      // Rename variable.
+      Blockly.Variables.renameVariable(workspace, this.variable_);
       return;
     } else if (id == Blockly.DELETE_VARIABLE_ID) {
-      if(variableEditable) {
-        // Delete variable.
-        workspace.deleteVariableById(this.variable_.getId());
-      } else {
-        Blockly.utils.toast(Blockly.Msg.DISABLED_VARIABLE.replace('%1', Blockly.Msg[this.name]));
-      }
+      // Delete variable.
+      workspace.deleteVariableById(this.variable_.getId());
       return;
     } else if (id == Blockly.NEW_BROADCAST_MESSAGE_ID) {
       var thisField = this;

@@ -841,17 +841,6 @@ Blockly.BlockSvg.prototype.showHelp_ = function() {
  * @private
  */
 Blockly.BlockSvg.prototype.showContextMenu_ = function(e) {
-  if (this.flyoutCheckbox && this.flyoutCheckbox.disabled) {
-    var type = '';
-    if(this.type === "data_variable") {
-      type = Blockly.Msg.VARIABLE;
-    } else if(this.type === "data_listcontents") {
-      type = Blockly.Msg.LIST;
-    }
-
-    Blockly.utils.toast(Blockly.Msg.DISABLED_VARIABLE.replace('%1', type));
-    return;
-  }
   if (this.workspace.options.readOnly || !this.contextMenu) {
     return;
   }
