@@ -679,6 +679,8 @@ Blockly.ContextMenu.appendDynamicMenuItem = function(e, options) {
           return tag || (!targetFlyout && targetFrame) ;
         case 'comment':
           return tag || (!targetFlyout && targetComment);
+        case 'toolbox':
+          return tag || targetFlyout;
         default:
           break;
       }

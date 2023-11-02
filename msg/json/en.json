@@ -265,7 +265,6 @@
     "DELETE_VARIABLE_CONFIRMATION": "Delete %1 uses of the \"%2\" variable?",
     "CANNOT_DELETE_VARIABLE_PROCEDURE": "Can't delete the variable \"%1\" because it's part of the definition of the function \"%2\"",
     "DELETE_VARIABLE": "Delete the \"%1\" variable",
-    "DISABLED_VARIABLE": "This \"%1\" only can be deleted、rename in stage.",
     "VARIABLE": "variable",
     "LIST": "list",
     "NEW_PROCEDURE": "Make a Block",

@@ -642,22 +642,10 @@ Blockly.VerticalFlyout.prototype.createCheckbox_ = function(block, cursorX,
         'height': this.CHECKBOX_SIZE + 2 * touchMargin,
         'width': this.CHECKBOX_SIZE + 2 * touchMargin,
       }, checkboxGroup);
-  var checkboxObj = {svgRoot: checkboxGroup, block: block};
+  var checkboxObj = {svgRoot: checkboxGroup, clicked: checkboxState, block: block};
 
-  if(checkboxState instanceof Object) {
-    checkboxObj.clicked = checkboxState.checked;
-    checkboxObj.disabled = checkboxState.disabled;
-  } else {
-    checkboxObj.clicked = !!checkboxState;
-    checkboxObj.disabled = false;
-  }
-
-  if (checkboxObj.clicked) {
+  if (checkboxState) {
     Blockly.utils.addClass((checkboxObj.svgRoot), 'checked');
-  }
-
-  if (checkboxObj.disabled) {
-    Blockly.utils.addClass((checkboxObj.svgRoot), 'disabled');
   }
 
   block.flyoutCheckbox = checkboxObj;
@@ -675,17 +663,7 @@ Blockly.VerticalFlyout.prototype.createCheckbox_ = function(block, cursorX,
  */
 Blockly.VerticalFlyout.prototype.checkboxClicked_ = function(checkboxObj) {
   return function(e) {
-    if (checkboxObj.disabled && !Blockly.locked) {
-      var type = '';
-      if(checkboxObj.block.type === "data_variable") {
-        type = Blockly.Msg.VARIABLE;
-      } else if(checkboxObj.block.type === "data_listcontents") {
-        type = Blockly.Msg.LIST;
-      }
-      Blockly.utils.toast(Blockly.Msg.DISABLED_VARIABLE.replace('%1', type));
-    } else if(!Blockly.locked) {
-      this.setCheckboxState(checkboxObj.block.id, !checkboxObj.clicked);
-    }
+    this.setCheckboxState(checkboxObj.block.id, !checkboxObj.clicked);
     // This event has been handled.  No need to bubble up to the document.
     e.stopPropagation();
     e.preventDefault();
