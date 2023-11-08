@@ -520,6 +520,12 @@ Blockly.Procedures.editProcedureCallback_ = function(block) {
         block.workspace.targetWorkspace : block.workspace;
     block = Blockly.Procedures.getPrototypeBlock(
         block.getProcCode(), workspaceToSearch);
+    // If the block does not exist, it means that it is a globally custom block
+    // and cannot be edited in the current workspace.
+    if (!block) {
+      Blockly.utils.toast('This block is not editable for the current sprite');
+      return;
+    }
   }
   // Block now refers to the procedure prototype block, it is safe to proceed.
   Blockly.Procedures.externalProcedureDefCallback(
@@ -569,7 +575,7 @@ Blockly.Procedures.externalProcedureDefCallback = function(/** mutator, callback
  */
 Blockly.Procedures.makeEditOption = function(block) {
   var editOption = {
-    enabled: block.isGlobal_ ? !Blockly.utils.isTeamwork() : true,
+    enabled: true,
     text: Blockly.Msg.EDIT_PROCEDURE,
     callback: function() {
       Blockly.Procedures.editProcedureCallback_(block);
