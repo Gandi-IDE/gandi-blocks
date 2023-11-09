@@ -1043,25 +1043,6 @@ Blockly.utils.getNewVariableIsDisabled = function() {
   return false;
 };
 
-/**
- * Gets the variable is editable or not.
- * @param {Boolean} id Variable id.
- * @return {boolean} True if the new variable should be disabled.
- * @package
- */
-Blockly.utils.getVariableIsEditable = function() {
-  return true;
-};
-
-/**
- * Gets whether the mode is collaborative.
- * @return {boolean} True if the mode is collaborative.
- * @package
- */
-Blockly.utils.isTeamwork = function() {
-  return false;
-};
-
 Blockly.utils.BLOCKS_ICONS = [
   [
     /"[\S]+?repeat\.svg"/gm,
