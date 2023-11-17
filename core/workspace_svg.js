@@ -1828,14 +1828,13 @@ Blockly.WorkspaceSvg.prototype.showContextMenu_ = function(e) {
     }
   }
 
-  var DELAY = 10;
   function deleteNext() {
     Blockly.Events.setGroup(eventGroup);
     var block = deleteList.shift();
     if (block) {
       if (block.workspace && !block.isInLockedFrame()) {
         block.dispose(false, true);
-        setTimeout(deleteNext, DELAY);
+        requestAnimationFrame(deleteNext);
       } else {
         deleteNext();
       }

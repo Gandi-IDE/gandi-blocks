@@ -298,13 +298,21 @@ Blockly.BlockSvg.prototype.initIconData = function() {
   for (var i = 0, descendant; descendant = descendants[i]; i++) {
     var icons = descendant.getIcons();
     for (var j = 0; j < icons.length; j++) {
-      var data = {
+      const icon = icons[j];
+      const data = {
         // goog.math.Coordinate with x and y properties (workspace coordinates).
-        location: icons[j].getIconLocation(),
+        location: icon.getIconLocation(),
         // Blockly.Icon
-        icon: icons[j],
-        currentLocation: icons[j].isVisible() ? icons[j].bubble_.comment.currentLocation() : null,
+        icon,
+        currentLocation: null,
       };
+      const setCurrentLocation = () => {
+        data.currentLocation = icon.isVisible() ? icon.bubble_.comment.currentLocation() : null;
+        if (!data.currentLocation) {
+          requestAnimationFrame(setCurrentLocation);
+        }
+      };
+      setCurrentLocation();
       dragIconData.push(data);
     }
   }
