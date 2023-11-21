@@ -1,6 +1,6 @@
 {
   "name": "@xigua/gandi-blocks",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "description": "Gandi Blocks is a library for building creative computing interfaces.",
   "author": "Massachusetts Institute of Technology",
   "license": "Apache-2.0",
@@ -8,7 +8,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/LLK/scratch-blocks.git",
-    "sha": "8bd00d3e4c8438e400b10833a661e189ca3adbf6"
+    "sha": "71113ff6412aa3ae35e1e38bb12f75bd181e4298"
   },
   "main": "./dist/vertical.js",
   "browser": "./shim/vertical.js",
