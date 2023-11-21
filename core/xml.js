@@ -664,11 +664,11 @@ Blockly.Xml.domToBlock = function(xmlBlock, workspace) {
       // Populating the connection database may be deferred until after the
       // blocks have rendered.
       if (!workspace.isFlyout) {
-        setTimeout(function() {
+        requestAnimationFrame(function() {
           if (topBlock.workspace) {  // Check that the block hasn't been deleted.
             topBlock.setConnectionsHidden(false);
           }
-        }, 1);
+        });
       }
       topBlock.updateDisabled();
       // Allow the scrollbars to resize and move based on the new contents.
@@ -835,11 +835,11 @@ Blockly.Xml.domToBlockHeadless_ = function(xmlBlock, workspace) {
         if (visible && !block.isInFlyout) {
           // Give the renderer a millisecond to render and position the block
           // before positioning the comment bubble.
-          setTimeout(function() {
+          requestAnimationFrame(function() {
             if (block.comment && block.comment.setVisible) {
               block.comment.setVisible(visible == 'true');
             }
-          }, 1);
+          });
         }
         var bubbleW = parseInt(xmlChild.getAttribute('w'), 10);
         var bubbleH = parseInt(xmlChild.getAttribute('h'), 10);
