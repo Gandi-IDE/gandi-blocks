@@ -1116,6 +1116,10 @@ Blockly.utils.getBlockSvgImage = function(
   if (!svgGroup) {
     return { url: '', height: 0, width: 0 };
   }
+  if (svgGroup.style.display == 'none') {
+    svgGroup.style.display = '';
+    requestAnimationFrame(() => svgGroup.style.display = 'none');
+  }
   const svgContent = svgGroup.outerHTML.replace(/&nbsp;/g, " ");
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("xmlns", SVG_NS);
