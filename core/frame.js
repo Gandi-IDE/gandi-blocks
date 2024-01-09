@@ -567,9 +567,9 @@ Blockly.Frame.prototype.cleanUp = function() {
   if (!Blockly.Events.getGroup()) {
     Blockly.Events.setGroup(true);
   }
-  var padding = 50;
-  var height = padding;
-  var width = 0;
+  const padding = 50;
+  let height = padding;
+  let width = 0;
 
   const { cols: columns, maxWidths } = this.getOrderedBlockColumns();
   let cursorX = padding;
@@ -596,13 +596,17 @@ Blockly.Frame.prototype.cleanUp = function() {
     cursorX += maxWidth + 96;
   }
 
-  this.render({
-    x: this.rect_.left,
-    y: this.rect_.top,
-    height: height,
-    width: width
-  });
+  this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
+  this.recordBlocksRelativeToSurfaceXY();
 
+  this.rect_.bottom = this.rect_.top + height;
+  this.rect_.right = this.rect_.left + width;
+  this.rect_.width = width;
+  this.rect_.height = height;
+
+  this.onBoundingClientRectChanged();
+
+  this.fireFrameRectChange();
   Blockly.Events.setGroup(false);
   this.workspace.setFrameToFront();
   this.workspace.setResizesEnabled(true);
@@ -1205,31 +1209,13 @@ Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e, takeOverSubEve
  */
 Blockly.Frame.prototype.resizeButtonMouseMove_ = function(dir, e) {
   if (this.workspace.isInWorkspaceSvg(e)) {
-    var diffX = (e.clientX - this.mostRecentEvent_.clientX) / this.workspace.scale;
-    var diffY = (e.clientY - this.mostRecentEvent_.clientY) / this.workspace.scale;
+    const diffX = (e.clientX - this.mostRecentEvent_.clientX) / this.workspace.scale;
+    const diffY = (e.clientY - this.mostRecentEvent_.clientY) / this.workspace.scale;
     this.mostRecentEvent_ = e;
-    var xDir = dir === 'tr' || dir === 'br' ? 'ltr' : 'rtl';
-    var yDir = dir === 'tl' || dir === 'tr' ? 'btt' : 'ttb';
+    const xDir = dir === 'tr' || dir === 'br' ? 'ltr' : 'rtl';
+    const yDir = dir === 'tl' || dir === 'tr' ? 'btt' : 'ttb';
     this.updateBoundingClientRect(diffX, diffY, xDir, yDir);
-    var newCoord = this.computeFrameRelativeXY();
-
-    var blocks = Object.values(this.blockDB_);
-    // If there are selected blocks in the frame, it needs to keep their relative position in the workspace unchanged.
-    if(blocks.length) {
-      var oldCoord = Blockly.utils.getRelativeXY(this.getSvgRoot());
-      var dx = oldCoord.x - newCoord.x;
-      var dy = oldCoord.y - newCoord.y;
-      if(dx || dy) {
-        blocks.forEach((block) => {
-          var xy = block.getRelativeToSurfaceXY(true);
-          block.translate(xy.x + dx, xy.y + dy);
-        });
-      }
-    }
-    this.translate(newCoord.x, newCoord.y);
-    this.updateFrameRectSize();
-    this.updateTitleBoxSize();
-    this.updateResizeButtonsPosition();
+    this.onBoundingClientRectChanged();
   }
 };
 
@@ -1263,50 +1249,14 @@ Blockly.Frame.prototype.resizeButtonMouseUp_ = function(dir, e, takeOverSubEvent
       this.workspace.setResizesEnabled(true);
     }
   } else {
+    Blockly.Events.setGroup(true);
     this.fireFrameRectChange();
     this.updateOwnedBlocks();
+    Blockly.Events.setGroup(false);
     Blockly.unbindEvent_(this.resizeButtonMouseMoveBindData_);
     Blockly.unbindEvent_(this.resizeButtonMouseUpBindData_);
     this.workspace.setResizesEnabled(true);
   }
-};
-
-/**
- * Render the frame.
- * @param {!FrameRectState} rect The frame rect state.
- * @param {Boolean} moveBlocks Whether to move blocks.
- * @private
- */
-Blockly.Frame.prototype.render = function(rect, moveBlocks = true) {
-  const blockMoveEvents = {};
-  this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
-  if (moveBlocks) {
-    this.recordBlocksRelativeToSurfaceXY();
-  } else {
-    Object.values(this.blockDB_).forEach((block) => {
-      const event = new Blockly.Events.BlockMove(block);
-      blockMoveEvents[block.id] = event;
-    });
-  }
-  this.rect_.left = rect.x;
-  this.rect_.top = rect.y;
-  this.rect_.bottom = this.rect_.top + rect.height;
-  this.rect_.right = this.rect_.left + rect.width;
-  this.rect_.width = rect.width;
-  this.rect_.height = rect.height;
-  var xy = this.computeFrameRelativeXY();
-  this.translate(xy.x, xy.y);
-  if (!moveBlocks) {
-    Object.values(blockMoveEvents).forEach((event) => {
-      event.recordNew();
-      Blockly.Events.fire(event);
-    });
-  }
-  this.updateFrameRectSize();
-  this.updateTitleBoxSize();
-  this.updateResizeButtonsPosition();
-  this.fireFrameRectChange();
-  this.workspace.resizeContents();
 };
 
 /**
@@ -1626,6 +1576,46 @@ Blockly.Frame.prototype.updateBoundingClientRect = function(diffX, diffY, xDir, 
     this.rect_.top += diffY;
     this.rect_.height -= diffY;
   }
+};
+
+Blockly.Frame.prototype.recalculateBlocksPosition = function(newCoord) {
+  var blocks = Object.values(this.blockDB_);
+  // If there are selected blocks in the frame, it needs to keep their relative position
+  // in the workspace unchanged.
+  if(blocks.length) {
+    var oldCoord = Blockly.utils.getRelativeXY(this.getSvgRoot());
+    var dx = oldCoord.x - newCoord.x;
+    var dy = oldCoord.y - newCoord.y;
+    if(dx || dy) {
+      console.log('Recalculating');
+      blocks.forEach((block) => {
+        var xy = block.getRelativeToSurfaceXY(true);
+        block.translate(xy.x + dx, xy.y + dy);
+      });
+    }
+  }
+};
+
+Blockly.Frame.prototype.setBoundingClientRect = function(rect) {
+  this.rect_.left = rect.x;
+  this.rect_.top = rect.y;
+  this.rect_.bottom = this.rect_.top + rect.height;
+  this.rect_.right = this.rect_.left + rect.width;
+  this.rect_.width = rect.width;
+  this.rect_.height = rect.height;
+
+  this.onBoundingClientRectChanged();
+  this.fireFrameRectChange();
+  this.workspace.resizeContents();
+};
+
+Blockly.Frame.prototype.onBoundingClientRectChanged = function() {
+  const xy = this.computeFrameRelativeXY();
+  this.recalculateBlocksPosition(xy);
+  this.translate(xy.x, xy.y);
+  this.updateFrameRectSize();
+  this.updateTitleBoxSize();
+  this.updateResizeButtonsPosition();
 };
 
 /**
