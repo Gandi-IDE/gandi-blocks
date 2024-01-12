@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-
+    <link rel="shortcut icon" type="image/x-icon" href="./favicon.ico" />
     <title>Vertical Playground</title>
     <style>
       :root {
@@ -54,7 +54,6 @@
     <script src="../blocks_vertical/looks.js"></script>
     <script src="../blocks_vertical/procedures.js"></script>
     <script src="../blocks_vertical/operators.js"></script>
-    <script src="../blocks_vertical/pen.js"></script>
     <script src="../blocks_vertical/sound.js"></script>
     <script src="../blocks_vertical/sensing.js"></script>
     <script src="../blocks_vertical/data.js"></script>
@@ -662,5 +661,606 @@
       />
     </p>
     <button onclick="setPosition()">定位</button>
+    <script>
+        function test() {
+          // 测试插入积木到SUBSTACK
+          // setTimeout(() => {
+          //   moveBlockTo("@;uQ;H1}I}c=uX-UeACk", {x: 319.5925925925926, y: 514.6296296296297});
+          //   connectBothBlock("KpBb]rQq=5:kNkeHGg9Z", ".ROZy2^d%1.?Lwm::Uww")
+          //   connectBothBlock("@;uQ;H1}I}c=uX-UeACk", "$WU~9bDav5NhnLs{TmEh", "SUBSTACK")
+          // }, 3000)
+
+          // 测试插入积木到SUBSTACK
+          // setTimeout(() => {
+          //   moveBlockTo("*D?Cy7pOv{hZD4QR-{--", {x: 76, y: 1151});
+          //   connectBothBlock("!e*UF_|SNZ8*XV9afgUz", "*D?Cy7pOv{hZD4QR-{--")
+          //   connectBothBlock("*D?Cy7pOv{hZD4QR-{--", "AmBgpdKG@V$_vsO=.?P$", "SUBSTACK")
+          // }, 3000)
+
+          // setTimeout(() => {
+            // disconnectBothBlock('Q9:51[,(,oeGvT%DefNy', {x: 10, y: 90})
+            // moveBlockTo("Q9:51[,(,oeGvT%DefNy", {x: 379, y: -15})
+            // disconnectBothBlock('GR}B9jJ-dIdSWg%BhdN+', {x: 379, y: 81})
+            // connectBothBlock('GR}B9jJ-dIdSWg%BhdN+', '/a:b{sNh}9GmV7xGToX%')
+            // disconnectBothBlock('m7/2]_CM1K5Wk7+p5og:', {x: -6, y: -6})
+            // connectBothBlock('m7/2]_CM1K5Wk7+p5og:', 'O4CtD1Z*RK+^ikI-*y:u')
+            // connectBothBlock('Q9:51[,(,oeGvT%DefNy', 'oc2h?q/hs?:Q95W@FV!R', 'SUBSTACK')
+          // }, 3000);
+
+          // setTimeout(() => {
+          //   // 删除正移动中的评论
+          //   deleteComment("]}R[zHj[suu]J70Q3`u-")
+          // }, 3000);
+
+          // setTimeout(() => {
+          //   // 移动正移动中的评论
+          //   moveComment("]}R[zHj[suu]J70Q3`u-", 722, 653)
+          // }, 3000);
+
+          // setTimeout(() => {
+            // 更新正移动中的评论
+            // 有问题，已处理
+            // updateComment("]}R[zHj[suu]J70Q3`u-", {minimized: true})
+            // updateComment("]}R[zHj[suu]J70Q3`u-", {text: "啊阿斯蒂芬神鼎飞丹砂sdfsakljdskfjkljsdklfjkljklsdjfkljakljklsjdfkljklsdjklfjlkjlk"})
+            // 有问题,已处理
+            // updateComment("]}R[zHj[suu]J70Q3`u-", {width: 266.6666259765625, height: 342})
+          // }, 3000);
+
+          // setTimeout(() => {
+          //   createFrame({
+          //     "id": "bp(`IZ!MbJO09|XDq[iG",
+          //     "title": "代码框",
+          //     "color": "45, 140, 255",
+          //     "locked": false,
+          //     "collapsed": false,
+          //     "blocks": ['Ppl}Zvo@`t9W^OUK/IbI', '4SAJW)IzsC7|WnWnx~UL'],
+          //     "width": 762,
+          //     "height": 519,
+          //     "x": 174.8,
+          //     "y": 374.8
+          //   })
+          // }, 3000);
+
+          // setTimeout(() => {
+          //   deleteFrame("~Pmq]C?8u0fO3`8ToXDP")
+          // }, 3000);
+
+          // 测试移动正在被Frame拖着移动的Block
+          // setTimeout(() => {
+          //   updateFrame("~Pmq]C?8u0fO3`8ToXDP", {blocks: ['4SAJW)IzsC7|WnWnx~UL']})
+          //   moveBlockTo("Ppl}Zvo@`t9W^OUK/IbI", {x: 536, y: 539});
+          // }, 3000)
+
+          // 测试移动正在被Frame拖着移动的Block
+          // setTimeout(() => {
+          //   updateFrame("~Pmq]C?8u0fO3`8ToXDP", {color: '255, 199, 0'})
+          // }, 3000)
+
+          // 如果一个Frame被锁定了，但他被别人在拖动，等别人拖动结束后该如何处理
+          // setTimeout(() => {
+          //   updateFrame("~Pmq]C?8u0fO3`8ToXDP", {color: '255, 199, 0'})
+          //   updateFrame("~Pmq]C?8u0fO3`8ToXDP", {collapsed: true})
+          //   updateFrame("~Pmq]C?8u0fO3`8ToXDP", {locked: true})
+          //   setTimeout(() => {
+          //     updateFrame("~Pmq]C?8u0fO3`8ToXDP", {collapsed: false})
+          //   }, 1000);
+          // }, 3000)
+
+          // 连接积木 stack + stack
+          // setTimeout(() => {
+          //   moveBlockTo("ILLo|?c|fuz*I|-zE=;M", {x: 446, y: 437});
+          //   connectBothBlock("*D?Cy7pOv{hZD4QR-{--", "ILLo|?c|fuz*I|-zE=;M");
+          // }, 3000)
+
+          // 连接积木 input + stack
+          // setTimeout(() => {
+          //   connectBothBlock("*D?Cy7pOv{hZD4QR-{--", "AmBgpdKG@V$_vsO=.?P$", "SUBSTACK");
+          // }, 3000)
+
+          // 连接积木 input + stack
+          // setTimeout(() => {
+          //   connectBothBlock("*D?Cy7pOv{hZD4QR-{--", "AmBgpdKG@V$_vsO=.?P$", "SUBSTACK");
+          // }, 3000)
+
+          // 测试删除拖动中的积木(1 row) 删除头
+          // setTimeout(() => {
+          //   disconnectBothBlock(".ROZy2^d%1.?Lwm::Uww", {x: 651, y: 935});
+          //   deleteBlock("@;uQ;H1}I}c=uX-UeACk")
+          // }, 3000)
+
+          // 测试删除拖动中的所有（2 row）积木
+          // setTimeout(() => {
+          //   // 拖拽到左侧进行删除
+          //   moveBlockTo("@;uQ;H1}I}c=uX-UeACk", {x: -193, y: 562});
+          //   deleteBlock(".ROZy2^d%1.?Lwm::Uww")
+          //   deleteBlock("@;uQ;H1}I}c=uX-UeACk")
+          // }, 3000)
+
+          // 测试删除拖动中的所有（3 row）积木
+          // setTimeout(() => {
+          //   // 拖拽到左侧进行删除
+          //   moveBlockTo("5Bql7e2~5)7zvBe:+rAa", {x: -193, y: 562});
+          //   deleteBlock(",by]S!}P}mY46)]bY7M9")
+          //   deleteBlock("Cj[XUWh^,bH$Tv-YDKZE")
+          //   deleteBlock(",EGK5eUDHmhmz8Ef|k4D")
+          //   deleteBlock("5Bql7e2~5)7zvBe:+rAa")
+          // }, 3000)
+
+          // 删除尾部 (1 row)
+          // setTimeout(() => {
+          //   disconnectBothBlock(".ROZy2^d%1.?Lwm::Uww", {x: 397, y: 384});
+          //   deleteBlock(".ROZy2^d%1.?Lwm::Uww")
+          // }, 3000)
+
+          // setTimeout(() => {
+            // disconnectBothBlock("Cj[XUWh^,bH$Tv-YDKZE", {x: 651, y: 935});
+            // deleteBlock(",by]S!}P}mY46)]bY7M9")
+            // deleteBlock("Cj[XUWh^,bH$Tv-YDKZE")
+          // }, 3000)
+
+          // 删除中间
+          // setTimeout(() => {
+          //   disconnectBothBlock("Cj[XUWh^,bH$Tv-YDKZE", {x: 751, y: 681});
+          //   connectBothBlock(",by]S!}P}mY46)]bY7M9", ",EGK5eUDHmhmz8Ef|k4D");
+          //   deleteBlock("Cj[XUWh^,bH$Tv-YDKZE")
+          //   deleteBlock(",EGK5eUDHmhmz8Ef|k4D")
+          // }, 3000)
+
+          // 更新变量名
+          // setTimeout(() => {
+          //   setTimeout(() => {updateVariableName("n)0Jvi!$+N1AsiU~I=hN", "var")}, 3000);
+          // }, 3000)
+        }
+
+        const draggingBlockBlocks = new Set();
+        const draggingFrames = new Set();
+
+        let draggingTargetName = null;
+
+        const startBlockDrag = Blockly.BlockDragger.prototype.startBlockDrag;
+        const endBlockDrag = Blockly.BlockDragger.prototype.endBlockDrag;
+        const startFrameDrag = Blockly.FrameDragger.prototype.startFrameDrag;
+        const endFrameDrag = Blockly.FrameDragger.prototype.endFrameDrag;
+        
+        Blockly.BlockDragger.prototype.startBlockDrag = function (...arg) {
+            startBlockDrag.call(this, ...arg);
+            initDraggingBlockBlocks(this.draggingBlock_);
+            draggingTargetName = "BLOCK"
+        };
+
+        Blockly.FrameDragger.prototype.startFrameDrag = function (...arg) {
+          startFrameDrag.call(this, ...arg);
+          draggingTargetName = "FRAME"
+          draggingFrames.add(this.draggingFrame_.id)
+          Object.values(this.draggingFrame_.blockDB_).forEach((block) => {
+            initDraggingBlockBlocks(block);
+          });
+        };
+
+        Blockly.BlockDragger.prototype.endBlockDrag = function (...arg) {
+            endBlockDrag.call(this, ...arg);
+            draggingBlockBlocks.clear();
+        };
+
+        Blockly.FrameDragger.prototype.endFrameDrag = function (...arg) {
+            endFrameDrag.call(this, ...arg);
+            draggingBlockBlocks.clear();
+        };
+
+        const performCallbackWithoutEvent = (callback) => {
+          Blockly.Events.disable();
+          callback();
+          Blockly.Events.enable();
+        };
+
+        function initDraggingBlockBlocks (blockSvg) {
+          const recurseThrough = block => {
+              draggingBlockBlocks.add(block.id);
+              // Recurse through all blocks attached under this one.
+              for (let i = 0; i < block.childBlocks_.length; i++) {
+                  recurseThrough(block.childBlocks_[i]);
+              }
+          };
+          recurseThrough(blockSvg);
+        }
+
+        function performAction(blocks, callback) {
+          const isDragging = blocks.some((block) => draggingBlockBlocks.has(block.id));
+          if (isDragging) {
+            console.log('draggingTargetName', draggingTargetName);
+            if (draggingTargetName === 'BLOCK') {
+              const _endBlockDrag = Blockly.BlockDragger.prototype.endBlockDrag;
+              Blockly.BlockDragger.prototype.endBlockDrag = function (e, currentDragDeltaXY, checkDraggingBlockAndDraggedConnection) {
+                _endBlockDrag.call(this, e, currentDragDeltaXY, () => {
+                  performCallbackWithoutEvent(callback.bind(this, this));
+                  if (checkDraggingBlockAndDraggedConnection) {
+                    checkDraggingBlockAndDraggedConnection(this);
+                  }
+                  Blockly.BlockDragger.prototype.endBlockDrag = _endBlockDrag;
+                });
+              };
+            } else if (draggingTargetName === 'FRAME') {
+              const _endFrameDrag = Blockly.FrameDragger.prototype.endFrameDrag;
+              Blockly.FrameDragger.prototype.endFrameDrag = function (e, currentDragDeltaXY, checkDraggingBlockAndDraggedConnection) {
+                _endFrameDrag.call(this, e, currentDragDeltaXY, () => {
+                  performCallbackWithoutEvent(callback.bind(this, this));
+                  if (checkDraggingBlockAndDraggedConnection) {
+                    checkDraggingBlockAndDraggedConnection(this);
+                  }
+                  Blockly.BlockDragger.prototype.endFrameDrag = _endFrameDrag;
+                });
+              };
+            }
+          } else {
+            performCallbackWithoutEvent(callback);
+          }
+        }
+
+        function performCommentAction(comment, callback) {
+          if (workspace.currentGesture_ && workspace.currentGesture_.bubbleDragger_) {
+            if (workspace.currentGesture_.bubbleDragger_.draggingBubble_ === comment.bubble_) {
+              const _endBubbleDrag = Blockly.BubbleDragger.prototype.endBubbleDrag;
+              Blockly.BubbleDragger.prototype.endBubbleDrag = function (...args) {
+                _endBubbleDrag.call(this, ...args);
+                performCallbackWithoutEvent(callback.bind(this, this));
+                Blockly.BlockDragger.prototype.endBubbleDrag = _endBubbleDrag;
+              };
+            }
+          } else {
+            performCallbackWithoutEvent(callback);
+          }
+        }
+
+        function performFrameAction(frame, callback) {
+          if (draggingFrames.has(frame.id)) {
+            const _endFrameDrag = Blockly.FrameDragger.prototype.endFrameDrag;
+            Blockly.FrameDragger.prototype.endFrameDrag = function (e, currentDragDeltaXY, checkDraggingBlockAndDraggedConnection) {
+              _endFrameDrag.call(this, e, currentDragDeltaXY, () => {
+                performCallbackWithoutEvent(callback.bind(this, this));
+                if (checkDraggingBlockAndDraggedConnection) {
+                  checkDraggingBlockAndDraggedConnection(this);
+                }
+                Blockly.BlockDragger.prototype.endFrameDrag = _endFrameDrag;
+              });
+            };
+          } else {
+            performCallbackWithoutEvent(callback);
+          }
+        }
+
+        // 将积木与其 parent 断开连接
+        function disconnectBothBlock(blockId, coordinate) {
+          const oldBlock = workspace.getBlockById(blockId);
+          if (oldBlock) {
+            performAction([oldBlock], (blockDragger) => {
+              const block = workspace.getBlockById(blockId);
+              const parent = block.getParent()
+              console.trace('Debug disconnectBothBlock', blockId);
+              if (block) {
+                if (blockDragger) {
+                  const connection = block.outputConnection || block.previousConnection;
+                  if (connection.isConnected()) {
+                    blockDragger.draggedConnectionManager_.reserveLocalConnection.push(connection);
+                  }
+                }
+                performCallbackWithoutEvent(() => {
+                  block.unplug();
+                  const xy = block.getRelativeToSurfaceXY();
+                  const rtlAwareX = workspace.RTL ? workspace.getWidth() - coordinate.x : coordinate.x;
+                  block.moveBy(rtlAwareX - xy.x, coordinate.y - xy.y, false);
+                })
+              }
+            });
+          }
+        }
+
+        // 将积木与其 parent 连接上
+        function connectBothBlock(blockId, parentId, inputName) {
+          const oldBlock = workspace.getBlockById(blockId);
+          const oldParentBlock = workspace.getBlockById(parentId);
+          if (oldBlock && oldParentBlock) {
+            const oldParent = oldBlock.getParent();
+            performAction([oldBlock, oldParentBlock],
+              (blockDragger) => {
+                console.log('Debug connectBothBlock', blockId, parentId);
+                const block = workspace.getBlockById(blockId);
+                const parentBlock = workspace.getBlockById(parentId);
+                if (block && parentBlock) {
+                  const blockConnection =
+                    block.outputConnection || block.previousConnection;
+                  let parentConnection;
+                  if (inputName) {
+                    const input = parentBlock.getInput(inputName);
+                    if (input) {
+                      parentConnection = input.connection;
+                    }
+                  } else if (blockConnection.type === 4) {
+                    parentConnection = parentBlock.nextConnection;
+                  }
+                  if (parentConnection) {
+                    blockConnection.connect(parentConnection);
+                    if (blockDragger) {
+                      const {draggedConnectionManager_: {closestConnection_, localConnection_}, draggingBlock_} = blockDragger;
+                      // 修正本地数据
+                      if (closestConnection_) {
+                        // 避免成环
+                        console.log('避免成环');
+                        if (closestConnection_.sourceBlock_.getSvgRoot().contains(draggingBlock_.getSvgRoot()) ||
+                          draggingBlock_.getSvgRoot().contains(closestConnection_.sourceBlock_.getSvgRoot())
+                        ) {
+                          blockDragger.draggedConnectionManager_.update({x: 1e6, y: 1e6}, blockDragger.deleteArea_, blockDragger.wasOutside_);
+                        }
+                        // 避免出现 1 -> 2 -> 3 在 1 后插入 A -> B 后，形成 1 -> A -> 2 -> 3 -> B, 正确的应该是 1 -> A -> B -> 2 -> 3
+                        if (localConnection_ === parentConnection) {
+                          let nextConnection = block.nextConnection;
+                          // 使用最后面的积木链接后续的积木
+                          while (nextConnection.targetConnection) {
+                            nextConnection = nextConnection.targetConnection.sourceBlock_.nextConnection;
+                          }
+                          blockDragger.draggedConnectionManager_.localConnection_ = nextConnection;
+                        }
+                      }
+                    }
+                  } else {
+                    log.warn(`Can't connect to non-existent input: ${inputName}`);
+                  }
+                }
+              }
+            );
+          }
+        }
+
+        // 移动积木
+        function moveBlockTo(blockId, {x, y}) {
+          const beforeBlock = workspace.getBlockById(blockId);
+          // If a block is already attached to another block, it is not moved,
+          // if a block is being dragged, its coordinates, and parent may change when it is released, so the previous coordinates are not applied.
+          performAction([beforeBlock], () => {
+              console.log('Debug moveBlockTo', blockId, {x, y});
+              const block = workspace.getBlockById(blockId);
+              if (block && !block.getParent()) {
+                  const xy = block.getRelativeToSurfaceXY();
+                  const rtlAwareX = workspace.RTL ? workspace.getWidth() - x : x;
+                  performCallbackWithoutEvent(() => {
+                    console.log('Debug moveBlockTo', rtlAwareX - xy.x, y - xy.y);
+                      block.moveBy(rtlAwareX - xy.x, y - xy.y, false);
+                  });
+              }
+          });
+        }
+
+        // 新增积木
+        function addBlocksToWorkspace(blocks) {
+          const blocksState = DebugVM.deserializeBlocks(blocks);
+          const scripts = Object.keys(blocksState).filter(
+            (i) => blocksState[i].topLevel
+          );
+          const xml = `<xml xmlns="http://www.w3.org/1999/xhtml">${scripts
+            .map((i) =>
+              DebugVM.editingTarget.blocks.blockToXML(i, {}, blocksState)
+            )
+            .join()}</xml>`;
+          Blockly.Xml.domToWorkspace(
+            Blockly.Xml.textToDom(xml),
+            Blockly.getMainWorkspace()
+          );
+        }
+
+        // 删除积木
+        function deleteBlock(blockId) {
+          const currentBlock = workspace.getBlockById(blockId);
+          if (currentBlock) {
+            performAction([currentBlock], (blockDragger) => {
+              const block = workspace.getBlockById(blockId);
+              if (block) {
+                if (blockDragger) {
+                  const {localConnection_, reserveLocalConnection} = blockDragger.draggedConnectionManager_;
+                  if (localConnection_ && block === localConnection_.sourceBlock_) {
+                    if (block.previousConnection === localConnection_) {
+                      const nextBlock = block.getNextBlock();
+                      if (nextBlock) {
+                        blockDragger.draggedConnectionManager_.localConnection_ = nextBlock.previousConnection;
+                      } else if (reserveLocalConnection.length > 0) {
+                        const conn = reserveLocalConnection.pop();
+                        blockDragger.draggingBlock_ = conn.sourceBlock_;
+                        blockDragger.draggedConnectionManager_.localConnection_ = conn;
+                      } else {
+                        // 删完了，没有可连的了
+                        performCallbackWithoutEvent(() => {
+                          blockDragger.draggedConnectionManager_.hidePreview_();
+                        })
+                        blockDragger.draggedConnectionManager_.closestConnection_ = null;
+                      }
+                    }
+                  }
+                }
+                const _dragger = workspace.currentGesture_?.blockDragger_;
+                if (_dragger && _dragger.draggedConnectionManager_.closestConnection_?.sourceBlock_ === block) {
+                  _dragger.draggedConnectionManager_.hidePreview_();
+                  _dragger.draggedConnectionManager_.closestConnection_ = null;
+                  _dragger.draggedConnectionManager_.localConnection_ = null;
+                }
+                block.dispose(true, true);
+              }
+            });
+          } else {
+            log.warn(`Block(${blockId}) not find`);
+          }
+        }
+
+        // 更新input
+        function updateBlockInput(blockId, name, value) {
+          performAction([workspace.getBlockById(blockId)], () => {
+            const block = workspace.getBlockById(blockId);
+            if (block) {
+              const field = block.getField(name);
+              if (field) {
+                field.setValue(value);
+              }
+            }
+          });
+        }
+
+        // 更新变量名
+        function updateVariableName(varId, name) {
+          performAction(workspace.getAllBlocks(), (blockDragger) => {
+            workspace.renameVariableById(varId, name);
+            if (blockDragger) {
+              requestAnimationFrame(() => workspace.refreshToolboxSelection_());
+            }
+          });
+        }
+
+        // 创建变量
+        function createVariable(...arg) {
+          workspace.createVariable(...arg);
+        }
+
+        // 删除变量
+        function deleteVariable(...arg) {
+          workspace.deleteVariableById(...arg);
+        }
+
+        function deleteComment (commentId) {
+          const comment = workspace.getCommentById(commentId);
+          if (comment) {
+              performCallbackWithoutEvent(() => {
+                if (workspace.currentGesture_ && workspace.currentGesture_.bubbleDragger_) {
+                  if (workspace.currentGesture_.bubbleDragger_.draggingBubble_ === comment.bubble_) {
+                    workspace.currentGesture_.dispose();
+                  }
+                }
+                comment.dispose(false, false);
+              });
+          } else {
+              // Only complain about root-level block.
+              log.warn(`Can't delete non-existent comment: ${commentId}`);
+          }
+        }
+
+        function moveComment (commentId, x, y) {
+            const comment = workspace.getCommentById(commentId);
+            if (!comment) {
+              log.warn(`Can't change non-existent comment: ${commentId}`);
+              return;
+            }
+            // 不更新一个正在被拖动的comment的x,y
+            if (workspace.currentGesture_ && workspace.currentGesture_.bubbleDragger_) {
+              if (workspace.currentGesture_.bubbleDragger_.draggingBubble_ === comment.bubble_) {
+                return;
+              }
+            }
+            performCallbackWithoutEvent(() => {
+                if (comment.workspace.RTL) {
+                    comment.moveTo(workspaceWidth_ - x, y);
+                } else {
+                    comment.moveTo(x, y);
+                }
+            });
+        }
+
+        function updateComment (commentId, contents) {
+          const comment = workspace.getCommentById(commentId);
+          if (!comment) {
+              log.warn(`Can't change non-existent comment: ${commentId}`);
+              return;
+          }
+          if (contents.hasOwnProperty(comment, 'minimized')) {
+              performCommentAction(() => {
+                const comment = workspace.getCommentById(commentId);
+                if (comment) {
+                  comment.setMinimized(contents.minimized);
+                }
+              return;
+              });
+          }
+          if (contents.hasOwnProperty('width') && contents.hasOwnProperty('height')) {
+              performCommentAction(comment, () => {
+                const comment = workspace.getCommentById(commentId);
+                if (comment) {
+                  comment.setSize(contents.width, contents.height);
+                }
+              return;
+              });
+          }
+          if (contents.hasOwnProperty('text')) {
+            performCallbackWithoutEvent(() => {
+              comment.setText(contents.text);
+            });
+          }
+        }
+
+        function createFrame (data) {
+          performAction(data.blocks.map(i => workspace.getBlockById(i)).filter(Boolean), () => {
+            const frame = workspace.createFrame(data);
+            if (frame.getBlockIds().length !== data.blocks.length) {
+              Blockly.Events.enable();
+              frame.oldBlockIdList_ = data.blocks;
+              frame.fireFrameBlocksChange();
+              Blockly.Events.disable();
+            }
+            workspace.resizeContents();
+          });
+        }
+
+        function deleteFrame (frameId) {
+            performCallbackWithoutEvent(() => {
+                workspace.deleteFrameById(frameId);
+            });
+        }
+
+        function updateFrame (frameId, contents) {
+            const frame = this.workspace.getFrameById(frameId);
+            if (!frame) {
+                log.warn(`Can't change non-existent frame: ${frameId}`);
+                return;
+            }
+            performCallbackWithoutEvent(() => {
+                if (contents.hasOwnProperty('blocks')) {
+                  performFrameAction(frame, () => {
+                    const l1 = contents.blocks;
+                    const l2 = Object.keys(frame.blockDB_);
+                    const addedBlocks = l1.filter(v => l2.indexOf(v) === -1);
+                    addedBlocks.forEach(blockId => {
+                        const block = workspace.getBlockById(blockId);
+                        if (block) {
+                            const result = block.requestMoveInFrame();
+                            // If it fail to add the block to frame, it means that there is a special scenario present,
+                            // such as the Block needing to change from a connected state to a disconnected state. In this case,
+                            // the Block cannot be added because it is a non-top level block. It needs to be waited for
+                            // the Block to move to the top level block and then tried again.
+                            if (!result) {
+                            // Here, a hack is used to make the Block try to add frames later on,
+                            // the first frame it tries to add is this frame.
+                                const temp = workspace.frameDB_[frameId];
+                                delete workspace.frameDB_[frameId];
+                                workspace.frameDB_[frameId] = temp;
+                            }
+                        }
+                    });
+                    const deletedBlocks = l2.filter(v => l1.indexOf(v) === -1);
+                    deletedBlocks.forEach(blockId => {
+                        const block = workspace.getBlockById(blockId);
+                        if (block) {
+                            block.requestMoveOutFrame();
+                        }
+                    });
+                  })
+                }
+                if (contents.hasOwnProperty('rect')) {
+                    frame.setBoundingClientRect(contents.rect, false);
+                }
+                if (contents.hasOwnProperty('color')) {
+                    frame.setColor(contents.color);
+                }
+                if (contents.hasOwnProperty('collapsed')) {
+                    frame.triggerChangeCollapsed(contents.collapsed);
+                }
+                if (contents.hasOwnProperty('locked')) {
+                    frame.triggerChangeLock();
+                }
+            });
+        }
+    </script>
   </body>
 </html>
