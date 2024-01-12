@@ -456,19 +456,16 @@ Blockly.BlockSvg.prototype.getRemovableToFrame = function(ignoreParentBlock) {
  * Move a block by a relative offset.
  * @param {number} dx Horizontal offset in workspace units.
  * @param {number} dy Vertical offset in workspace units.
- * @param {boolean} keepStill Whether to leave the block position unchanged.
  */
-Blockly.BlockSvg.prototype.moveBy = function(dx, dy, keepStill) {
+Blockly.BlockSvg.prototype.moveBy = function(dx, dy) {
   goog.asserts.assert(!this.parentBlock_, 'Block has parent.');
   var eventsEnabled = Blockly.Events.isEnabled();
   if (eventsEnabled) {
     var event = new Blockly.Events.BlockMove(this);
     var dragIconData = this.initIconData(this);
   }
-  if (!keepStill) {
-    var xy = this.getRelativeToSurfaceXY(true);
-    this.translate(xy.x + dx, xy.y + dy);
-  }
+  var xy = this.getRelativeToSurfaceXY(true);
+  this.translate(xy.x + dx, xy.y + dy);
   this.moveConnections_(dx, dy);
   if (eventsEnabled) {
     event.recordNew();
@@ -663,7 +660,7 @@ Blockly.BlockSvg.prototype.snapToGrid = function() {
   dx = Math.round(dx);
   dy = Math.round(dy);
   if (dx != 0 || dy != 0) {
-    this.moveBy(dx, dy, this.frame_);
+    this.moveBy(dx, dy);
   }
 };
 
@@ -1510,7 +1507,8 @@ Blockly.BlockSvg.prototype.scheduleSnapAndBump = function() {
 Blockly.BlockSvg.prototype.fireIconsMoveEvent = function(iconData) {
   for (var i = 0; i < iconData.length; i++) {
     var data = iconData[i];
-    if (data.currentLocation) {
+    // It's possible that comment has already been deleted (in collaborative scenarios)
+    if (data.currentLocation && data.icon.bubble_) {
       var event = new Blockly.Events.CommentMove(data.icon.bubble_.comment);
       event.setOldCoordinate(data.currentLocation);
       event.recordNew();

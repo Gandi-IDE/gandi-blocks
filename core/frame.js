@@ -232,15 +232,22 @@ Blockly.Frame.prototype.borderColor_ = 'var(--theme-brand-color, #2D8CFF)';
  */
 Blockly.Frame.prototype.appendBlocksToBlocksCanvas = function() {
   Blockly.Events.disable();
+  let nonExistentBlocks = [];
   this.options.blocks.forEach((blockId) => {
     var block = this.workspace.getBlockById(blockId);
     if (block) {
       this.addBlock(block);
       block.frame_ = this;
       block.moveBlockToContainer('frame');
+    } else {
+      nonExistentBlocks.push(blockId);
     }
   });
   Blockly.Events.enable();
+  if (nonExistentBlocks.length) {
+    this.oldBlockIdList_ = this.options.blocks;
+    this.fireFrameBlocksChange();
+  }
 };
 
 /**
@@ -712,23 +719,23 @@ Blockly.Frame.prototype.fireFrameRectChange = function() {
   var eventsEnabled = Blockly.Events.isEnabled();
   if (eventsEnabled) {
     this.fireFrameChange('rect', this.oldBoundingFrameRect_, this.getBoundingFrameRect());
-    this.fireFrameBlocksCoordinatesChange(true);
+    this.fireFrameBlocksCoordinatesChange();
   }
 };
 
-Blockly.Frame.prototype.fireFrameBlocksCoordinatesChange = function(isFollowFrame) {
+Blockly.Frame.prototype.fireFrameBlocksCoordinatesChange = function() {
   if (this.oldBlocksCoordinate_) {
     // When the position of a Frame changes, it needs to update the position information of the blocks it contains.
     for (const key in this.blockDB_) {
       if (Object.hasOwnProperty.call(this.blockDB_, key)) {
         var block = this.blockDB_[key];
-        var event = new Blockly.Events.BlockMove(block, isFollowFrame);
+        var event = new Blockly.Events.BlockMove(block);
         var data = this.oldBlocksCoordinate_[block.id];
         if (data) {
           event.oldCoordinate = data.oldCoordinate;
           event.recordNew();
           var dxy = goog.math.Coordinate.difference(event.newCoordinate, event.oldCoordinate);
-          block.moveBy(dxy.x, dxy.y, true);
+          block.moveConnections_(dxy.x, dxy.y);
           Blockly.Events.fire(event);
           block.fireIconsMoveEvent(data.dragIconData);
         }
@@ -938,7 +945,7 @@ Blockly.Frame.prototype.moveToDragSurface_ = function(e) {
  */
 Blockly.Frame.prototype.moveOffDragSurface_ = function(newXY, wouldDeleteFrame) {
   if (wouldDeleteFrame) {
-    this.fireFrameBlocksCoordinatesChange(false);
+    this.fireFrameBlocksCoordinatesChange();
   } else {
     this.rect_.left = newXY.x + this.resizeButtonWidth_ / 2;
     this.rect_.top = newXY.y + this.resizeButtonHeight_ / 2 + this.titleInputHeight_;
@@ -1587,7 +1594,6 @@ Blockly.Frame.prototype.recalculateBlocksPosition = function(newCoord) {
     var dx = oldCoord.x - newCoord.x;
     var dy = oldCoord.y - newCoord.y;
     if(dx || dy) {
-      console.log('Recalculating');
       blocks.forEach((block) => {
         var xy = block.getRelativeToSurfaceXY(true);
         block.translate(xy.x + dx, xy.y + dy);
@@ -1597,6 +1603,8 @@ Blockly.Frame.prototype.recalculateBlocksPosition = function(newCoord) {
 };
 
 Blockly.Frame.prototype.setBoundingClientRect = function(rect) {
+  this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
+
   this.rect_.left = rect.x;
   this.rect_.top = rect.y;
   this.rect_.bottom = this.rect_.top + rect.height;
@@ -1641,6 +1649,9 @@ Blockly.Frame.prototype.dispose = function(retainBlocks) {
   this.oldBlockIdList_ = this.getBlockIds();
   const ws = this.workspace;
   const oldBlocks = Object.assign({}, this.blockDB_);
+
+  // Stop rerendering.
+  this.rendered = false;
 
   // Before deleting a block, it is necessary to fire the "delete Frame" event.
   // This will allow the block to fall back onto the frame when undoing the deletion of the frame.

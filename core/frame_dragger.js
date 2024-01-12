@@ -180,9 +180,11 @@ Blockly.FrameDragger.prototype.dragFrame = function(e, currentDragDeltaXY) {
  * @param {!Event} e The mouseup/touchend event.
  * @param {!goog.math.Coordinate} currentDragDeltaXY How far the pointer has
  *     moved from the position at the start of the drag, in pixel units.
+ * @param {?Function} checkDraggingBlockAndDraggedConnection Check that the data and
+ *     connections of the drag blocks are up to date and available
  * @package
  */
-Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
+Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY, checkDraggingBlockAndDraggedConnection) {
   const delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
   const newLoc = goog.math.Coordinate.sum(this.startXY_, delta);
 
@@ -200,7 +202,12 @@ Blockly.FrameDragger.prototype.endFrameDrag = function(e, currentDragDeltaXY) {
   const deleted = this.maybeDeleteFrame_();
   if (!deleted) {
     this.dragFrame(e, currentDragDeltaXY);
+    if (checkDraggingBlockAndDraggedConnection) {
+      checkDraggingBlockAndDraggedConnection();
+    }
     this.draggingFrame_.onStopDrag();
+  } if (checkDraggingBlockAndDraggedConnection) {
+    checkDraggingBlockAndDraggedConnection();
   }
 
   this.workspace_.setResizesEnabled(true);

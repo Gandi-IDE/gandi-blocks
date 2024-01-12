@@ -375,17 +375,14 @@ Blockly.Events.Delete.prototype.run = function(forward) {
 /**
  * Class for a block move event.  Created before the move.
  * @param {Blockly.Block} block The moved block.  Null for a blank event.
- * @param {boolean} isFollowFrame Whether it is moving with the frame.
  * @extends {Blockly.Events.BlockBase}
  * @constructor
  */
-Blockly.Events.Move = function(block, isFollowFrame) {
+Blockly.Events.Move = function(block) {
   if (!block) {
     return;  // Blank event to be populated by fromJson.
   }
   Blockly.Events.Move.superClass_.constructor.call(this, block);
-
-  this.isFollowFrame = isFollowFrame;
 
   var location = this.currentLocation_();
   this.oldFrameId = location.frameId;
@@ -528,7 +525,7 @@ Blockly.Events.Move.prototype.run = function(forward) {
   if (coordinate) {
     var xy = block.getRelativeToSurfaceXY();
     var rtlAwareX = workspace.RTL ? workspace.getWidth() - coordinate.x : coordinate.x;
-    block.moveBy(rtlAwareX - xy.x, coordinate.y - xy.y, this.isFollowFrame);
+    block.moveBy(rtlAwareX - xy.x, coordinate.y - xy.y);
     if (this.newParentId !== this.oldParentId) {
       block.requestMoveInFrame();
     }
