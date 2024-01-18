@@ -810,6 +810,11 @@
           // setTimeout(() => {
           //   setTimeout(() => {updateVariableName("n)0Jvi!$+N1AsiU~I=hN", "var")}, 3000);
           // }, 3000)
+
+          // setTimeout(() => {
+          //   disconnectBothBlock("Gb`=u!Y^e|pZ;29_p(eH");
+          //   connectBothBlock("LD-5Lll;,];[hNCOM{0e", "INFnJV!}n(o2S!5UJ`f/", "SUBSTACK");
+          // }, 3000)
         }
 
         const draggingBlockBlocks = new Set();
@@ -945,9 +950,11 @@
                 }
                 performCallbackWithoutEvent(() => {
                   block.unplug();
-                  const xy = block.getRelativeToSurfaceXY();
-                  const rtlAwareX = workspace.RTL ? workspace.getWidth() - coordinate.x : coordinate.x;
-                  block.moveBy(rtlAwareX - xy.x, coordinate.y - xy.y, false);
+                  if (coordinate) {
+                    const xy = block.getRelativeToSurfaceXY();
+                    const rtlAwareX = workspace.RTL ? workspace.getWidth() - coordinate.x : coordinate.x;
+                    block.moveBy(rtlAwareX - xy.x, coordinate.y - xy.y, false);
+                  }
                 })
               }
             });
