@@ -613,7 +613,11 @@ Blockly.Workspace.prototype.deleteFrameById = function(id, retainBlocks) {
  */
 Blockly.Workspace.prototype.retitleFrameById = function(id, newTitle) {
   var frame = this.getFrameById(id);
-  frame.setTitle(newTitle);
+  if (frame) {
+    frame.setTitle(newTitle);
+  } else {
+    console.warn('Could not find frame: ' + id);
+  }
 };
 
 /**
@@ -892,6 +896,17 @@ Blockly.Workspace.prototype.fireDeletionListeners = function(block, undoFunc) {
       console.error('error on firing deletion event for block:', block, ', using func:', func, ', with error:', e);
     }
   }
+};
+
+/**
+ * Set whether the workspace is disabled or not.
+ * @param {boolean} disabled True if disabled.
+ */
+Blockly.Workspace.prototype.setDisabled = function(disabled) {
+  // if (this.disabled != disabled) {
+  //   this.disabled = disabled;
+  // }
+  Blockly.locked = disabled;
 };
 
 /**

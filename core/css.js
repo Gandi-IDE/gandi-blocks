@@ -1304,6 +1304,14 @@ Blockly.Css.CONTENT = [
     'transform: rotate(-90deg);',
   '}',
 
+  '.blocklyFrameCollapsed .blocklyFrameCollapsedContent {',
+    'display: block;',
+  '}',
+
+  '.blocklyFrameCollapsedContent {',
+    'display: none;',
+  '}',
+
   '.blocklyFrameForeignObject {',
     'transform: scale(calc(1 / var(--scale, 1)));',
     'transform-origin: 4px var(--frame-title-height, 24);',

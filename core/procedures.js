@@ -531,7 +531,8 @@ Blockly.Procedures.editProcedureCallback_ = function(block) {
   Blockly.Procedures.externalProcedureDefCallback(
       block.mutationToDom(),
       Blockly.Procedures.editProcedureCallbackFactory_(block),
-      true
+      true,
+      block.id
   );
 };
 

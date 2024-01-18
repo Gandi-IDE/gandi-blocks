@@ -147,6 +147,11 @@ Blockly.InsertionMarkerManager = function(block) {
    * @private
    */
   this.availableConnections_ = this.initAvailableConnections_();
+
+  /**
+   * Some spare connections.
+   */
+  this.reserveLocalConnection = [];
 };
 
 /**
@@ -159,6 +164,7 @@ Blockly.InsertionMarkerManager.prototype.dispose = function() {
   this.availableConnections_.length = 0;
   this.closestConnection_ = null;
   this.localConnection_ = null;
+  this.reserveLocalConnection = [];
 
   Blockly.Events.disable();
   try {

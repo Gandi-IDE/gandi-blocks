@@ -511,7 +511,7 @@ Blockly.Events.FrameChange.prototype.run = function(forward) {
       });
       break;
     case 'rect':
-      frame.render(value, false);
+      frame.setBoundingClientRect(value);
       break;
     case 'color':
       frame.setColor(value.color);

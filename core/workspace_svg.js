@@ -1166,7 +1166,7 @@ Blockly.WorkspaceSvg.prototype.pasteFrame_ = function(xmlFrame) {
       // the Blocks in the Frame need to be moved.
       const dx = {x: Blockly.SNAP_RADIUS, y: Blockly.SNAP_RADIUS * 2};
       for (const blockId in frame.blockDB_) {
-        frame.blockDB_[blockId].moveBy(dx.x, dx.y, true);
+        frame.blockDB_[blockId].moveBy(dx.x, dx.y);
       }
       frame.moveBy(dx.x, dx.y);
     }

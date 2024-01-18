@@ -211,9 +211,11 @@ Blockly.BlockDragger.prototype.dragBlock = function(e, currentDragDeltaXY) {
  * @param {!Event} e The mouseup/touchend event.
  * @param {!goog.math.Coordinate} currentDragDeltaXY How far the pointer has
  *     moved from the position at the start of the drag, in pixel units.
+ * @param {?Function} checkDraggingBlockAndDraggedConnection Check that the data and
+ *     connections of the drag blocks are up to date and available
  * @package
  */
-Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
+Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY, checkDraggingBlockAndDraggedConnection) {
   // Make sure internal state is fresh.
   this.dragBlock(e, currentDragDeltaXY);
   let delta = this.pixelsToWorkspaceUnits_(currentDragDeltaXY);
@@ -255,22 +257,43 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY) {
     deletedProcBlock = this.draggingBlock_.childBlocks_[0];
   }
   var deleted = this.maybeDeleteBlock_();
+
+  const draggingBlockId = this.draggingBlock_.id;
   if (!deleted) {
     // These are expensive and don't need to be done if we're deleting.
     this.draggingBlock_.moveConnections_(delta.x, delta.y);
     this.draggingBlock_.setDragging(false);
-    if (this.draggedConnectionManager_.wouldConnectBlock()) {
-      // Applying connections also rerenders the relevant blocks.
-      this.draggedConnectionManager_.applyConnections();
-    } else {
-      this.draggingBlock_.render();
+
+    // When multiple people collaborate on editing, the block fragment being dragged may have been modified
+    // by others during the dragging process.
+    // Must be called before generating a new relationship between Frame and Blocks.
+    if(checkDraggingBlockAndDraggedConnection) {
+      checkDraggingBlockAndDraggedConnection();
     }
-    // It is necessary to confirm whether the block is within the frame before firing the BlockMove event,
-    // so that when using the undo function, it can correctly determine whether the block is within the frame."
+
+    if (this.draggingBlock_.workspace) {
+      // It is possible that the draggingBlock has been replaced due to the previous operation
+      if (this.draggingBlock_.id === draggingBlockId) {
+        this.fireMoveEvent_();
+      }
+      if (this.draggedConnectionManager_.wouldConnectBlock()) {
+        // Applying connections also rerenders the relevant blocks.
+        this.draggedConnectionManager_.applyConnections();
+      } else {
+        this.draggingBlock_.render();
+      }
+  
+      this.draggingBlock_.scheduleSnapAndBump();
+    }
+
     this.workspace_.resetFrameAndTopBlocksMap();
-    this.fireMoveEvent_();
-    this.draggingBlock_.scheduleSnapAndBump();
   } else {
+    // When multiple people collaborate on editing, the block fragment being dragged may have been modified
+    // by others during the dragging process.
+    // Must be called before generating a new relationship between Frame and Blocks.
+    if(checkDraggingBlockAndDraggedConnection) {
+      checkDraggingBlockAndDraggedConnection();
+    }
     this.workspace_.resetFrameAndTopBlocksMap();
   }
   // The data of dragIconData must be reset after executing the fireMoveEvent.
