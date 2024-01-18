@@ -1370,6 +1370,7 @@ Blockly.Frame.prototype.setTitle = function(newTitle) {
   if(this.title != newTitle) {
     this.title = newTitle;
     this.titleInput_.value = this.title;
+    this.updateTitleBoxSize();
     Blockly.Events.fire(new Blockly.Events.FrameRetitle(this, newTitle));
   }
 };
