@@ -944,13 +944,13 @@ Blockly.Frame.prototype.moveToDragSurface_ = function(e) {
  * @private
  */
 Blockly.Frame.prototype.moveOffDragSurface_ = function(newXY, wouldDeleteFrame) {
+  this.rect_.left = newXY.x + this.resizeButtonWidth_ / 2;
+  this.rect_.top = newXY.y + this.resizeButtonHeight_ / 2 + this.titleInputHeight_;
+  this.rect_.right = this.rect_.left + this.rect_.width + this.resizeButtonWidth_ / 2;
+  this.rect_.bottom = this.rect_.top + this.rect_.height + this.resizeButtonWidth_ / 2;
+
   if (wouldDeleteFrame) {
-    this.fireFrameBlocksCoordinatesChange();
-  } else {
-    this.rect_.left = newXY.x + this.resizeButtonWidth_ / 2;
-    this.rect_.top = newXY.y + this.resizeButtonHeight_ / 2 + this.titleInputHeight_;
-    this.rect_.right = this.rect_.left + this.rect_.width + this.resizeButtonWidth_ / 2;
-    this.rect_.bottom = this.rect_.top + this.rect_.height + this.resizeButtonWidth_ / 2;
+    this.fireFrameRectChange();
   }
   this.translate(newXY.x, newXY.y);
   this.svgRect_.setAttribute('filter', 'none');
