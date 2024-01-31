@@ -890,6 +890,9 @@ Blockly.Xml.domToBlockHeadless_ = function(xmlBlock, workspace) {
           block.nextConnection.setShadowDom(childShadowElement);
         }
         if (childBlockElement) {
+          if (!block.nextConnection) {
+            throw new Error('Block(id:' + block.id + ', type:' + block.type + ') next statement does not exist.');
+          }
           goog.asserts.assert(block.nextConnection,
               'Next statement does not exist.');
           // If there is more than one XML 'next' tag.
