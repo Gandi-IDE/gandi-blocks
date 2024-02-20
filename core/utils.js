@@ -1282,6 +1282,7 @@ if (!goog.global['Blockly']) {
 if (!goog.global['Blockly']['Utils']) {
   goog.global['Blockly']['Utils'] = {};
 }
+goog.global['Blockly']['Utils']['genUid'] = Blockly.utils.genUid;
 goog.global['Blockly']['Utils']['getBlockDesc'] = Blockly.utils.getBlockDesc;
 goog.global['Blockly']['Utils']['getBlockSvgImage'] = Blockly.utils.getBlockSvgImage;
 goog.global['Blockly']['Utils']['tokenizeInterpolation'] = Blockly.utils.tokenizeInterpolation;
