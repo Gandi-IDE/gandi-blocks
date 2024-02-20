@@ -527,7 +527,7 @@ Blockly.Css.CONTENT = [
     'z-index: 20;',
     'transition: .3s;',
   '}',
-  '.blocklyFlyout:hover {',
+  '.toolboxBody:hover, .blocklyFlyout:hover {',
     'overflow: visible;',
   '}',
   '.blocklyFlyout:hover #blocklyBlockMenuClipRect {',
@@ -813,8 +813,7 @@ Blockly.Css.CONTENT = [
   '}',
 
   '.blocklyFlyoutBackground {',
-    'fill: var(--theme-color-300);',
-    'fill-opacity: .8;',
+    'fill-opacity: 0;',
   '}',
 
   '.blocklyMainWorkspaceScrollbar {',
@@ -1737,6 +1736,7 @@ Blockly.Css.CONTENT = [
     'background-size: 54px;',
     'pointer-events: none;',
     'z-index: 21;',
+    'border-radius: 0 0 8px 8px;',
   '}',
 
   '.toolboxSwitchButton {',
