@@ -1039,6 +1039,13 @@ Blockly.WorkspaceSvg.prototype.reportValue = function(id, value) {
   var valueReportBox = goog.dom.createElement('div');
   valueReportBox.setAttribute('class', 'valueReportBox');
   valueReportBox.innerHTML = Blockly.scratchBlocksUtils.encodeEntities(value);
+  // use to get focus and event priority
+  valueReportBox.setAttribute("tabindex", "0");
+  valueReportBox.onkeydown = (event) => {
+    if ((event.altKey || event.ctrlKey || event.metaKey) && event.code === "KeyC") {
+      event.stopPropagation();
+    }
+  };
   contentDiv.appendChild(valueReportBox);
   Blockly.DropDownDiv.setColour(
       Blockly.Colours.valueReportBackground,
