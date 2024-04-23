@@ -1397,6 +1397,7 @@ Blockly.Css.CONTENT = [
     'white-space: nowrap;',
     'background-color: transparent;',
     'pointer-events: none;',
+    'box-sizing: content-box;',
   '}',
 
   '.blocklyFrame .blocklyFrameTitleInput:focus {',
