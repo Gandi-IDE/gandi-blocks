@@ -207,7 +207,7 @@ Blockly.FieldDropdown.prototype.showEditor_ = function() {
 
   function handleInputChange() {
     var temporaryOptions = options.filter(function(opt) {
-      return opt[0].includes(goog.string.trim(labelInput.getValue()));
+      return opt[0].toUpperCase().includes(goog.string.trim(labelInput.getValue().toUpperCase()));
     });
     menu.removeChildren(true);
     highlightIndex = -1;
@@ -254,6 +254,7 @@ Blockly.FieldDropdown.prototype.showEditor_ = function() {
       return;
     }
   }
+
   if (Blockly.showDropdownSearchableDropdowns) {
     labelInput = new goog.ui.LabelInput('');
     labelInput.render(contentDiv);
