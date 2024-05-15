@@ -287,6 +287,18 @@ Blockly.onKeyDown_ = function(e) {
     if (Blockly.selected instanceof Blockly.Frame) {
       Blockly.selected.dispose();
     } else {
+      if (Blockly.selected instanceof Blockly.BlockSvg) {
+        const block = Blockly.selected;
+        if (block.type === Blockly.PROCEDURES_DEFINITION_BLOCK_TYPE) {
+          const procCode = block.childBlocks_[0].getProcCode();
+          const callers = Blockly.Procedures.getCallers(procCode, block.workspace, block, false /* allowRecursive */);
+          if (callers.length > 0) {
+            alert(Blockly.Msg.PROCEDURE_USED);
+            Blockly.Events.setGroup(false);
+            return;
+          }
+        }
+      }
       Blockly.selected.dispose(/* heal */ true, true);
     }
     Blockly.Events.setGroup(false);

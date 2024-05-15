@@ -32,6 +32,7 @@ goog.provide('Blockly.ContextMenu');
 
 goog.require('Blockly.Events.BlockCreate');
 goog.require('Blockly.scratchBlocksUtils');
+goog.require('Blockly.Procedures');
 goog.require('Blockly.utils');
 goog.require('Blockly.utils.uiMenu');
 
@@ -240,7 +241,15 @@ Blockly.ContextMenu.blockDeleteOption = function(block) {
     enabled: true,
     separator: true,
     callback: function() {
-      var ws = block.workspace;
+      const ws = block.workspace;
+      if (block.type === Blockly.PROCEDURES_DEFINITION_BLOCK_TYPE) {
+        const procCode = block.childBlocks_[0].getProcCode();
+        const callers = Blockly.Procedures.getCallers(procCode, ws, block, false /* allowRecursive */);
+        if (callers.length > 0) {
+          alert(Blockly.Msg.PROCEDURE_USED);
+          return false;
+        }
+      }
       setTimeout(function() {
         ws.fireDeletionListeners(block);
       });
