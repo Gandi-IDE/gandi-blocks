@@ -765,7 +765,7 @@ Blockly.Frame.prototype.fireFrameBlocksChange = function() {
 Blockly.Frame.prototype.getBoundingRectangle = function() {
   var frame = this.getFrameGroupRelativeXY();
   var width = this.getWidth() + this.resizeButtonWidth_;
-  var height = this.getHeight() + this.resizeButtonHeight_ + this.titleInputHeight_;
+  var height = (this.isCollapsed ? 60 : this.getHeight()) + this.resizeButtonHeight_ + this.titleInputHeight_;
   var topLeft;
   var bottomRight;
   if (this.RTL) {

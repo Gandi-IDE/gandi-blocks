@@ -1523,7 +1523,7 @@ Blockly.WorkspaceSvg.prototype.onMouseWheel_ = function(e) {
  *   containing the blocks on the workspace.
  */
 Blockly.WorkspaceSvg.prototype.getBlocksBoundingBox = function() {
-  var topBlocks = this.getTopBlocks(false);
+  var topBlocks = this.getTopBlocks(false).filter(i => !i.getSelfFrame() || !i.getSelfFrame().isCollapsed);
   var topComments = this.getTopComments(false);
   var topFrames = this.getTopFrames(false);
   var topElements = topBlocks.concat(topComments, topFrames);
