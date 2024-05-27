@@ -164,7 +164,8 @@ Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_DEF_CONTEXTMENU = {
     // Find the delete option and update its callback to be specific to
     // functions.
     for (var i = 0, option; option = menuOptions[i]; i++) {
-      if (option.text == Blockly.Msg.DELETE_BLOCK) {
+      const text = typeof option.text === 'string' ? option.text : option.text.dataset.text;
+      if (text === Blockly.Msg.DELETE_BLOCK) {
         var input = this.getInput('custom_block');
         // this is the root block, not the shadow block.
         if (input && input.connection && input.connection.targetBlock()) {
@@ -219,7 +220,8 @@ Blockly.ScratchBlocks.VerticalExtensions.PROCEDURE_DEF_CONTEXTMENU = {
     }
     // Find and remove the duplicate option
     for (var i = 0, option; option = menuOptions[i]; i++) {
-      if (option.text == Blockly.Msg.DUPLICATE) {
+      const text = typeof option.text === 'string' ? option.text : option.text.dataset.text;
+      if (text === Blockly.Msg.DUPLICATE) {
         menuOptions.splice(i, 1);
         break;
       }
