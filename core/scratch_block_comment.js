@@ -425,7 +425,8 @@ Blockly.ScratchBlockComment.prototype.setMinimized = function(minimize) {
   this.isMinimized_ = minimize;
   if (minimize) {
     this.bubble_.setMinimized(true, this.getLabelText());
-    this.setBubbleSize(Blockly.ScratchBlockComment.MINIMIZE_WIDTH,
+    const textWidth = Blockly.Field.getCachedWidth(this.bubble_.topBarLabel_);
+    this.setBubbleSize(textWidth + 80,
         Blockly.ScratchBubble.TOP_BAR_HEIGHT);
     // Note we are not updating this.width_ or this.height_ here
     // because we want to keep track of the width/height of the
@@ -446,7 +447,7 @@ Blockly.ScratchBlockComment.prototype.setMinimized = function(minimize) {
 Blockly.ScratchBlockComment.prototype.setBubbleSize = function(width, height) {
   if (this.bubble_) {
     if (this.isMinimized_) {
-      this.bubble_.setBubbleSize(Blockly.ScratchBlockComment.MINIMIZE_WIDTH,
+      this.bubble_.setBubbleSize(width,
           Blockly.ScratchBubble.TOP_BAR_HEIGHT);
     } else {
       this.bubble_.setBubbleSize(width, height);

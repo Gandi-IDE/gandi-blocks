@@ -571,7 +571,6 @@ Blockly.WorkspaceCommentSvg.prototype.setSize = function(width, height) {
   var doubleBorderWidth = 2 * Blockly.WorkspaceCommentSvg.BORDER_WIDTH;
 
   if (this.isMinimized_) {
-    width = Blockly.WorkspaceCommentSvg.MINIMIZE_WIDTH;
     height = Blockly.WorkspaceCommentSvg.TOP_BAR_HEIGHT;
   } else {
     // Minimum size of a 'full size' (not minimized) comment.
@@ -660,7 +659,9 @@ Blockly.WorkspaceComment.prototype.setMinimized = function(minimize) {
     if (this.rendered_) {
       this.setRenderedMinimizeState_(true, this.getLabelText());
     }
-    this.setSize(Blockly.WorkspaceCommentSvg.MINIMIZE_WIDTH,
+    const textWidth = Blockly.Field.getCachedWidth(this.topBarLabel_);
+    // svg width 32+32
+    this.setSize(textWidth + 80,
         Blockly.WorkspaceCommentSvg.TOP_BAR_HEIGHT);
   } else {
     if (this.rendered_) {
