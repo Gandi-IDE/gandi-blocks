@@ -136,6 +136,7 @@
     "MOTION_XSCROLL": "x scroll",
     "MOTION_YSCROLL": "y scroll",
     "MOTION_STAGE_SELECTED": "Stage selected: no motion blocks",
+    "MOTION_MOVEGRIDS": "move %1 grids(40 steps)",
     "OPERATORS_ADD": "%1 + %2",
     "OPERATORS_SUBTRACT": "%1 - %2",
     "OPERATORS_MULTIPLY": "%1 * %2",
@@ -247,6 +248,10 @@
     "HELP": "Help",
     "UNDO": "Undo",
     "REDO": "Redo",
+    "FRAME": "Frame",
+    "COLLAPSED_X_BLOCKS": "Collapsed %1 blocks",
+    "COLOR": "Color",
+    "CREATE_FRAME": "Create Frame",
     "EDIT_PROCEDURE": "Edit",
     "SHOW_PROCEDURE_DEFINITION": "Go to definition",
     "WORKSPACE_COMMENT_DEFAULT_TEXT": "Say something...",
@@ -265,6 +270,7 @@
     "DELETE_VARIABLE_CONFIRMATION": "Delete %1 uses of the \"%2\" variable?",
     "CANNOT_DELETE_VARIABLE_PROCEDURE": "Can't delete the variable \"%1\" because it's part of the definition of the function \"%2\"",
     "DELETE_VARIABLE": "Delete the \"%1\" variable",
+    "DISABLED_VARIABLE": "This \"%1\" only can be deleted、rename in stage.",
     "VARIABLE": "variable",
     "LIST": "list",
     "NEW_PROCEDURE": "Make a Block",
@@ -284,5 +290,6 @@
     "NEW_BROADCAST_MESSAGE": "New message",
     "NEW_BROADCAST_MESSAGE_TITLE": "New message name:",
     "BROADCAST_MODAL_TITLE": "New Message",
-    "DEFAULT_BROADCAST_MESSAGE_NAME": "message1"
+    "DEFAULT_BROADCAST_MESSAGE_NAME": "message1",
+    "PROCEDURE_RETURN": "return %1"
 }
