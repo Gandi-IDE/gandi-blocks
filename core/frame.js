@@ -1475,7 +1475,7 @@ Blockly.Frame.prototype.triggerChangeCollapsed = function(isCollapsed) {
     }
   }
   Blockly.Events.setGroup(false);
-
+  this.workspace.resizeContents();
   this.workspace.queueIntersectionCheck();
 };
 
