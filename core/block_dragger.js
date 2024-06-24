@@ -99,6 +99,14 @@ Blockly.BlockDragger = function(block, workspace) {
    */
   this.startXY_ = this.draggingBlock_.getRelativeToSurfaceXY(true);
 
+  const frame = this.draggingBlock_.getSelfFrame();
+  /**
+   * The ID of the frame associated with the dragging block, if available.
+   * @type {?string}
+   * @private
+   */
+  this.startFrame_ = frame ? frame.id : undefined;
+
   /**
    * A list of all of the icons (comment, warning, and mutator) that are
    * on this block and its descendants.  Moving an icon moves the bubble that
@@ -271,6 +279,9 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY, ch
       checkDraggingBlockAndDraggedConnection();
     }
 
+    // Recompute the relationships between blocks and frames.
+    this.workspace_.resetFrameAndTopBlocksMap();
+
     if (this.draggingBlock_.workspace) {
       // It is possible that the draggingBlock has been replaced due to the previous operation
       if (this.draggingBlock_.id === draggingBlockId) {
@@ -285,8 +296,6 @@ Blockly.BlockDragger.prototype.endBlockDrag = function(e, currentDragDeltaXY, ch
   
       this.draggingBlock_.scheduleSnapAndBump();
     }
-
-    this.workspace_.resetFrameAndTopBlocksMap();
   } else {
     // When multiple people collaborate on editing, the block fragment being dragged may have been modified
     // by others during the dragging process.
@@ -422,6 +431,7 @@ Blockly.BlockDragger.prototype.fireEndDragEvent_ = function(isOutside) {
  */
 Blockly.BlockDragger.prototype.fireMoveEvent_ = function() {
   var event = new Blockly.Events.BlockMove(this.draggingBlock_);
+  event.oldFrameId = this.startFrame_;
   event.oldCoordinate = this.startXY_;
   event.recordNew();
   Blockly.Events.fire(event);

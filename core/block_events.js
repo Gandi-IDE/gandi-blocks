@@ -383,7 +383,6 @@ Blockly.Events.Move = function(block) {
     return;  // Blank event to be populated by fromJson.
   }
   Blockly.Events.Move.superClass_.constructor.call(this, block);
-
   var location = this.currentLocation_();
   this.oldFrameId = location.frameId;
   this.oldParentId = location.parentId;
