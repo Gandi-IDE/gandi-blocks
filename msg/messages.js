@@ -303,7 +303,6 @@ Blockly.Msg.HELP = 'Help';
 Blockly.Msg.UNDO = 'Undo';
 Blockly.Msg.REDO = 'Redo';
 Blockly.Msg.CREATE_FRAME = 'Create Frame';
-Blockly.Msg.DELETE_FRAME = 'Delete';
 Blockly.Msg.DUPLICATE_FRAME = 'Duplicate';
 Blockly.Msg.CLEAN_UP_FRAME = 'Clean up Blocks';
 Blockly.Msg.EDIT_PROCEDURE = 'Edit';

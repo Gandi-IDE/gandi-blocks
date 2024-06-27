@@ -399,7 +399,7 @@ Blockly.ContextMenu.frameSetColorOption = function(frame) {
  */
 Blockly.ContextMenu.frameDeleteOption = function(frame) {
   var deleteOption = {
-    text: Blockly.utils.createMenuOptionNode(Blockly.Msg.DELETE_FRAME, '⌫', 'var(--theme-error-color)'),
+    text: Blockly.utils.createMenuOptionNode(Blockly.Msg.DELETE, '⌫', 'var(--theme-error-color)'),
     enabled: true,
     separator: true,
     callback: function() {
