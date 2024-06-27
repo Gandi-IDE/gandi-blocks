@@ -187,7 +187,9 @@ Blockly.Xml.fieldToDom_ = function(field) {
     if (field.referencesVariables()) {
       return Blockly.Xml.fieldToDomVariable_(field);
     } else {
-      var container = goog.dom.createDom('field', null, field.getValue());
+      // The value of the field is not necessarily a string type; this needs to be handled uniformly.
+      var value = field.getValue().toString();
+      var container = goog.dom.createDom('field', null, value);
       container.setAttribute('name', field.name);
       return container;
     }

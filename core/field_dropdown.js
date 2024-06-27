@@ -197,7 +197,7 @@ Blockly.FieldDropdown.prototype.showEditor_ = function() {
       menuItem.setValue(value);
       menuItem.setCheckable(true);
       menu.addChild(menuItem, true);
-      var checked = (value == thisField.value_);
+      var checked = thisField.isEqual(value, thisField.value_);
       menuItem.setChecked(checked);
       if (checked) {
         thisField.selectedItem = menuItem;
@@ -471,7 +471,7 @@ Blockly.FieldDropdown.prototype.setValue = function(newValue) {
   var options = this.getOptions();
   for (var i = 0; i < options.length; i++) {
     // Options are tuples of human-readable text and language-neutral values.
-    if (options[i][1] == newValue) {
+    if (this.isEqual(options[i][1], newValue)) {
       var content = options[i][0];
       if (typeof content == 'object') {
         this.imageJson_ = content;
@@ -489,6 +489,14 @@ Blockly.FieldDropdown.prototype.setValue = function(newValue) {
   // (like variable names).
   this.text_ = newValue;
   this.forceRerender();
+};
+
+Blockly.FieldDropdown.prototype.isEqual = function(value, other) {
+  // The value of the field is not necessarily a string type.
+  if (typeof value === 'boolean') {
+    return value.toString() === other.toString();
+  }
+  return value == other;
 };
 
 /**
