@@ -317,11 +317,16 @@ Blockly.Frame.prototype.createDom_ = function() {
       this.blocksGroup_);
   this.svgRect_.tooltip = this;
 
-  Blockly.bindEvent_(this.svgRect_, 'mousedown', this, function() {
-    // If the frame is locked, it cannot be selected.
-    if(this.locked || !this.isEmpty_) return;
-
-    this.select();
+  // Double-clicking on the blank area of the Frame can select the Frame.
+  Blockly.bindEvent_(this.svgRect_, 'mousedown', this, function(e) {
+    // If the frame is locked or the workspace is locked, it cannot be selected.
+    if (Blockly.locked || this.locked) return;
+    const now = Date.now();
+    const delta = now - (e.target.getAttribute('last-down') || now);
+    e.target.setAttribute('last-down', now);
+    if (delta > 0 && delta < 250) {
+      this.select();
+    }
   });
 
   Blockly.bindEventWithChecks_(this.frameGroup_, 'mousedown', null, this.onMouseDown_.bind(this));
@@ -442,6 +447,7 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
 
   requestAnimationFrame(() => this.resizeTitleInputWidth());
 
+  // Clicking on the Frame title can select the Frame.
   Blockly.bindEvent_(inputWrapper, 'mousedown', this, function() {
     // If the frame is locked or the workspace is locked, it cannot be selected.
     if (Blockly.locked || this.locked) return;
