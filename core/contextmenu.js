@@ -349,7 +349,7 @@ Blockly.ContextMenu.wsUndoOption = function(ws) {
  */
 Blockly.ContextMenu.wsCreateFrameOption = function(ws) {
   return {
-    text: Blockly.utils.createMenuOptionNode(Blockly.Msg.CREATE_FRAME, 'A'),
+    text: Blockly.utils.createMenuOptionNode(Blockly.Msg.CREATE_FRAME, goog.userAgent.WINDOWS ? 'Ctrl A' : '⌘ A'),
     enabled: true,
     callback: function() {
       ws.setWaitingCreateFrameEnabled(true);

@@ -203,11 +203,13 @@ Blockly.onKeyDown_ = function(e) {
     Blockly.DropDownDiv.hide();
     // Pressing esc cancel frame creation
     Blockly.mainWorkspace.setWaitingCreateFrameEnabled(false);
-  } else if (e.keyCode == 65 && !Blockly.locked && options.frames && isWorkspaceFocused) {
+  } else if (!Blockly.locked && e.keyCode == 65 && ((e.metaKey && goog.userAgent.MAC) || (e.ctrlKey  && goog.userAgent.WINDOWS)) && options.frames && isWorkspaceFocused) {
     // Don't attempt to create a frame during drags.
     if (Blockly.mainWorkspace.isDragging() || Blockly.mainWorkspace.resizingFrame) {
       return;
     }
+    // Prevent triggering select all.
+    e.preventDefault();
     Blockly.mainWorkspace.setWaitingCreateFrameEnabled(true);
   }  else if (e.keyCode == 8 || e.keyCode == 46) {
     // Delete or backspace.
