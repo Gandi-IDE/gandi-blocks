@@ -333,16 +333,6 @@ Blockly.Frame.prototype.createDom_ = function() {
     height: 0,
     width: 0
   }, this.frameGroup_);
-  Blockly.bindEvent_(this.blocksGroup_, 'mouseenter', this, function() {
-    if (!this.workspace.draggingBlocks_ && !this.locked) {
-      this.frameGroup_.classList.add('blocklyFrameHover');
-    }
-  });
-  Blockly.bindEvent_(this.blocksGroup_, 'mouseleave', this, function() {
-    if (!this.workspace.draggingBlocks_) {
-      this.frameGroup_.classList.remove('blocklyFrameHover');
-    }
-  });
   this.foreignObjectBody_ = document.createElementNS(Blockly.HTML_NS, 'body');
   this.foreignObjectBody_.setAttribute('xmlns', Blockly.HTML_NS);
   this.foreignObjectBody_.className = 'blocklyMinimalBody blocklyFrameForeignObjectBody';
@@ -470,18 +460,6 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
     }
   });
 
-  Blockly.bindEvent_(titleWrapper, 'mouseenter', this, function() {
-    if (Blockly.locked) return;
-    if (!this.workspace.draggingBlocks_ && !this.locked) {
-      this.frameGroup_.classList.add('blocklyFrameHover');
-    }
-  });
-  Blockly.bindEvent_(titleWrapper, 'mouseleave', this, function() {
-    if (Blockly.locked) return;
-    if (!this.workspace.draggingBlocks_) {
-      this.frameGroup_.classList.remove('blocklyFrameHover');
-    }
-  });
   this.foreignObjectBody_.appendChild(titleWrapper);
 
   var xy = this.computeFrameRelativeXY();

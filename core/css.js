@@ -1246,14 +1246,6 @@ Blockly.Css.CONTENT = [
     'color: var(--theme-brand-color, #2D8CFF);',
   '}',
 
-  '.blocklyFrameHover .blocklyFrameTitleInput, .blocklyFrame.frameSelected .blocklyFrameTitleInput {',
-    'color: var(--theme-brand-color, #2D8CFF);',
-  '}',
-
-  '.blocklyFrameHover .blocklyFrameRectangle, .blocklyFrame.frameSelected .blocklyFrameRectangle {',
-    'stroke: var(--theme-brand-color, #2D8CFF);',
-  '}',
-
   '.blocklyFrameHighlight .blocklyFrameRectangle {',
     'stroke: #57A3FF !important;',
   '}',
