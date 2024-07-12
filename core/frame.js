@@ -503,13 +503,66 @@ Blockly.Frame.prototype.createTitleEditor_ = function() {
  * @private
  */
 Blockly.Frame.prototype.createResizeGroup_ = function() {
-  var tx = 0;
-  var ty = this.titleInputHeight_;
+  const tx = 0;
+  const ty = this.titleInputHeight_;
   /** @type {SVGElement} */
   this.resizeGroup_ = Blockly.utils.createSvgElement('g', {
     'class': 'frameResizeButtons',
     'transform': 'translate(' + tx + ',' + ty + ')',
   },  this.frameGroup_);
+
+  const lineWidth = 10;
+  const halfLineWidth = lineWidth / 2;
+  // top line
+  this.resizeButtons.t = Blockly.utils.createSvgElement('rect', {
+    'class': 'frameResizeHandleTopOrBottom',
+    'fill': "url(#resizeHandleStrokeVerticalGradient)",
+    'x': 4 - halfLineWidth,
+    'y': this.resizeButtonHeight_ / 2 - halfLineWidth,
+    'width': this.getWidth(),
+    'height': lineWidth,
+  }, this.resizeGroup_);
+  this.resizeButtons.t.style.y = `calc(${this.resizeButtonHeight_ / 2} - (5 / var(--scale)))`;
+  this.resizeButtons.t.style.height = `calc(${lineWidth}px / var(--scale))`;
+  Blockly.bindEventWithChecks_(this.resizeButtons.t, 'mousedown', null,  this.resizeHandleMouseDown_.bind(this, 't'));
+
+  // right line
+  this.resizeButtons.r = Blockly.utils.createSvgElement('rect', {
+    'class': 'frameResizeHandleLeftOrRight',
+    'fill': "url(#resizeHandleStrokeHorizontalGradient)",
+    'x': this.getWidth() + 4 - halfLineWidth,
+    'y': this.resizeButtonHeight_ / 2,
+    'width': lineWidth,
+    'height': this.getHeight(),
+  }, this.resizeGroup_);
+  this.resizeButtons.r.style.width = `calc(${lineWidth}px / var(--scale))`;
+  Blockly.bindEventWithChecks_(this.resizeButtons.r, 'mousedown', null,  this.resizeHandleMouseDown_.bind(this, 'r'));
+
+  // bottom line
+  this.resizeButtons.b = Blockly.utils.createSvgElement('rect', {
+    'class': 'frameResizeHandleTopOrBottom',
+    'fill': "url(#resizeHandleStrokeVerticalGradient)",
+    'x': 4,
+    'y': this.resizeButtonHeight_ / 2 - halfLineWidth,
+    'width': this.getWidth(),
+    'height': lineWidth,
+  }, this.resizeGroup_);
+  this.resizeButtons.b.style.height = `calc(${lineWidth}px / var(--scale))`;
+  Blockly.bindEventWithChecks_(this.resizeButtons.b, 'mousedown', null,  this.resizeHandleMouseDown_.bind(this, 'b'));
+
+  // left line
+  this.resizeButtons.l = Blockly.utils.createSvgElement('rect', {
+    'class': 'frameResizeHandleLeftOrRight',
+    'fill': "url(#resizeHandleStrokeHorizontalGradient)",
+    'x': 4 - halfLineWidth,
+    'y': this.resizeButtonHeight_ / 2,
+    'width': lineWidth,
+    'height': this.getHeight(),
+  }, this.resizeGroup_);
+  this.resizeButtons.l.style.x = `calc(4 - (${halfLineWidth} / var(--scale)))`;
+  this.resizeButtons.l.style.width = `calc(${lineWidth}px / var(--scale))`;
+  Blockly.bindEventWithChecks_(this.resizeButtons.l, 'mousedown', null,  this.resizeHandleMouseDown_.bind(this, 'l'));
+
   // top left corner
   this.resizeButtons.tl = Blockly.utils.createSvgElement('rect', {
     'class': 'blocklyResizeButtonNW',
@@ -520,7 +573,7 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
     'height': this.resizeButtonHeight_,
     'width': this.resizeButtonWidth_
   }, this.resizeGroup_);
-  Blockly.bindEventWithChecks_(this.resizeButtons.tl, 'mousedown', null,  this.resizeButtonMouseDown_.bind(this, 'tl'));
+  Blockly.bindEventWithChecks_(this.resizeButtons.tl, 'mousedown', null,  this.resizeHandleMouseDown_.bind(this, 'tl'));
   // top right corner
   this.resizeButtons.tr = Blockly.utils.createSvgElement('rect', {
     'class': 'blocklyResizeButtonNE',
@@ -531,18 +584,7 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
     'height': this.resizeButtonHeight_,
     'width': this.resizeButtonWidth_
   }, this.resizeGroup_);
-  Blockly.bindEventWithChecks_(this.resizeButtons.tr, 'mousedown', null,  this.resizeButtonMouseDown_.bind(this, 'tr'));
-  // bottom left corner
-  this.resizeButtons.bl = Blockly.utils.createSvgElement('rect', {
-    'class': 'blocklyResizeButtonSW',
-    'stroke': this.borderColor_,
-    'fill': '#FFFFFF',
-    'x': '0',
-    'y': this.getHeight(),
-    'height': this.resizeButtonHeight_,
-    'width': this.resizeButtonWidth_
-  }, this.resizeGroup_);
-  Blockly.bindEventWithChecks_(this.resizeButtons.bl, 'mousedown', null,  this.resizeButtonMouseDown_.bind(this, 'bl'));
+  Blockly.bindEventWithChecks_(this.resizeButtons.tr, 'mousedown', null,  this.resizeHandleMouseDown_.bind(this, 'tr'));
   // bottom right corner
   this.resizeButtons.br = Blockly.utils.createSvgElement('rect', {
     'class': 'blocklyResizeButtonSE',
@@ -553,7 +595,18 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
     'height': this.resizeButtonHeight_,
     'width': this.resizeButtonWidth_
   }, this.resizeGroup_);
-  Blockly.bindEventWithChecks_(this.resizeButtons.br, 'mousedown', null,  this.resizeButtonMouseDown_.bind(this, 'br'));
+  Blockly.bindEventWithChecks_(this.resizeButtons.br, 'mousedown', null,  this.resizeHandleMouseDown_.bind(this, 'br'));
+  // bottom left corner
+  this.resizeButtons.bl = Blockly.utils.createSvgElement('rect', {
+    'class': 'blocklyResizeButtonSW',
+    'stroke': this.borderColor_,
+    'fill': '#FFFFFF',
+    'x': '0',
+    'y': this.getHeight(),
+    'height': this.resizeButtonHeight_,
+    'width': this.resizeButtonWidth_
+  }, this.resizeGroup_);
+  Blockly.bindEventWithChecks_(this.resizeButtons.bl, 'mousedown', null,  this.resizeHandleMouseDown_.bind(this, 'bl'));
   return this.resizeGroup_;
 };
 
@@ -1170,7 +1223,7 @@ Blockly.Frame.prototype.recordBlocksRelativeToSurfaceXY = function() {
  * @param {Boolean} takeOverSubEvents Whether to take over subsequent events.
  * @private
  */
-Blockly.Frame.prototype.resizeButtonMouseDown_ = function(dir, e, takeOverSubEvents) {
+Blockly.Frame.prototype.resizeHandleMouseDown_ = function(dir, e, takeOverSubEvents) {
   this.mostRecentEvent_ = e;
   this.oldBoundingFrameRect_ = this.getBoundingFrameRect();
   this.frameGroup_.style.cursor = 'pointer';
@@ -1212,8 +1265,40 @@ Blockly.Frame.prototype.resizeButtonMouseMove_ = function(dir, e) {
     const diffX = (e.clientX - this.mostRecentEvent_.clientX) / this.workspace.scale;
     const diffY = (e.clientY - this.mostRecentEvent_.clientY) / this.workspace.scale;
     this.mostRecentEvent_ = e;
-    const xDir = dir === 'tr' || dir === 'br' ? 'ltr' : 'rtl';
-    const yDir = dir === 'tl' || dir === 'tr' ? 'btt' : 'ttb';
+    let xDir = '';
+    let yDir = '';
+    switch (dir) {
+      case 'tl':
+        xDir = 'rtl';
+        yDir = 'btt';
+        break;
+      case 't':
+        yDir = 'btt';
+        break;
+      case 'tr':
+        xDir = 'ltr';
+        yDir = 'btt';
+        break;
+      case 'r':
+        xDir = 'ltr';
+        break;
+      case 'br':
+        xDir = 'ltr';
+        yDir = 'ttb';
+        break;
+      case 'b':
+        yDir = 'ttb';
+        break;
+      case 'bl':
+        xDir = 'rtl';
+        yDir = 'ttb';
+        break;
+      case 'l':
+        xDir = 'rtl';
+        break;
+      default:
+        break;
+    }
     this.updateBoundingClientRect(diffX, diffY, xDir, yDir);
     this.onBoundingClientRectChanged();
   }
@@ -1562,20 +1647,30 @@ Blockly.Frame.prototype.updateOwnedBlocks = function() {
  */
 Blockly.Frame.prototype.updateBoundingClientRect = function(diffX, diffY, xDir, yDir) {
   // Left to right
-  if (xDir === 'ltr') {
-    this.rect_.right += diffX;
-    this.rect_.width += diffX;
-  } else {
-    this.rect_.left += diffX;
-    this.rect_.width -= diffX;
+  switch (xDir) {
+    case 'ltr':
+      this.rect_.right += diffX;
+      this.rect_.width += diffX;
+      break;
+    case 'rtl':
+      this.rect_.left += diffX;
+      this.rect_.width -= diffX;
+      break;
+    default:
+      break;
   }
   // Top to bottom
-  if (yDir === 'ttb') {
-    this.rect_.bottom += diffY;
-    this.rect_.height += diffY;
-  } else {
-    this.rect_.top += diffY;
-    this.rect_.height -= diffY;
+  switch (yDir) {
+    case 'ttb':
+      this.rect_.bottom += diffY;
+      this.rect_.height += diffY;
+      break;
+    case 'btt':
+      this.rect_.top += diffY;
+      this.rect_.height -= diffY;
+      break;
+    default:
+      break;
   }
 };
 
@@ -1628,6 +1723,16 @@ Blockly.Frame.prototype.updateResizeButtonsPosition = function() {
   this.resizeButtons.bl.setAttribute('y', this.getHeight());
   this.resizeButtons.br.setAttribute('x', this.getWidth());
   this.resizeButtons.br.setAttribute('y', this.getHeight());
+
+  this.resizeButtons.t.setAttribute('width', this.getWidth());
+
+  this.resizeButtons.r.style.x = `calc(${this.getWidth() + 4} - (5 / var(--scale)))`;
+  this.resizeButtons.r.setAttribute('height', this.getHeight());
+
+  this.resizeButtons.b.style.y = `calc(${this.getHeight() + 4} - (5 / var(--scale)))`;
+  this.resizeButtons.b.setAttribute('width', this.getWidth());
+
+  this.resizeButtons.l.setAttribute('height', this.getHeight());
 };
 
 /**

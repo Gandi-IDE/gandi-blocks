@@ -228,6 +228,111 @@ Blockly.createDom_ = function(container, options) {
         'operator': 'over'
       },
       replacementGlowFilter);
+  
+  var resizeHandleStrokeHorizontalGradient = Blockly.utils.createSvgElement('linearGradient',
+      {
+        'id': 'resizeHandleStrokeHorizontalGradient',
+        'x1': 0,
+        'y1': 0,
+        'x2': 1,
+        'y2': 0,
+      },
+      defs);
+  Blockly.utils.createSvgElement('stop',
+      {
+        'offset': '0%',
+        'stop-opacity': '0',
+        'stop-color': 'var(--theme-brand-color, #2D8CFF)'
+      },
+      resizeHandleStrokeHorizontalGradient);
+  Blockly.utils.createSvgElement('stop',
+      {
+        'offset': '45%',
+        'stop-opacity': '0',
+        'stop-color': 'var(--theme-brand-color, #2D8CFF)'
+      },
+      resizeHandleStrokeHorizontalGradient);
+  Blockly.utils.createSvgElement('stop',
+      {
+        'offset': '45%',
+        'stop-opacity': '1',
+        'stop-color': 'var(--theme-brand-color, #2D8CFF)'
+      },
+      resizeHandleStrokeHorizontalGradient);
+  Blockly.utils.createSvgElement('stop',
+      {
+        'offset': '55%',
+        'stop-opacity': '1',
+        'stop-color': 'var(--theme-brand-color, #2D8CFF)'
+      },
+      resizeHandleStrokeHorizontalGradient);
+  Blockly.utils.createSvgElement('stop',
+      {
+        'offset': '55%',
+        'stop-opacity': '0',
+        'stop-color': 'var(--theme-brand-color, #2D8CFF)'
+      },
+      resizeHandleStrokeHorizontalGradient);
+  Blockly.utils.createSvgElement('stop',
+      {
+        'offset': '100%',
+        'stop-opacity': '0',
+        'stop-color': 'var(--theme-brand-color, #2D8CFF)'
+      },
+      resizeHandleStrokeHorizontalGradient);
+
+  var resizeHandleStrokeVerticalGradient = Blockly.utils.createSvgElement('linearGradient',
+      {
+        'id': 'resizeHandleStrokeVerticalGradient',
+        'x1': 0,
+        'y1': 0,
+        'x2': 0,
+        'y2': 1,
+      },
+      defs);
+  Blockly.utils.createSvgElement('stop',
+      {
+        'offset': '0%',
+        'stop-opacity': '0',
+        'stop-color': 'var(--theme-brand-color, #2D8CFF)'
+      },
+      resizeHandleStrokeVerticalGradient);
+  Blockly.utils.createSvgElement('stop',
+      {
+        'offset': '45%',
+        'stop-opacity': '0',
+        'stop-color': 'var(--theme-brand-color, #2D8CFF)'
+      },
+      resizeHandleStrokeVerticalGradient);
+  Blockly.utils.createSvgElement('stop',
+      {
+        'offset': '45%',
+        'stop-opacity': '1',
+        'stop-color': 'var(--theme-brand-color, #2D8CFF)'
+      },
+      resizeHandleStrokeVerticalGradient);
+  Blockly.utils.createSvgElement('stop',
+      {
+        'offset': '55%',
+        'stop-opacity': '1',
+        'stop-color': 'var(--theme-brand-color, #2D8CFF)'
+      },
+      resizeHandleStrokeVerticalGradient);
+  Blockly.utils.createSvgElement('stop',
+      {
+        'offset': '55%',
+        'stop-opacity': '0',
+        'stop-color': 'var(--theme-brand-color, #2D8CFF)'
+      },
+      resizeHandleStrokeVerticalGradient);
+  Blockly.utils.createSvgElement('stop',
+      {
+        'offset': '100%',
+        'stop-opacity': '0',
+        'stop-color': 'var(--theme-brand-color, #2D8CFF)'
+      },
+      resizeHandleStrokeVerticalGradient);
+
   /*
     <pattern id="blocklyDisabledPattern837493" patternUnits="userSpaceOnUse"
              width="10" height="10">

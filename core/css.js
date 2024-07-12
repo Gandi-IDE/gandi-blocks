@@ -1398,6 +1398,14 @@ Blockly.Css.CONTENT = [
     'border-color: var(--theme-brand-color);',
   '}',
 
+  '.frameResizeHandleTopOrBottom {',
+    'cursor: ns-resize;',
+  '}',
+
+  '.frameResizeHandleLeftOrRight {',
+    'cursor: ew-resize;',
+  '}',
+
   '.blocklyResizeButtonNW,.blocklyResizeButtonSE{',
     'cursor: nwse-resize;',
   '}',
@@ -1410,6 +1418,7 @@ Blockly.Css.CONTENT = [
     'width: calc(8px / var(--scale, 1));',
     'height: calc(8px / var(--scale, 1));',
     'transform: translate(calc(4px - 4px / var(--scale, 1)),calc(4px - 4px / var(--scale, 1)));',
+    'stroke-width: calc(1px / var(--scale, 1));',
   '}',
 
   '.scratchNotePickerKeyLabel {',

@@ -589,7 +589,7 @@ Blockly.Gesture.prototype.doStart = function(e) {
 
   if(this.isWaitingCreateFrame()) {
     this.creatingFrame_ = this.startWorkspace_.createFrame();
-    this.creatingFrame_.resizeButtonMouseDown_('br', e, true);
+    this.creatingFrame_.resizeHandleMouseDown_('br', e, true);
   }
 
   this.currentDragDeltaXY_ = new goog.math.Coordinate(0, 0);
