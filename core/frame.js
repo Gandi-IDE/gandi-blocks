@@ -517,7 +517,7 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
   this.resizeButtons.t = Blockly.utils.createSvgElement('rect', {
     'class': 'frameResizeHandleTopOrBottom',
     'fill': "url(#resizeHandleStrokeVerticalGradient)",
-    'x': 4 - halfLineWidth,
+    'x': 4,
     'y': this.resizeButtonHeight_ / 2 - halfLineWidth,
     'width': this.getWidth(),
     'height': lineWidth,
@@ -535,6 +535,7 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
     'width': lineWidth,
     'height': this.getHeight(),
   }, this.resizeGroup_);
+  this.resizeButtons.r.style.x = `calc(${this.getWidth() + 4} - (5 / var(--scale)))`;
   this.resizeButtons.r.style.width = `calc(${lineWidth}px / var(--scale))`;
   Blockly.bindEventWithChecks_(this.resizeButtons.r, 'mousedown', null,  this.resizeHandleMouseDown_.bind(this, 'r'));
 
@@ -543,10 +544,11 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
     'class': 'frameResizeHandleTopOrBottom',
     'fill': "url(#resizeHandleStrokeVerticalGradient)",
     'x': 4,
-    'y': this.resizeButtonHeight_ / 2 - halfLineWidth,
+    'y': this.getHeight() + 4 - 10,
     'width': this.getWidth(),
     'height': lineWidth,
   }, this.resizeGroup_);
+  this.resizeButtons.b.style.y = `calc(${this.getHeight() + 4} - (5 / var(--scale)))`;
   this.resizeButtons.b.style.height = `calc(${lineWidth}px / var(--scale))`;
   Blockly.bindEventWithChecks_(this.resizeButtons.b, 'mousedown', null,  this.resizeHandleMouseDown_.bind(this, 'b'));
 

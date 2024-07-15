@@ -1312,7 +1312,7 @@ Blockly.Css.CONTENT = [
 
   '.blocklyFrameForeignObject {',
     'transform: scale(calc(1 / var(--scale, 1)));',
-    'transform-origin: 4px var(--frame-title-height, 24);',
+    'transform-origin: 4px 28px;',
     'width: calc(var(--frame-title-width) * var(--scale, 1));',
   '}',
 
