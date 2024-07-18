@@ -522,7 +522,7 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
     'width': this.getWidth(),
     'height': lineWidth,
   }, this.resizeGroup_);
-  this.resizeButtons.t.style.y = `calc(${this.resizeButtonHeight_ / 2} - (5 / var(--scale)))`;
+  this.resizeButtons.t.style.y = `calc(${this.resizeButtonHeight_ / 2}px - (5px / var(--scale)))`;
   this.resizeButtons.t.style.height = `calc(${lineWidth}px / var(--scale))`;
   Blockly.bindEventWithChecks_(this.resizeButtons.t, 'mousedown', null,  this.resizeHandleMouseDown_.bind(this, 't'));
 
@@ -535,7 +535,7 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
     'width': lineWidth,
     'height': this.getHeight(),
   }, this.resizeGroup_);
-  this.resizeButtons.r.style.x = `calc(${this.getWidth() + 4} - (5 / var(--scale)))`;
+  this.resizeButtons.r.style.x = `calc(${this.getWidth() + 4}px - (5px / var(--scale)))`;
   this.resizeButtons.r.style.width = `calc(${lineWidth}px / var(--scale))`;
   Blockly.bindEventWithChecks_(this.resizeButtons.r, 'mousedown', null,  this.resizeHandleMouseDown_.bind(this, 'r'));
 
@@ -548,7 +548,7 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
     'width': this.getWidth(),
     'height': lineWidth,
   }, this.resizeGroup_);
-  this.resizeButtons.b.style.y = `calc(${this.getHeight() + 4} - (5 / var(--scale)))`;
+  this.resizeButtons.b.style.y = `calc(${this.getHeight() + 4}px - (5px / var(--scale)))`;
   this.resizeButtons.b.style.height = `calc(${lineWidth}px / var(--scale))`;
   Blockly.bindEventWithChecks_(this.resizeButtons.b, 'mousedown', null,  this.resizeHandleMouseDown_.bind(this, 'b'));
 
@@ -561,7 +561,7 @@ Blockly.Frame.prototype.createResizeGroup_ = function() {
     'width': lineWidth,
     'height': this.getHeight(),
   }, this.resizeGroup_);
-  this.resizeButtons.l.style.x = `calc(4 - (${halfLineWidth} / var(--scale)))`;
+  this.resizeButtons.l.style.x = `calc(4px - (${halfLineWidth}px / var(--scale)))`;
   this.resizeButtons.l.style.width = `calc(${lineWidth}px / var(--scale))`;
   Blockly.bindEventWithChecks_(this.resizeButtons.l, 'mousedown', null,  this.resizeHandleMouseDown_.bind(this, 'l'));
 
@@ -1728,10 +1728,10 @@ Blockly.Frame.prototype.updateResizeButtonsPosition = function() {
 
   this.resizeButtons.t.setAttribute('width', this.getWidth());
 
-  this.resizeButtons.r.style.x = `calc(${this.getWidth() + 4} - (5 / var(--scale)))`;
+  this.resizeButtons.r.style.x = `calc(${this.getWidth() + 4}px - (5px / var(--scale)))`;
   this.resizeButtons.r.setAttribute('height', this.getHeight());
 
-  this.resizeButtons.b.style.y = `calc(${this.getHeight() + 4} - (5 / var(--scale)))`;
+  this.resizeButtons.b.style.y = `calc(${this.getHeight() + 4}px - (5px / var(--scale)))`;
   this.resizeButtons.b.setAttribute('width', this.getWidth());
 
   this.resizeButtons.l.setAttribute('height', this.getHeight());
