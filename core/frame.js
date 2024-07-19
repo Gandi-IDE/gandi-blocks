@@ -70,7 +70,6 @@ Blockly.Frame = function(workspace, opt_options) {
   /** @type {boolean} */
   this.RTL = workspace.RTL;
 
-
   const isClone = !!workspace.getFrameById(this.options.id);
 
   /**
@@ -331,6 +330,14 @@ Blockly.Frame.prototype.createDom_ = function() {
 
   Blockly.bindEventWithChecks_(this.frameGroup_, 'mousedown', null, this.onMouseDown_.bind(this));
 
+  /**
+   * Avoid using the following styles in Safari + foreignObject:
+   * position (you can use position: fixed, but this will cause overflow issues)
+   * webkit-transform-style
+   * webkit-backface-visibility
+   * transition
+   * transform
+   */
   this.foreignObject_ = Blockly.utils.createSvgElement('foreignObject', {
     class: 'blocklyFrameForeignObject',
     'x': this.resizeButtonWidth_ / 2,
@@ -1608,7 +1615,7 @@ Blockly.Frame.prototype.updateTitleBoxSize = function() {
     var height = this.titleInputHeight_;
     var width = this.getWidth();
     this.foreignObject_.setAttribute("height", height);
-    this.foreignObject_.setAttribute("width", width);
+    this.foreignObject_.setAttribute("width", width * this.workspace.scale);
     if (width < 40) {
       width = 40;
       this.foreignObjectBody_.classList.add("blocklyFrameForeignObjectBodyMini");
@@ -1616,7 +1623,6 @@ Blockly.Frame.prototype.updateTitleBoxSize = function() {
       this.foreignObjectBody_.classList.remove("blocklyFrameForeignObjectBodyMini");
     }
     this.foreignObject_.style.setProperty('--frame-title-width', width + 'px');
-    this.foreignObject_.style.setProperty('--frame-title-height', height + 'px');
   }
 };
 

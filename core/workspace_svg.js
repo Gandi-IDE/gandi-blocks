@@ -2222,6 +2222,22 @@ Blockly.WorkspaceSvg.prototype.setScale = function(newScale) {
   }
   this.scale = newScale;
   this.svgBlockCanvas_.style.setProperty('--scale', this.scale);
+  if (goog.userAgent.SAFARI) {
+    this.getAllFrames().forEach(frame => {
+      frame.foreignObject_.setAttribute("width", frame.getWidth() * this.scale);
+      if (frame.rerenderId) {
+        cancelAnimationFrame(frame.rerenderId);
+        frame.rerenderId = null;
+      }
+      // 强制重绘
+      frame.rerenderId = window.requestAnimationFrame(function() {
+        frame.foreignObject_.style.setProperty('display', 'none');
+        window.requestAnimationFrame(function() {
+          frame.foreignObject_.style.removeProperty('display');
+        });
+      });
+    });
+  }
   if (this.grid_) {
     this.grid_.update(this.scale);
   }
