@@ -626,9 +626,13 @@ Blockly.Gesture.prototype.handleMove = function(e) {
   } else if (this.isDraggingWorkspace_) {
     this.workspaceDragger_.drag(this.currentDragDeltaXY_);
   } else if (this.isDraggingBlock_) {
-    if (this.blockDragger_.dragBlock(
-        this.mostRecentEvent_, this.currentDragDeltaXY_)) {
-      stopPropagation = false;
+    if(this.blockDragger_.draggingBlock_.workspace) {
+      if (this.blockDragger_.dragBlock(this.mostRecentEvent_, this.currentDragDeltaXY_)) {
+        stopPropagation = false;
+      }
+    } else {
+      console.warn('Cannot drag a block that has already been disposed of.');
+      this.dispose();
     }
   } else if (this.isDraggingBubble_) {
     this.bubbleDragger_.dragBubble(this.mostRecentEvent_,
